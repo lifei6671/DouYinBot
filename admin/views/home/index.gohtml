@@ -1,0 +1,176 @@
+
+<!doctype html>
+<html lang="zh-CN" class="h-100">
+<head>
+    <meta name="referrer" content="never">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="抖音无水印工具_最新抖音在线无水印解析">
+    <title>抖音无水印工具_最新抖音在线无水印解析</title>
+    <link href="/static/bootstrap/v4.6.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicons -->
+    <link rel="icon" href="/static/favicons/favicon.ico">
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="/static/css/navbar.css" rel="stylesheet">
+</head>
+<body class="d-flex flex-column h-100">
+
+<header>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="#">抖音无水印下载工具</a>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+{{/*            <ul class="navbar-nav mr-auto">*/}}
+{{/*                <li class="nav-item active">*/}}
+{{/*                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>*/}}
+{{/*                </li>*/}}
+{{/*                <li class="nav-item">*/}}
+{{/*                    <a class="nav-link" href="#">Link</a>*/}}
+{{/*                </li>*/}}
+{{/*                <li class="nav-item">*/}}
+{{/*                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>*/}}
+{{/*                </li>*/}}
+{{/*            </ul>*/}}
+        </div>
+    </nav>
+</header>
+
+<!-- Begin page content -->
+<main role="main" class="flex-shrink-0 mt-5 mb-5">
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                抖音无水印下载
+            </div>
+            <div class="card-body">
+                <form action="{{urlfor "HomeController.Index"}}" method="post">
+                    <div class="form-group">
+                        <label for="douYinContent">抖音分享的内容</label>
+                        <input type="text" class="form-control" name="douYinContent" id="douYinContent">
+                        <small id="emailHelp" class="form-text text-muted">例如：3.8 md:/ %健身 %减肥 %健康  https://v.douyin.com/ekQqQpC/ 腹制佌链接，打开Dou音搜索，直接观看視频！</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">解析</button>
+                    <button type="button" id="downloadVideo" class="btn btn-primary">下载</button>
+                    <span id="errorMessage" class="text-danger" style="font-size: 12px"></span>
+                    <span id="alertMessage" class="text-info" style="font-size: 12px"></span>
+                </form>
+            </div>
+            <div class="card-body pl-5 pr-5" id="video-content">
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer mt-auto py-3">
+    <div class="container">
+        <span class="text-muted">抖音无水印下载.</span>
+    </div>
+</footer>
+
+<script src="/static/jquery/jquery-3.6.0.min.js"></script>
+<script src="/static/bootstrap/v4.6.0/js/bootstrap.bundle.min.js"></script>
+<script type="application/javascript">
+    function getVideoContent() {
+        $("#errorMessage").text('');
+        $("#alertMessage").text("");
+        $("#video-content").html('');
+        let douYinContent = $("#douYinContent").val();
+        if (douYinContent === ""){
+            $("#errorMessage").text('请将分享的内容粘贴到文本框');
+            return false;
+        }
+        return douYinContent;
+    }
+    function downVideo (url, name){
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+        xhr.onload = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                let blob = this.response;
+                let u = window.URL.createObjectURL(new Blob([blob]));
+                let a = document.createElement('a');
+                a.download = name;
+                a.href = u;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            }
+        };
+        xhr.send()
+    }
+
+    $(function (){
+        let $alertMessage = $("#alertMessage");
+        let $errorMessage = $("#errorMessage");
+        let $douYinContent = $("#douYinContent");
+        let $form = $("form");
+
+        $form.submit(function (event){
+           event.preventDefault();
+           let douYinContent = getVideoContent();
+           if (douYinContent === false){
+               return false;
+           }
+           $.ajax({
+               url:$form.attr("action"),
+               dataType:"json",
+               type:"post",
+               data: $form.serializeArray(),
+               success: function ($resp){
+                   if($resp.errcode === 0){
+                       $("#video-content").html($resp.data);
+                   } else {
+                       $errorMessage.text($resp.message);
+                   }
+               },
+               error : function (){
+                   $errorMessage.text('服务器异常');
+               }
+           });
+          return false;
+       }) ;
+       $("#downloadVideo").on("click",function (){
+           let douYinContent = getVideoContent();
+           if (douYinContent === false){
+               return false;
+           }
+            $.ajax( {
+               url :"{{urlfor "HomeController.Download"}}" ,
+                dataType: "json",
+                type:"get",
+                data: "url=" + encodeURI(douYinContent),
+                success: function ($resp) {
+                    if($resp.errcode === 0) {
+                        downVideo($resp.data.url,$resp.data.name);
+                    }else {
+                        $errorMessage.text($resp.message);
+                    }
+                },
+                error : function () {
+                    $errorMessage.text('服务器异常');
+                }
+            });
+       });
+    });
+</script>
+</body>
+</html>
