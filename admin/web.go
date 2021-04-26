@@ -75,6 +75,11 @@ func Run(addr string, configFile string) error {
 	})
 	savePath, err := web.AppConfig.String("auto-save-path")
 	if err == nil {
+		if _, err := os.Stat(savePath); os.IsNotExist(err) {
+			if err := os.MkdirAll(savePath, 0655); err != nil {
+				return err
+			}
+		}
 		web.SetStaticPath("/video", savePath)
 	}
 	if err := service.Run(context2.Background()); err != nil {
