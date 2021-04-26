@@ -8,4 +8,8 @@ import (
 func init() {
 	web.Router("/douyin", &controllers.HomeController{}, "get,post:Index")
 	web.Router("/douyin/download", &controllers.HomeController{}, "get:Download")
+
+	web.Router("/wechat", &controllers.WeiXinController{}, "get:Index")
+	web.Router("/wechat", &controllers.WeiXinController{}, "post:Dispatch")
+
 }

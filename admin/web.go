@@ -1,12 +1,14 @@
 package admin
 
 import (
+	context2 "context"
 	"embed"
 	"fmt"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
 	_ "github.com/lifei6671/douyinbot/admin/routers"
+	"github.com/lifei6671/douyinbot/admin/service"
 	"mime"
 	"net/http"
 	"os"
@@ -71,6 +73,14 @@ func Run(addr string, configFile string) error {
 			logs.Error("写入数据到客户端失败 -> %+v", err)
 		}
 	})
+	savePath, err := web.AppConfig.String("auto-save-path")
+	if err == nil {
+		web.SetStaticPath("/video", savePath)
+	}
+	if err := service.Run(context2.Background()); err != nil {
+		return err
+	}
+
 	web.Run(addr)
 	return nil
 }

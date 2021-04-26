@@ -95,11 +95,14 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	item := gjson.Get(body, "item_list.0")
 
 	res := item.Get("video.play_addr.url_list.0")
-	video := Video{}
+	video := Video{
+		PlayRawAddr: rawUrlStr,
+	}
 
 	if !res.Exists() {
 		return video, errors.New("未找到视频地址 ->" + urlStr)
 	}
+
 	video.PlayAddr = strings.ReplaceAll(res.Str, "playwm", "play")
 	res = item.Get("video.play_addr.uri")
 	if res.Exists() {
@@ -117,15 +120,27 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if res.Exists() {
 		video.MusicAddr = res.Str
 	}
-	res = item.Get("author.unique_id")
+	res = item.Get("author.uid")
 	if res.Exists() {
 		video.Author.Id = res.Str
+	}
+	res = item.Get("author.short_id")
+	if res.Exists() {
+		video.Author.ShortId = res.Str
 	}
 	res = item.Get("author.nickname")
 	if res.Exists() {
 		video.Author.Nickname = res.Str
 	}
+	res = item.Get("author.signature")
+	if res.Exists() {
+		video.Author.Signature = res.Str
+	}
 
+	res = item.Get("desc")
+	if res.Exists() {
+		video.Desc = res.Str
+	}
 	res = item.Get("author.avatar_larger.url_list.0")
 	if res.Exists() {
 		video.Author.AvatarLarger = res.Str

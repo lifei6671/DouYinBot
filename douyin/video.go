@@ -10,13 +10,17 @@ import (
 type Video struct {
 	PlayId      string
 	PlayAddr    string
+	PlayRawAddr string
 	Cover       string
 	OriginCover string
 	MusicAddr   string
+	Desc        string
 	Author      struct {
 		Id           string
+		ShortId      string
 		Nickname     string
 		AvatarLarger string
+		Signature    string
 	}
 }
 
@@ -24,8 +28,8 @@ func (v *Video) GetFilename() string {
 	return v.Author.Nickname + "-" + v.PlayId + ".mp4"
 }
 
-func (v *Video) Download(filename string) error {
-	name := v.Author.Nickname + "-" + v.PlayId + ".mp4"
+func (v *Video) Download(filename string) (string, error) {
+	name := filepath.Join(v.Author.Id, v.Author.Nickname+"-"+v.PlayId+".mp4")
 	f, err := os.Stat(filename)
 	if err == nil && f.IsDir() {
 		filename = filepath.Join(filename, name)
@@ -38,28 +42,28 @@ func (v *Video) Download(filename string) error {
 			dir = filepath.Dir(filename)
 		}
 		if err := os.MkdirAll(dir, 0655); err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	req, err := http.NewRequest(http.MethodGet, v.PlayAddr, nil)
 	if err != nil {
-		return err
+		return "", err
 	}
 	req.Header.Add("User-Agent", userAgent)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	f1, err := os.Create(filename)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer f1.Close()
 	_, err = io.Copy(f1, resp.Body)
-	return err
+	return filename, err
 }
 
 func (v *Video) GetDownloadUrl() (string, error) {

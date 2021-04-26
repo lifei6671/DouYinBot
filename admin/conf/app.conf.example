@@ -5,6 +5,7 @@ autorender=true
 recoverpanic=true
 viewspath=views
 runmode=dev
+copyrequestbody = true
 
 #session配置
 sessionon=true
@@ -19,5 +20,15 @@ enablexsrf = false
 xsrfkey = mI7fL9k109ljmoDAmBBTPfowTGEAZznx9b8jH9@5
 xsrfexpire = 3600
 
+#文件默认保存路径
+auto-save-path=
 #微信公众号Token
 wechattoken=
+#EncodingAESKey
+wechatencodingaeskey=
+
+#七牛配置
+qiuniuaccesskey=
+qiuniusecretkey=
+qiuniubucketname=
+qiniudoamin=

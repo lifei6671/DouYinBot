@@ -82,7 +82,7 @@ func (c *HomeController) Download() {
 						Data:    video.PlayAddr,
 					}
 				} else {
-					err = video.Download(filename)
+					_, err = video.Download(filename)
 					if err != nil {
 						c.Data["json"] = &structs.JsonResult{
 							ErrCode: 1,
