@@ -69,7 +69,7 @@ func (c *HomeController) Download() {
 					Message: "ok",
 					Data: map[string]string{
 						"url":  location,
-						"name": video.PlayId + ".mp4",
+						"name": video.GetFilename(),
 					},
 				}
 

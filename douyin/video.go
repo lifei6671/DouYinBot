@@ -20,6 +20,10 @@ type Video struct {
 	}
 }
 
+func (v *Video) GetFilename() string {
+	return v.Author.Nickname + "-" + v.PlayId + ".mp4"
+}
+
 func (v *Video) Download(filename string) error {
 	name := v.Author.Nickname + "-" + v.PlayId + ".mp4"
 	f, err := os.Stat(filename)

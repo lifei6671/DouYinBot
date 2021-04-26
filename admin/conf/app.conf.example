@@ -18,3 +18,6 @@ sessionhashkey=PNroxCpM0ULMRZ$z5e4e!Gxn
 enablexsrf = false
 xsrfkey = mI7fL9k109ljmoDAmBBTPfowTGEAZznx9b8jH9@5
 xsrfexpire = 3600
+
+#微信公众号Token
+wechattoken=
