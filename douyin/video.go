@@ -33,14 +33,10 @@ func (v *Video) Download(filename string) (string, error) {
 	f, err := os.Stat(filename)
 	if err == nil && f.IsDir() {
 		filename = filepath.Join(filename, name)
-	} else if os.IsNotExist(err) {
-		var dir string
-		if filepath.Ext(filename) == "" {
-			dir = filename
-			filename = filepath.Join(filename, name)
-		} else {
-			dir = filepath.Dir(filename)
-		}
+	}
+	dir := filepath.Dir(filename)
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, 0655); err != nil {
 			return "", err
 		}
