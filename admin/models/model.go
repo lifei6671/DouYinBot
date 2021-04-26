@@ -18,8 +18,13 @@ func Init(dataSource string) error {
 			return err
 		}
 	}
+
 	// 参数1        数据库的别名，用来在 ORM 中切换数据库使用
 	// 参数2        driverName
 	// 参数3        对应的链接字符串
-	return orm.RegisterDataBase("default", "sqlite3", filename)
+	if err := orm.RegisterDataBase("default", "sqlite3", filename); err != nil {
+		return err
+	}
+	err = orm.RunSyncdb("default", false, true)
+	return err
 }
