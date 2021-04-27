@@ -67,9 +67,9 @@ func (c *WeiXinController) Dispatch() {
 		}
 		var err error
 
-		textRequestBody, err = wx.ParseEncryptTextRequestBody(c.Ctx.Input.RequestBody)
+		textRequestBody, err = wx.ParseEncryptRequestBody(timestamp, nonce, msgSignature, c.Ctx.Input.RequestBody)
 		if err != nil {
-			logs.Error("解析微信消息失败 -> %+v", msgSignature)
+			logs.Error("解析微信消息失败 -> %+v", err)
 			_ = c.Ctx.Output.Body([]byte("success"))
 			c.StopRun()
 			return

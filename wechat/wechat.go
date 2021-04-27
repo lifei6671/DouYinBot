@@ -11,6 +11,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/beego/beego/v2/core/logs"
 	"io"
 	"log"
 	"math/big"
@@ -150,15 +151,42 @@ func (w *WeiXin) aesEncrypt(plainData []byte, aesKey []byte) ([]byte, error) {
 	return cipherData, nil
 }
 
-func (w *WeiXin) ParseEncryptTextRequestBody(plainText []byte) (*TextRequestBody, error) {
+func (w *WeiXin) ParseEncryptTextRequestBody(plainText []byte) (*EncryptRequestBody, error) {
+	// xml Decoding
+	textRequestBody := &EncryptRequestBody{}
+	err := xml.Unmarshal(plainText, textRequestBody)
+	return textRequestBody, err
+}
 
-	// Read length
-	buf := bytes.NewBuffer(plainText[16:20])
-	var length int32
-	err := binary.Read(buf, binary.BigEndian, &length)
+func (w *WeiXin) ParseEncryptRequestBody(timestamp, nonce, msgSignature string, rawBody []byte) (*TextRequestBody, error) {
+	encryptRequestBody, err := w.ParseEncryptTextRequestBody(rawBody)
 	if err != nil {
 		return nil, err
 	}
+	// Validate msg signature
+	if !w.ValidateMsg(timestamp, nonce, encryptRequestBody.Encrypt, msgSignature) {
+		return nil, errors.New("校验数据来源失败")
+	}
+	log.Println("Wechat Service: msg_signature validation is ok!")
+
+	// Decode base64
+	cipherData, err := base64.StdEncoding.DecodeString(encryptRequestBody.Encrypt)
+	if err != nil {
+		log.Println("Wechat Service: Decode base64 error:", err)
+		return nil, err
+	}
+
+	// AES Decrypt
+	plainText, err := aesDecrypt(cipherData, w.aesKey)
+	if err != nil {
+		logs.Error("解密微信加密数据失败 ->", err)
+		return nil, err
+	}
+	// Read length
+	buf := bytes.NewBuffer(plainText[16:20])
+	var length int32
+	binary.Read(buf, binary.BigEndian, &length)
+	fmt.Println(string(plainText[20 : 20+length]))
 
 	// appID validation
 	appIDstart := 20 + length
@@ -167,8 +195,6 @@ func (w *WeiXin) ParseEncryptTextRequestBody(plainText []byte) (*TextRequestBody
 		log.Println("Wechat Service: appid is invalid!")
 		return nil, errors.New("Appid is invalid")
 	}
-
-	// xml Decoding
 	textRequestBody := &TextRequestBody{}
 	err = xml.Unmarshal(plainText[20:20+length], textRequestBody)
 	return textRequestBody, err
@@ -216,6 +242,7 @@ func (w *WeiXin) MakeEncryptResponseBody(fromUserName, toUserName, content, nonc
 
 	return xml.MarshalIndent(encryptBody, " ", "  ")
 }
+
 func (w *WeiXin) randomString(n int, allowedChars ...[]rune) string {
 	var letters []rune
 
