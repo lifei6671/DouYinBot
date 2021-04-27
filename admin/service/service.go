@@ -95,7 +95,7 @@ func execute(ctx context.Context) {
 				AvatarLarger:     video.Author.AvatarLarger,
 				AuthorId:         video.Author.Id,
 				AuthorShortId:    video.Author.ShortId,
-				VideoRawPlayAddr: video.PlayRawAddr,
+				VideoRawPlayAddr: video.VideoRawAddr,
 				VideoPlayAddr:    video.PlayAddr,
 				VideoId:          video.PlayId,
 				VideoCover:       video.OriginCover,

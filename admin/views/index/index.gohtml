@@ -1,0 +1,103 @@
+
+<!doctype html>
+<html lang="zh-CN" class="h-100">
+<head>
+    <meta name="referrer" content="never">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="抖音无水印工具_最新抖音在线无水印解析">
+    <title>抖音无水印工具_最新抖音在线无水印解析</title>
+    <link href="/static/bootstrap/v4.6.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Favicons -->
+    <link rel="icon" href="/static/favicons/favicon.ico">
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+        .image-content{
+            height: 425px;
+            width: 100%;display:flex;
+            justify-content:center;
+            align-items:center;
+            overflow: hidden
+        }
+        .image-content>img{
+            width:100%;
+            vertical-align: middle;
+        }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="/static/css/navbar.css" rel="stylesheet">
+</head>
+<body class="d-flex flex-column h-100">
+
+<header>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="#">抖音无水印下载工具</a>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+        </div>
+    </nav>
+</header>
+
+<!-- Begin page content -->
+<main role="main" class="flex-shrink-0 mt-5 mb-5">
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                {{range .List}}
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm" style="height: 550px">
+                        <div class="image-content">
+                            <img src="{{.VideoCover}}" alt="{{.Nickname}}">
+                        </div>
+
+                        <div class="card-body">
+                            <p class="card-text">{{.Desc}}.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">播放</button>
+                                    <a href="{{.VideoPlayAddr}}" target="_blank" class="btn btn-sm btn-outline-secondary">下载</a>
+                                </div>
+                                <small class="text-muted">{{dateformat .Created "2006-01-02 15:04:05"}}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{else}}
+                   <p>没有数据</p>
+                {{end}}
+            </div>
+            <div class="row">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination">
+                        <li class="page-item{{if eq .Previous "#"}} disabled{{end}}"><a class="page-link" href="{{.Previous}}">上一页</a></li>
+                        <li class="page-item{{if eq .Next "#"}} disabled{{end}}"><a class="page-link" href="{{.Next}}">下一页</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="footer mt-auto py-3">
+    <div class="container">
+        <span class="text-muted">抖音无水印下载.</span>
+    </div>
+</footer>
+<script src="/static/jquery/jquery-3.6.0.min.js"></script>
+<script src="/static/bootstrap/v4.6.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const PageSize = 9
+
 type DouYinVideo struct {
 	Id               int       `orm:"column(id);auto;pk"`
 	Nickname         string    `orm:"column(nickname);size(100); description(作者昵称)"`
@@ -28,6 +30,15 @@ func (d *DouYinVideo) TableName() string {
 
 func NewDouYinVideo() *DouYinVideo {
 	return &DouYinVideo{}
+}
+
+func (d *DouYinVideo) GetList(pageIndex int) (list []DouYinVideo, err error) {
+	o := orm.NewOrm()
+	offset := (pageIndex - 1) * PageSize
+
+	_, err = o.QueryTable(d.TableName()).OrderBy("-id").Offset(offset).Limit(PageSize).All(&list)
+
+	return
 }
 
 func (d *DouYinVideo) Save() error {

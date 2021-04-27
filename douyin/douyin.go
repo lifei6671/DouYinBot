@@ -96,7 +96,8 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 
 	res := item.Get("video.play_addr.url_list.0")
 	video := Video{
-		PlayRawAddr: rawUrlStr,
+		VideoRawAddr: urlStr,
+		PlayRawAddr:  rawUrlStr,
 	}
 
 	if !res.Exists() {

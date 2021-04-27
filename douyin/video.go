@@ -8,14 +8,15 @@ import (
 )
 
 type Video struct {
-	PlayId      string
-	PlayAddr    string
-	PlayRawAddr string
-	Cover       string
-	OriginCover string
-	MusicAddr   string
-	Desc        string
-	Author      struct {
+	PlayId       string
+	PlayAddr     string
+	VideoRawAddr string
+	PlayRawAddr  string
+	Cover        string
+	OriginCover  string
+	MusicAddr    string
+	Desc         string
+	Author       struct {
 		Id           string
 		ShortId      string
 		Nickname     string
