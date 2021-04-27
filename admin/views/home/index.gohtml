@@ -33,27 +33,23 @@
 <body class="d-flex flex-column h-100">
 
 <header>
-    <!-- Fixed navbar -->
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <a class="navbar-brand" href="#">抖音无水印下载工具</a>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-{{/*            <ul class="navbar-nav mr-auto">*/}}
-{{/*                <li class="nav-item active">*/}}
-{{/*                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>*/}}
-{{/*                </li>*/}}
-{{/*                <li class="nav-item">*/}}
-{{/*                    <a class="nav-link" href="#">Link</a>*/}}
-{{/*                </li>*/}}
-{{/*                <li class="nav-item">*/}}
-{{/*                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>*/}}
-{{/*                </li>*/}}
-{{/*            </ul>*/}}
+    <div class="navbar navbar-dark bg-dark shadow-sm">
+        <div class="container d-flex justify-content-between">
+            <a href="/" class="navbar-brand d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true" class="mr-2" viewBox="0 0 24 24" focusable="false"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <strong>白茶清欢短视频</strong>
+            </a>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{urlfor "HomeController.Index"}}">抖音无水印下载工具 <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
 </header>
 
 <!-- Begin page content -->
-<main role="main" class="flex-shrink-0 mt-5 mb-5">
+<main role="main" class="flex-shrink-0 mb-5">
     <div class="container">
         <div class="card">
             <div class="card-header">
