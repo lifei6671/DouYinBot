@@ -69,6 +69,7 @@ func execute(ctx context.Context) {
 			if !ok {
 				return
 			}
+			logs.Info("开始解析抖音视频任务 -> %s", content)
 			video, err := dy.Get(content)
 			if err != nil {
 				logs.Error("解析抖音视频地址失败 -> 【%s】- %+v", content, err)
@@ -106,7 +107,7 @@ func execute(ctx context.Context) {
 				logs.Error("保存视频到数据库失败 -> 【%s】 - %+v", content, err)
 				continue
 			}
-			logs.Info("解析抖音视频成功 -> ", content)
+			logs.Info("解析抖音视频成功 -> 【%s】- %s", content, m.VideoBackAddr)
 
 		case <-ctx.Done():
 			return
