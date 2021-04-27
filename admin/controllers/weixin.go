@@ -1,10 +1,9 @@
 package controllers
 
 import (
-	"bytes"
 	"context"
+	"encoding/xml"
 	"fmt"
-	"github.com/antchfx/xmlquery"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/lifei6671/douyinbot/admin/service"
@@ -15,6 +14,7 @@ import (
 var (
 	token = web.AppConfig.DefaultString("wechattoken", "")
 	key   = web.AppConfig.DefaultString("wechatencodingaeskey", "")
+	appid = web.AppConfig.DefaultString("wechatappid", "")
 )
 
 type WeiXinController struct {
@@ -28,7 +28,7 @@ func (c *WeiXinController) Index() {
 	nonce := c.Ctx.Input.Query("nonce")
 	echostr := c.Ctx.Input.Query("echostr")
 
-	wx := wechat.NewWeiXin(token, key)
+	wx := wechat.NewWeiXin(appid, token, key)
 
 	signatureGen := wx.MakeSignature(timestamp, nonce)
 
@@ -41,76 +41,88 @@ func (c *WeiXinController) Index() {
 }
 
 func (c *WeiXinController) Dispatch() {
-	doc, err := xmlquery.Parse(bytes.NewReader(c.Ctx.Input.RequestBody))
-	if err != nil {
-		logs.Error("解析微信消息失败 -> %+v", err)
-		_ = c.Ctx.Output.Body([]byte("success"))
-		c.StopRun()
-	}
-	node, err := xmlquery.Query(doc, "//MsgType")
-	if err != nil {
-		logs.Error("解析微信消息失败 -> %+v", err)
-		_ = c.Ctx.Output.Body([]byte("success"))
-		c.StopRun()
-		return
-	}
-	var toUserName, fromUserName string
+	encryptType := c.Ctx.Input.Query("encrypt_type")
+	msgSignature := c.Ctx.Input.Query("msg_signature")
+	nonce := c.Ctx.Input.Query("nonce")
+	timestamp := c.Ctx.Input.Query("timestamp")
 
-	toUserNameNode, err := xmlquery.Query(doc, "//ToUserName")
-	if err != nil || toUserNameNode == nil {
-		logs.Error("解析微信消息失败 -> %s - %+v", string(c.Ctx.Input.RequestBody), err)
-		_ = c.Ctx.Output.Body([]byte("success"))
-		c.StopRun()
-		return
-	}
-	toUserName = toUserNameNode.InnerText()
+	wx := wechat.NewWeiXin(appid, token, key)
 
-	fromUserNameNode, err := xmlquery.Query(doc, "//FromUserName")
-	if err != nil || fromUserNameNode == nil {
-		logs.Error("解析微信消息失败 -> %s - %+v", string(c.Ctx.Input.RequestBody), err)
-		_ = c.Ctx.Output.Body([]byte("success"))
-		c.StopRun()
-		return
-	}
-	fromUserName = fromUserNameNode.InnerText()
+	textRequestBody := &wechat.TextRequestBody{}
 
-	if node.InnerText() == string(wechat.WeiXinTextMsgType) {
-		node, err = xmlquery.Query(doc, "//Content")
-		if err != nil || node == nil {
-			c.Data["xml"] = wechat.PassiveUserReplyMessage{
-				ToUserName:   wechat.Value(fromUserName),
-				FromUserName: wechat.Value(toUserName),
-				CreateTime:   wechat.Value(fmt.Sprintf("%d", time.Now().Unix())),
-				MsgType:      wechat.Value(string(wechat.WeiXinTextMsgType)),
-				Content:      wechat.Value("解析消息内容失败"),
-			}
-			_ = c.ServeXML()
+	logs.Info("微信请求 ->", string(c.Ctx.Input.RequestBody))
+	if encryptType == wechat.EncryptTypeAES {
+		requestBody := &wechat.EncryptRequestBody{}
+		if err := xml.Unmarshal(c.Ctx.Input.RequestBody, requestBody); err != nil {
+			logs.Error("解析微信消息失败 -> %+v", err)
+			_ = c.Ctx.Output.Body([]byte("success"))
+			c.StopRun()
 			return
 		}
-		content := node.InnerText()
-		service.Push(context.Background(), content)
-
-		resp := wechat.PassiveUserReplyMessage{
-			ToUserName:   wechat.Value(fromUserName),
-			FromUserName: wechat.Value(toUserName),
-			CreateTime:   wechat.Value(fmt.Sprintf("%d", time.Now().Unix())),
-			MsgType:      wechat.Value(string(wechat.WeiXinTextMsgType)),
-			Content:      wechat.Value("处理成功"),
+		if !wx.ValidateMsg(timestamp, nonce, requestBody.Encrypt, msgSignature) {
+			logs.Error("解析微信消息失败 -> %+v", msgSignature)
+			_ = c.Ctx.Output.Body([]byte("success"))
+			c.StopRun()
+			return
 		}
-		c.Data["xml"] = resp
-		_ = c.ServeXML()
+		var err error
+
+		textRequestBody, err = wx.ParseEncryptTextRequestBody(c.Ctx.Input.RequestBody)
+		if err != nil {
+			logs.Error("解析微信消息失败 -> %+v", msgSignature)
+			_ = c.Ctx.Output.Body([]byte("success"))
+			c.StopRun()
+			return
+		}
+	} else {
+
+		err := xml.Unmarshal(c.Ctx.Input.RequestBody, textRequestBody)
+		if err != nil {
+			logs.Error("解析微信消息失败 -> %+v", msgSignature)
+			_ = c.Ctx.Output.Body([]byte("success"))
+			c.StopRun()
+			return
+		}
+
+	}
+
+	if textRequestBody.MsgType == string(wechat.WeiXinTextMsgType) {
+		if textRequestBody.Content == "" {
+			c.response(wx, textRequestBody, "解析消息失败")
+			return
+		}
+		service.Push(context.Background(), textRequestBody.Content)
+
+		c.response(wx, textRequestBody, "处理成功")
 		return
 	}
-	resp := wechat.PassiveUserReplyMessage{
-		ToUserName:   wechat.Value(fromUserName),
-		FromUserName: wechat.Value(toUserName),
-		CreateTime:   wechat.Value(fmt.Sprintf("%d", time.Now().Unix())),
-		MsgType:      wechat.Value(string(wechat.WeiXinTextMsgType)),
-		Content:      wechat.Value("不支持的消息类型"),
+	c.response(wx, textRequestBody, "不支持的消息类型")
+}
+
+func (c *WeiXinController) response(wx *wechat.WeiXin, textRequestBody *wechat.TextRequestBody, content string) error {
+	nonce := c.Ctx.Input.Query("nonce")
+	timestamp := c.Ctx.Input.Query("timestamp")
+	encryptType := c.Ctx.Input.Query("encrypt_type")
+
+	if encryptType == wechat.EncryptTypeAES {
+		c.Data["xml"] = wechat.PassiveUserReplyMessage{
+			ToUserName:   wechat.Value(textRequestBody.FromUserName),
+			FromUserName: wechat.Value(textRequestBody.ToUserName),
+			CreateTime:   wechat.Value(fmt.Sprintf("%d", time.Now().Unix())),
+			MsgType:      wechat.Value(string(wechat.WeiXinTextMsgType)),
+			Content:      wechat.Value(content),
+		}
+		return c.ServeXML()
+	} else {
+		body, err := wx.MakeEncryptResponseBody(textRequestBody.ToUserName, textRequestBody.FromUserName, content, nonce, timestamp)
+		if err != nil {
+			logs.Error("解析微信消息失败 -> %+v", textRequestBody)
+			_ = c.Ctx.Output.Body([]byte("success"))
+			c.StopRun()
+			return err
+		}
+		err = c.Ctx.Output.Body(body)
+		c.StopRun()
+		return err
 	}
-	c.Data["xml"] = resp
-
-	_ = c.ServeXML()
-	return
-
 }

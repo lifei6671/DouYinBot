@@ -1,7 +1,14 @@
 package wechat
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"time"
+)
 
+const (
+	EncryptTypeAES = "aes"
+	EncryptTypeRAW = "raw"
+)
 const (
 	WeiXinTextMsgType  WeiXinMsgType = "text"
 	WeiXinImageMsgType WeiXinMsgType = "image"
@@ -15,6 +22,15 @@ type WeiXinMsgType string
 
 type CDATA struct {
 	Text string `xml:",cdata"`
+}
+type TextRequestBody struct {
+	XMLName      xml.Name `xml:"xml"`
+	ToUserName   string
+	FromUserName string
+	CreateTime   time.Duration
+	MsgType      string
+	Content      string
+	MsgId        int
 }
 
 type PassiveUserReplyMessage struct {
@@ -35,4 +51,12 @@ type EncryptRequestBody struct {
 	XMLName    xml.Name `xml:"xml"`
 	ToUserName string
 	Encrypt    string
+}
+
+type EncryptResponseBody struct {
+	XMLName      xml.Name `xml:"xml"`
+	Encrypt      CDATA
+	MsgSignature CDATA
+	TimeStamp    string
+	Nonce        CDATA
 }

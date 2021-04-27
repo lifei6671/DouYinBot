@@ -23,6 +23,7 @@ xsrfexpire = 3600
 #文件默认保存路径
 auto-save-path=
 #微信公众号Token
+wechatappid=
 wechattoken=
 #EncodingAESKey
 wechatencodingaeskey=
