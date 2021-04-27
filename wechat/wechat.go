@@ -29,11 +29,13 @@ type WeiXin struct {
 }
 
 func NewWeiXin(appid, token, key string) *WeiXin {
-	return &WeiXin{
+	wx := &WeiXin{
 		appid:       appid,
 		token:       token,
 		encodingKey: key,
 	}
+	wx.aesKey = wx.EncodingAESKey2AESKey()
+	return wx
 }
 
 func (w *WeiXin) ValidateMsg(timestamp, nonce, msgEncrypt, msgSignatureIn string) bool {
@@ -167,8 +169,6 @@ func (w *WeiXin) ParseEncryptRequestBody(timestamp, nonce, msgSignature string, 
 	if !w.ValidateMsg(timestamp, nonce, encryptRequestBody.Encrypt, msgSignature) {
 		return nil, errors.New("校验数据来源失败")
 	}
-	log.Println("Wechat Service: msg_signature validation is ok!")
-
 	// Decode base64
 	cipherData, err := base64.StdEncoding.DecodeString(encryptRequestBody.Encrypt)
 	if err != nil {
@@ -186,8 +186,6 @@ func (w *WeiXin) ParseEncryptRequestBody(timestamp, nonce, msgSignature string, 
 	buf := bytes.NewBuffer(plainText[16:20])
 	var length int32
 	binary.Read(buf, binary.BigEndian, &length)
-	fmt.Println(string(plainText[20 : 20+length]))
-
 	// appID validation
 	appIDstart := 20 + length
 	id := plainText[appIDstart : int(appIDstart)+len(w.appid)]
