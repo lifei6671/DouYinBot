@@ -76,7 +76,7 @@
                             <p class="card-text">{{.Desc}}.</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
-                                    <a href="{{.VideoRawPlayAddr}}" target="_blank" type="button" class="btn btn-sm btn-outline-secondary">播放</a>
+                                    <button data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}" class="btn btn-sm btn-outline-secondary">播放</button>
                                     <a href="{{.VideoPlayAddr}}" target="_blank" class="btn btn-sm btn-outline-secondary">下载</a>
                                 </div>
                                 <small class="text-muted">{{dateformat .Created "2006-01-02 15:04:05"}}</small>
@@ -98,6 +98,29 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="playVideoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <video id="playVideo" autoplay="autoplay" width="100%">
+                                您的浏览器不支持 video 标签。
+                            </video>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 <footer class="footer mt-auto py-3">
@@ -107,5 +130,18 @@
 </footer>
 <script src="/static/jquery/jquery-3.6.0.min.js"></script>
 <script src="/static/bootstrap/v4.6.0/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('#playVideoModal').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget);
+            const title = button.data('title');
+            const body = button.data('play')
+
+            const modal = $(this);
+            modal.find('.modal-title').text(title);
+            modal.find('#playVideo').attr('src',body)
+        })
+    });
+</script>
 </body>
 </html>

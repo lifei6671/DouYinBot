@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-const PageSize = 9
+const PageSize = 15
 
 type DouYinVideo struct {
 	Id               int       `orm:"column(id);auto;pk"`
