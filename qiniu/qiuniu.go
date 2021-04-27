@@ -13,6 +13,9 @@ type Bucket struct {
 }
 
 func NewBucket(accessKey, secretKey string) *Bucket {
+	if accessKey == "" || secretKey == "" {
+		return nil
+	}
 	mac := qbox.NewMac(accessKey, secretKey)
 
 	return &Bucket{

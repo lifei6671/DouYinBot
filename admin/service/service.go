@@ -31,17 +31,14 @@ func Run(ctx context.Context) (err error) {
 	accessKey, err = web.AppConfig.String("qiuniuaccesskey")
 	if err != nil {
 		logs.Error("获取七牛配置失败 -> [qiuniuaccesskey] - %+v", err)
-		return err
 	}
 	secretKey, err = web.AppConfig.String("qiuniusecretkey")
 	if err != nil {
 		logs.Error("获取七牛配置失败 -> [qiuniusecretkey] - %+v", err)
-		return err
 	}
 	bucketName, err = web.AppConfig.String("qiuniubucketname")
 	if err != nil {
 		logs.Error("获取七牛配置失败 -> [qiuniubucketname] - %+v", err)
-		return err
 	}
 	domain, err = web.AppConfig.String("qiniudoamin")
 	if err != nil {
@@ -82,11 +79,13 @@ func execute(ctx context.Context) {
 			}
 			name := strings.TrimPrefix(p, savepath)
 
-			err = bucket.UploadFile(bucketName, name, p)
-			if err != nil {
-				logs.Error("上传文件到七牛储存空间失败 -> 【%s】 - %+v", content, err)
-				_ = os.Remove(p)
-				continue
+			if bucket != nil {
+				err = bucket.UploadFile(bucketName, name, p)
+				if err != nil {
+					logs.Error("上传文件到七牛储存空间失败 -> 【%s】 - %+v", content, err)
+					_ = os.Remove(p)
+					continue
+				}
 			}
 
 			m := models.DouYinVideo{
