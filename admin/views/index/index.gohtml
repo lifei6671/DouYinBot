@@ -142,20 +142,14 @@
             const modal = $(this);
             modal.find('.modal-title').text(title);
             modal.find('#playVideo').attr('src',body)
+            const audio = document.getElementById('playVideo');
+            audio.play();
+            document.addEventListener("WeixinJSBridgeReady", function () {
+                audio.play();
+            }, false);
         }).on("hide.bs.modal",function (event) {
             let audio = document.getElementById('playVideo');
             audio.pause();
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            function audioAutoPlay() {
-                const audio = document.getElementById('playVideo');
-                audio.play();
-                document.addEventListener("WeixinJSBridgeReady", function () {
-                    audio.play();
-                }, false);
-            }
-            audioAutoPlay();
         });
 
         if (/i(Phone|P(o|a)d)/.test(navigator.userAgent)) {
