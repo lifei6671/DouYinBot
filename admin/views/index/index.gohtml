@@ -37,6 +37,12 @@
             width:100%;
             vertical-align: middle;
         }
+        main .card{
+            height: 570px
+        }
+        main .card .card-body>.card-text{
+            height:60px;
+        }
     </style>
     <!-- Custom styles for this template -->
     <link href="/static/css/navbar.css" rel="stylesheet">
@@ -66,12 +72,11 @@
         <div class="container">
             <div class="row">
                 {{range .List}}
-                <div class="col-md-4">
-                    <div class="card mb-4 shadow-sm" style="height: 550px">
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="card mb-4 shadow-sm">
                         <div class="image-content">
-                            <img src="{{.VideoCover}}" alt="{{.Nickname}}">
+                            <img src="{{.VideoCover}}" alt="{{.Nickname}}" data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}">
                         </div>
-
                         <div class="card-body">
                             <p class="card-text">{{.Desc}}.</p>
                             <div class="d-flex justify-content-between align-items-center">
@@ -110,7 +115,7 @@
                 <div class="modal-body">
                     <div class="container-fluid">
                         <div class="row">
-                            <video id="playVideo" autoplay="autoplay" width="100%" controls="controls">
+                            <video id="playVideo" autoplay="autoplay" width="100%" height="100%" controls="controls">
                                 您的浏览器不支持 video 标签。
                             </video>
                         </div>
@@ -137,10 +142,14 @@
             const modal = $(this);
             modal.find('.modal-title').text(title);
             modal.find('#playVideo').attr('src',body)
+        }).on("hide.bs.modal",function (event) {
+            let audio = document.getElementById('playVideo');
+            audio.pause();
         });
+
         document.addEventListener('DOMContentLoaded', function () {
             function audioAutoPlay() {
-                var audio = document.getElementById('playVideo');
+                const audio = document.getElementById('playVideo');
                 audio.play();
                 document.addEventListener("WeixinJSBridgeReady", function () {
                     audio.play();
