@@ -91,17 +91,24 @@ func (c *WeiXinController) Dispatch() {
 			c.response(wx, textRequestBody, "解析消息失败")
 			return
 		}
-		if err := service.Register(textRequestBody.Content,textRequestBody.FromUserName); err != service.ErrNoUserRegister {
-			if err != nil {
-				c.response(wx,textRequestBody,err.Error())
+		if handler := service.GetHandler(textRequestBody.Content); handler != nil {
+			if resp, err := handler(textRequestBody); err != nil {
+				c.response(wx, textRequestBody, "处理失败")
 			} else {
-				c.response(wx,textRequestBody,"注册成功")
+				c.responseBody(wx, resp)
+			}
+		}
+		if err := service.Register(textRequestBody.Content, textRequestBody.FromUserName); err != service.ErrNoUserRegister {
+			if err != nil {
+				c.response(wx, textRequestBody, err.Error())
+			} else {
+				c.response(wx, textRequestBody, "注册成功")
 			}
 			return
 		}
 		service.Push(context.Background(), service.MediaContent{
-			Content:textRequestBody.Content,
-			UserId: textRequestBody.FromUserName,
+			Content: textRequestBody.Content,
+			UserId:  textRequestBody.FromUserName,
 		})
 
 		c.response(wx, textRequestBody, "处理成功")
@@ -109,7 +116,25 @@ func (c *WeiXinController) Dispatch() {
 	}
 	c.response(wx, textRequestBody, "不支持的消息类型")
 }
+func (c *WeiXinController) responseBody(wx *wechat.WeiXin, resp wechat.PassiveUserReplyMessage) {
+	nonce := c.Ctx.Input.Query("nonce")
+	timestamp := c.Ctx.Input.Query("timestamp")
+	encryptType := c.Ctx.Input.Query("encrypt_type")
 
+	if encryptType == wechat.EncryptTypeAES {
+		c.Data["xml"] = resp
+		c.ServeXML()
+	} else {
+		body, err := wx.MakeEncryptResponseBody(resp.FromUserName.Text, resp.ToUserName.Text, resp.Content.Text, nonce, timestamp)
+		if err != nil {
+			logs.Error("解析微信消息失败 -> %+v", resp)
+			_ = c.Ctx.Output.Body([]byte("success"))
+			c.StopRun()
+		}
+		err = c.Ctx.Output.Body(body)
+		c.StopRun()
+	}
+}
 func (c *WeiXinController) response(wx *wechat.WeiXin, textRequestBody *wechat.TextRequestBody, content string) error {
 	nonce := c.Ctx.Input.Query("nonce")
 	timestamp := c.Ctx.Input.Query("timestamp")

@@ -15,7 +15,7 @@ type User struct {
 	WechatId string    `orm:"column(wechat_id);size(200);null;description(微信的用户ID)"`
 	Status   int       `orm:"column(status);type(tinyint);default(0);description(用户状态:0=正常/1=禁用/2=删除)" json:"status"`
 	Created  time.Time `orm:"column(created);auto_now_add;type(datetime);description(创建时间)"`
-	Updated  time.Time `orm:"column(created);auto_now_add;type(datetime);description(创建时间)"`
+	Updated  time.Time `orm:"column(updated);auto_now;type(datetime);description(修改时间)"`
 }
 
 func (u *User) TableName() string {
@@ -58,4 +58,9 @@ func (u *User) First(account string) (*User, error) {
 func (u *User) String() string {
 	b, _ := json.Marshal(u)
 	return string(b)
+}
+
+func init() {
+	// 需要在init中注册定义的model
+	orm.RegisterModel(new(User))
 }
