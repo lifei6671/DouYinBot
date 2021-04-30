@@ -97,6 +97,7 @@ func (c *WeiXinController) Dispatch() {
 			} else {
 				c.responseBody(wx, resp)
 			}
+			return
 		}
 		if err := service.Register(textRequestBody.Content, textRequestBody.FromUserName); err != service.ErrNoUserRegister {
 			if err != nil {
@@ -132,8 +133,8 @@ func (c *WeiXinController) responseBody(wx *wechat.WeiXin, resp wechat.PassiveUs
 			c.StopRun()
 		}
 		err = c.Ctx.Output.Body(body)
-		c.StopRun()
 	}
+	c.StopRun()
 }
 func (c *WeiXinController) response(wx *wechat.WeiXin, textRequestBody *wechat.TextRequestBody, content string) error {
 	nonce := c.Ctx.Input.Query("nonce")
