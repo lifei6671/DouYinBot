@@ -20,8 +20,12 @@ enablexsrf = false
 xsrfkey = mI7fL9k109ljmoDAmBBTPfowTGEAZznx9b8jH9@5
 xsrfexpire = 3600
 
+#视频解析工作协程数量
+workernumber=15
+
 #文件默认保存路径
 auto-save-path=
+
 #微信公众号Token
 wechatappid=
 wechattoken=

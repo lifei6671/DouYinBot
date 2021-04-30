@@ -9,6 +9,7 @@ const PageSize = 15
 
 type DouYinVideo struct {
 	Id               int       `orm:"column(id);auto;pk"`
+	UserId           int       `orm:"column(user_id);index;description(所属用户)"`
 	Nickname         string    `orm:"column(nickname);size(100); description(作者昵称)"`
 	Signature        string    `orm:"column(signature);size(255);null;description(作者信息)"`
 	AvatarLarger     string    `orm:"column(avatar_larger);size(2000);null;description(作者头像)"`

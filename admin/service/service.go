@@ -2,25 +2,34 @@ package service
 
 import (
 	"context"
+	"errors"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/lifei6671/douyinbot/admin/models"
 	"github.com/lifei6671/douyinbot/douyin"
 	"github.com/lifei6671/douyinbot/qiniu"
+	"golang.org/x/crypto/bcrypt"
 	"os"
 	"strings"
 )
 
 var (
-	videoShareChan = make(chan string, 100)
-	accessKey      = ""
-	secretKey      = ""
-	bucketName     = ""
-	domain         = ""
-	savepath       = ""
+	ErrNoUserRegister = errors.New("不是用户注册")
+	workerNum         = 10
+	videoShareChan    = make(chan MediaContent, 100)
+	accessKey         = ""
+	secretKey         = ""
+	bucketName        = ""
+	domain            = ""
+	savepath          = ""
 )
 
-func Push(ctx context.Context, content string) {
+type MediaContent struct {
+	Content string
+	UserId  string
+}
+
+func Push(ctx context.Context, content MediaContent) {
 	select {
 	case videoShareChan <- content:
 	case <-ctx.Done():
@@ -28,6 +37,10 @@ func Push(ctx context.Context, content string) {
 }
 
 func Run(ctx context.Context) (err error) {
+	if num, err := web.AppConfig.Int("workernumber"); err == nil && num > 0 {
+		workerNum = num
+	}
+
 	accessKey, err = web.AppConfig.String("qiuniuaccesskey")
 	if err != nil {
 		logs.Error("获取七牛配置失败 -> [qiuniuaccesskey] - %+v", err)
@@ -50,10 +63,9 @@ func Run(ctx context.Context) (err error) {
 		logs.Error("获取本地储存目录失败 ->[auto-save-path] %+v", err)
 		return err
 	}
-	go execute(ctx)
-	go execute(ctx)
-	go execute(ctx)
-	go execute(ctx)
+	for i := 0; i < workerNum; i++ {
+		go execute(ctx)
+	}
 	return nil
 }
 
@@ -67,7 +79,7 @@ func execute(ctx context.Context) {
 				return
 			}
 			logs.Info("开始解析抖音视频任务 -> %s", content)
-			video, err := dy.Get(content)
+			video, err := dy.Get(content.Content)
 			if err != nil {
 				logs.Error("解析抖音视频地址失败 -> 【%s】- %+v", content, err)
 				continue
@@ -87,8 +99,13 @@ func execute(ctx context.Context) {
 					continue
 				}
 			}
-
+			user, err := models.NewUser().First(content.UserId)
+			if err != nil {
+				logs.Error("获取用户失败 -> %s - %+v", content, err)
+				continue
+			}
 			m := models.DouYinVideo{
+				UserId:           user.Id,
 				Nickname:         video.Author.Nickname,
 				Signature:        video.Author.Signature,
 				AvatarLarger:     video.Author.AvatarLarger,
@@ -112,4 +129,33 @@ func execute(ctx context.Context) {
 			return
 		}
 	}
+}
+
+func Register(content, wechatId string) error {
+	if strings.HasPrefix(content, "注册#") {
+		items := strings.Split(strings.TrimPrefix(content, "注册#"), "#")
+		if len(items) != 3 || items[0] == "" || items[1] == "" || items[2] == "" {
+			return errors.New("注册信息格式不正确")
+		}
+		if !strings.Contains(items[2], "@") {
+			return errors.New("邮箱格式不正确")
+		}
+		user := models.NewUser()
+		user.Account = items[0]
+		password, err := bcrypt.GenerateFromPassword([]byte(items[1]), bcrypt.DefaultCost)
+		if err != nil {
+			logs.Error("加密密码失败 -> %+v", err)
+			return errors.New("密码格式不正确")
+		}
+		user.Password = string(password)
+		user.WechatId = wechatId
+		user.Email = strings.TrimSpace(items[2])
+		err = user.Insert()
+		if err != nil {
+			logs.Error("注册用户失败 -> %+v - %+v", user, err)
+			return errors.New("注册用户失败")
+		}
+		return nil
+	}
+	return ErrNoUserRegister
 }

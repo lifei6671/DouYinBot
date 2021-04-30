@@ -1,10 +1,17 @@
 package models
 
 import (
+	"errors"
 	"github.com/beego/beego/v2/client/orm"
 	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"path/filepath"
+)
+
+var (
+	ErrUserAccountExist  = errors.New("用户账号已存在")
+	ErrUsrEmailExist     = errors.New("用户邮箱已存在")
+	ErrUserWechatIdExist = errors.New("微信已绑定其他账号")
 )
 
 func Init(dataSource string) error {

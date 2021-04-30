@@ -91,7 +91,18 @@ func (c *WeiXinController) Dispatch() {
 			c.response(wx, textRequestBody, "解析消息失败")
 			return
 		}
-		service.Push(context.Background(), textRequestBody.Content)
+		if err := service.Register(textRequestBody.Content,textRequestBody.FromUserName); err != service.ErrNoUserRegister {
+			if err != nil {
+				c.response(wx,textRequestBody,err.Error())
+			} else {
+				c.response(wx,textRequestBody,"注册成功")
+			}
+			return
+		}
+		service.Push(context.Background(), service.MediaContent{
+			Content:textRequestBody.Content,
+			UserId: textRequestBody.FromUserName,
+		})
 
 		c.response(wx, textRequestBody, "处理成功")
 		return
