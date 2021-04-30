@@ -117,6 +117,7 @@ func (c *WeiXinController) Dispatch() {
 	}
 	c.response(wx, textRequestBody, "不支持的消息类型")
 }
+
 func (c *WeiXinController) responseBody(wx *wechat.WeiXin, resp wechat.PassiveUserReplyMessage) {
 	nonce := c.Ctx.Input.Query("nonce")
 	timestamp := c.Ctx.Input.Query("timestamp")
