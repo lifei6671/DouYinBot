@@ -34,3 +34,10 @@ go build -o douyinbot main.go
 ./douyinbot --config-file=配置文件 --data-file=数据库路径
 ```
 
+
+### Docker 使用
+
+```shell
+docker pull lifei6671/douyinbot:1.0.0
+docker run -p 9080:9080 -v /data/conf:/var/www/douyinbot/conf /data/data:/var/www/douyinbot/data -v /data/douyin:/var/www/douyinbot/douyin -d lifei6671/douyinbot:1.0.0
+```
