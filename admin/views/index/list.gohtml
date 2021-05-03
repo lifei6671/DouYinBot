@@ -114,7 +114,7 @@
             <div class="row">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination">
-                        <li class="page-item{{if eq .First "#"}} disabled{{end}}"><a class="page-link" href="/">首页</a></li>
+                        <li class="page-item{{if eq .First "#"}} disabled{{end}}"><a class="page-link" href="{{.First}}">首页</a></li>
                         <li class="page-item{{if eq .Previous "#"}} disabled{{end}}"><a class="page-link" href="{{.Previous}}">上一页</a></li>
                         <li class="page-item{{if eq .Next "#"}} disabled{{end}}"><a class="page-link" href="{{.Next}}">下一页</a></li>
                         <li class="page-item{{if eq .Last "#"}} disabled{{end}}"><a class="page-link" href="{{.Last}}">尾页</a></li>
