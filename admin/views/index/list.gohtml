@@ -6,12 +6,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="抖音无水印工具_最新抖音在线无水印解析">
-    <title>抖音无水印工具_最新抖音在线无水印解析</title>
+    <title>{{.Nickname}}_抖音无水印工具_最新抖音在线无水印解析</title>
     <link href="/static/bootstrap/v4.6.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Favicons -->
     <link rel="icon" href="/static/favicons/favicon.ico">
 
     <style>
+        body {
+            position: relative;
+            font-family: Helvetica, -apple-system, "Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Microsoft Yahei","Helvetica Neue",Helvetica;
+        }
+
         .bd-placeholder-img {
             font-size: 1.125rem;
             text-anchor: middle;
@@ -38,16 +43,20 @@
             vertical-align: middle;
         }
         main .card{
-            height: 580px
+            height: 570px
         }
         main .card .card-body>.card-text{
             height:60px;
         }
-        main .card-body .author>a{
-            color: #0886E9;
+        .search-head{
+            margin: 10px auto;
+            padding-bottom: 15px;
+            line-height: 1.5em;
+            border-bottom: 3px solid #EEEEEE;
         }
-        main .card-body .author>a:hover{
-            text-decoration:none;
+        .search-head .search-title{
+            font-size: 22px;
+            font-weight: 300;
         }
     </style>
     <!-- Custom styles for this template -->
@@ -57,49 +66,49 @@
 
 <header>
     <!-- Fixed navbar -->
-        <div class="navbar navbar-dark bg-dark shadow-sm">
-            <div class="container d-flex justify-content-between">
-                <a href="/" class="navbar-brand d-flex align-items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true" class="mr-2" viewBox="0 0 24 24" focusable="false"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    <strong>白茶清欢短视频</strong>
-                </a>
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item active">
-                        <a class="nav-link" href="{{urlfor "HomeController.Index"}}">抖音无水印下载工具 <span class="sr-only">(current)</span></a>
-                    </li>
-                </ul>
-            </div>
+    <div class="navbar navbar-dark bg-dark shadow-sm">
+        <div class="container d-flex justify-content-between">
+            <a href="/" class="navbar-brand d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true" class="mr-2" viewBox="0 0 24 24" focusable="false"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <strong>白茶清欢短视频</strong>
+            </a>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{urlfor "HomeController.Index"}}">抖音无水印下载工具 <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
         </div>
+    </div>
 </header>
 
 <!-- Begin page content -->
 <main role="main" class="flex-shrink-0">
-    <div class="album py-5 bg-light">
+    <div class="album py-3 bg-light">
         <div class="container">
+            <div class="search-head">
+                <strong class="search-title">显示"{{.Nickname}}"的视频列表</strong>
+            </div>
             <div class="row">
                 {{range .List}}
-                <div class="col-lg-4 col-md-6 col-sm-12">
-                    <div class="card mb-4 shadow-sm">
-                        <div class="image-content">
-                            <img src="{{.VideoCover}}" alt="{{.Nickname}}" data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}">
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">
-                                <a href="{{urlfor "IndexController.List" ":author_id" .AuthorId ":page" 1 }}">@{{.Nickname}}</a>
-                                {{.Desc}}.
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="btn-group">
-                                    <button data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}" class="btn btn-sm btn-outline-secondary">播放</button>
-                                    <a href="{{.VideoRawPlayAddr}}" target="_blank" class="btn btn-sm btn-outline-secondary">来源</a>
+                    <div class="col-lg-4 col-md-6 col-sm-12">
+                        <div class="card mb-4 shadow-sm">
+                            <div class="image-content">
+                                <img src="{{.VideoCover}}" alt="{{.Nickname}}" data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}">
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{.Desc}}.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                        <button data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}" class="btn btn-sm btn-outline-secondary">播放</button>
+                                        <a href="{{.VideoRawPlayAddr}}" target="_blank" class="btn btn-sm btn-outline-secondary">来源</a>
+                                    </div>
+                                    <small class="text-muted">{{dateformat .Created "2006-01-02 15:04:05"}}</small>
                                 </div>
-                                <small class="text-muted">{{dateformat .Created "2006-01-02 15:04:05"}}</small>
                             </div>
                         </div>
                     </div>
-                </div>
                 {{else}}
-                   <p>没有数据</p>
+                    <p>没有数据</p>
                 {{end}}
             </div>
             <div class="row">

@@ -8,6 +8,7 @@ import (
 func init() {
 	web.Router("/", &controllers.IndexController{}, "get:Index")
 	web.Router("/page/:page:int.html", &controllers.IndexController{}, "get:Index")
+	web.Router("/page/:author_id:int_:page:int.html", &controllers.IndexController{}, "get:List")
 	web.Router("/douyin", &controllers.HomeController{}, "get,post:Index")
 	web.Router("/douyin/download", &controllers.HomeController{}, "get:Download")
 

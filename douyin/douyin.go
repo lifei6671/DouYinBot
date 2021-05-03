@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/tidwall/gjson"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
@@ -92,6 +93,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if err != nil {
 		return Video{}, err
 	}
+	ioutil.WriteFile("./log.txt", []byte(body), 0655)
 	item := gjson.Get(body, "item_list.0")
 
 	res := item.Get("video.play_addr.url_list.0")

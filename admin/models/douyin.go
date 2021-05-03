@@ -33,11 +33,17 @@ func NewDouYinVideo() *DouYinVideo {
 	return &DouYinVideo{}
 }
 
-func (d *DouYinVideo) GetList(pageIndex int) (list []DouYinVideo, err error) {
+func (d *DouYinVideo) GetList(pageIndex int, authorId int) (list []DouYinVideo, total int, err error) {
 	o := orm.NewOrm()
 	offset := (pageIndex - 1) * PageSize
+	query := o.QueryTable(d.TableName()).OrderBy("-id")
+	if authorId > 0 {
+		query = query.Filter("author_id", authorId)
+	}
+	count, err := query.Count()
+	total = int(count)
 
-	_, err = o.QueryTable(d.TableName()).OrderBy("-id").Offset(offset).Limit(PageSize).All(&list)
+	_, err = query.Offset(offset).Limit(PageSize).All(&list)
 
 	return
 }
