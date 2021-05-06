@@ -37,3 +37,9 @@ qiuniuaccesskey=
 qiuniusecretkey=
 qiuniubucketname=
 qiniudoamin=
+
+#百度网盘配置
+baiduappid=
+baiduappkey=
+baidusecretkey=
+baidusignkey=
