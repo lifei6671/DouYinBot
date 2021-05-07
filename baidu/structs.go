@@ -1,10 +1,13 @@
 package baidu
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
@@ -93,6 +96,47 @@ type PreCreateUploadFileParam struct {
 	SliceMD5   string   `json:"slice_md5"`
 	LocalCTime int64    `json:"local_ctime"`
 	LocalMTime int64    `json:"local_mtime"`
+}
+
+func NewPreCreateUploadFileParam(filename string, path string) (*PreCreateUploadFileParam, error) {
+	reader, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+	info, err := reader.Stat()
+	if err != nil {
+		return nil, err
+	}
+	b := make([]byte, 4096)
+
+	blockList := make([]string, 0)
+	for i := 0; ; i++ {
+		b = b[:0]
+		n, err := io.ReadFull(reader, b)
+		if err == io.EOF {
+			break
+		}
+		has := md5.Sum(b[:n])
+		md5str1 := fmt.Sprintf("%x", has)
+		blockList = append(blockList, md5str1)
+	}
+	sliceBody := make([]byte, 256*1024)
+	n, _ := io.ReadFull(reader, sliceBody)
+	h := md5.Sum(sliceBody[:n])
+
+	return &PreCreateUploadFileParam{
+		Path:       path,
+		Size:       int(info.Size()),
+		IsDir:      false,
+		AutoInit:   1,
+		RType:      3,
+		BlockList:  blockList,
+		UploadId:   blockList[0],
+		SliceMD5:   fmt.Sprintf("%x", h),
+		LocalCTime: info.ModTime().Unix(),
+		LocalMTime: time.Now().Unix(),
+	}, nil
 }
 
 func (u *PreCreateUploadFileParam) Values() url.Values {

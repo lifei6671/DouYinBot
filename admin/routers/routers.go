@@ -15,4 +15,6 @@ func init() {
 	web.Router("/wechat", &controllers.WeiXinController{}, "get:Index")
 	web.Router("/wechat", &controllers.WeiXinController{}, "post:Dispatch")
 
+	web.Router("/baidu/authorize", &controllers.BaiduController{}, "get:Index")
+	web.Router("/baidu", &controllers.BaiduController{}, "get:Authorize")
 }

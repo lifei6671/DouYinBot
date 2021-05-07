@@ -13,6 +13,7 @@ type User struct {
 	Email    string    `orm:"column(email);size(255);unique;description(用户邮箱)"`
 	Avatar   string    `orm:"column(avatar);default(/static/avatar/default.jpg);size(1000);" json:"avatar"`
 	WechatId string    `orm:"column(wechat_id);size(200);null;description(微信的用户ID)"`
+	BaiduId  string    `orm:"column(baidu_id);size(200);null;description(百度网盘用户Id)"`
 	Status   int       `orm:"column(status);type(tinyint);default(0);description(用户状态:0=正常/1=禁用/2=删除)" json:"status"`
 	Created  time.Time `orm:"column(created);auto_now_add;type(datetime);description(创建时间)"`
 	Updated  time.Time `orm:"column(updated);auto_now;type(datetime);description(修改时间)"`
@@ -48,7 +49,10 @@ func (u *User) Insert() error {
 
 func (u *User) First(account string) (*User, error) {
 	o := orm.NewOrm()
-	cond := orm.NewCondition().And("account", account).Or("email", account).Or("wechat_id", account)
+	cond := orm.NewCondition().And("account", account).
+		Or("email", account).
+		Or("wechat_id", account).
+		Or("baidu_id", account)
 
 	err := o.QueryTable(u.TableName()).SetCond(cond).One(u)
 

@@ -2,6 +2,7 @@ package baidu
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -117,6 +118,37 @@ func (d *Netdisk) GetAccessToken(code, registeredUrl string) (*TokenResponse, er
 		d.printf("申请token失败:code=%s; registered_url=%s; response_body=%s,error=%+v", code, registeredUrl, string(body), err)
 	}
 	return &tokenResp, err
+}
+
+func (d *Netdisk) SetAccessToken(token *TokenResponse) {
+	d.token = token.Clone()
+}
+
+func (d *Netdisk) AutoRefreshToken(ctx context.Context) error {
+	if d.token == nil {
+		return ErrAccessTokenEmpty
+	}
+	err := d.RefreshToken()
+	if err != nil {
+		return err
+	}
+	interval := time.Duration(d.token.ExpiresIn-1) * time.Second
+
+	t := time.NewTicker(interval)
+	for {
+		select {
+		case <-t.C:
+			err = d.RefreshToken()
+			if err != nil {
+				d.printf("刷新access_token失败 -> %+v", err)
+			} else {
+				interval = time.Duration(d.token.ExpiresIn-1) * time.Second
+			}
+			t.Reset(interval)
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
 }
 
 //RefreshToken 刷新access_token值.
@@ -254,6 +286,7 @@ func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader)
 	b := make([]byte, 4096)
 
 	for i := 0; ; i++ {
+		b = b[:0]
 		_, err := io.ReadFull(reader, b)
 		if err == io.EOF {
 			break

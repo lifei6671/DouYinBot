@@ -33,13 +33,16 @@ wechattoken=
 wechatencodingaeskey=
 
 #七牛配置
+qiniuenable=
 qiuniuaccesskey=
 qiuniusecretkey=
 qiuniubucketname=
 qiniudoamin=
 
 #百度网盘配置
+baidunetdiskenable=
 baiduappid=
 baiduappkey=
 baidusecretkey=
 baidusignkey=
+baiduregisteredurl=
