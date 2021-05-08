@@ -306,7 +306,7 @@ func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader)
 		urlStr := uploadFileUrl + param.Values().Encode()
 		body := bytes.NewBufferString("file=")
 		body.Write(b[:n])
-		resp, err := http.Post(urlStr, "multipart/form-data", body)
+		resp, err := http.Post(urlStr, "application/x-www-form-urlencoded", body)
 		if err != nil {
 			return nil, fmt.Errorf("file index:%d, error:%w", i, err)
 		}
