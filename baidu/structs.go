@@ -109,11 +109,10 @@ func NewPreCreateUploadFileParam(filename string, path string) (*PreCreateUpload
 	if err != nil {
 		return nil, err
 	}
-	b := make([]byte, 4096)
+	b := make([]byte, 4096*1024)
 
 	blockList := make([]string, 0)
-	for i := 0; ; i++ {
-		b = b[:0]
+	for {
 		n, err := io.ReadFull(reader, b)
 		if err == io.EOF {
 			break
@@ -122,10 +121,6 @@ func NewPreCreateUploadFileParam(filename string, path string) (*PreCreateUpload
 		md5str1 := fmt.Sprintf("%x", has)
 		blockList = append(blockList, md5str1)
 	}
-	sliceBody := make([]byte, 256*1024)
-	n, _ := io.ReadFull(reader, sliceBody)
-	h := md5.Sum(sliceBody[:n])
-
 	return &PreCreateUploadFileParam{
 		Path:       path,
 		Size:       int(info.Size()),
@@ -134,7 +129,6 @@ func NewPreCreateUploadFileParam(filename string, path string) (*PreCreateUpload
 		RType:      3,
 		BlockList:  blockList,
 		UploadId:   blockList[0],
-		SliceMD5:   fmt.Sprintf("%x", h),
 		LocalCTime: info.ModTime().Unix(),
 		LocalMTime: time.Now().Unix(),
 	}, nil

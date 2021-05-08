@@ -284,22 +284,17 @@ func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader)
 	}
 	var superFiles []SuperFile
 
-	b := make([]byte, 4096)
+	b := make([]byte, 4096*1024)
 
 	for i := 0; ; i++ {
-		b = b[:0]
-		_, err := io.ReadFull(reader, b)
+		n, err := io.ReadFull(reader, b)
 		if err == io.EOF {
 			break
 		}
 		param.PartSeq = i
 		urlStr := uploadFileUrl + param.Values().Encode()
 		body := bytes.NewBufferString("file=")
-		b, err := io.ReadAll(reader)
-		if err != nil {
-			return nil, fmt.Errorf("file index:%d, error:%w", i, err)
-		}
-		body.Write(b)
+		body.Write(b[:n])
 		resp, err := http.Post(urlStr, "multipart/form-data", body)
 		if err != nil {
 			return nil, fmt.Errorf("file index:%d, error:%w", i, err)
