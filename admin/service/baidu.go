@@ -47,11 +47,14 @@ func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remot
 		logs.Error("预创建文件失败 -> [filename=%s] ; %+v", remoteName, err)
 		return nil, fmt.Errorf("预创建文件失败 -> [filename=%s] ; %w", remoteName, err)
 	}
+	logs.Info("开始预创建文件 ->%s", uploadFile)
 	preUploadFile, err := bd.PreCreate(uploadFile)
 	if err != nil {
 		logs.Error("预创建文件失败 -> [filename=%s] ; %+v", remoteName, err)
 		return nil, fmt.Errorf("预创建文件失败 -> [filename=%s] ; %w", remoteName, err)
 	}
+	logs.Info("开始分片上传文件 -> %s", preUploadFile)
+
 	superFiles, err := bd.UploadFile(preUploadFile, remoteName)
 	if err != nil {
 		logs.Error("创建文件失败 -> [filename=%s] ; %+v", remoteName, err)
@@ -62,10 +65,12 @@ func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remot
 	for i, f := range superFiles {
 		param.BlockList[i] = f.Md5
 	}
+	logs.Info("最终合并文件 -> %s", param)
 	createFile, err := bd.CreateFile(param)
 	if err != nil {
 		logs.Error("创建文件失败 -> [filename=%s] ; %+v", remoteName, err)
 		return nil, fmt.Errorf("创建文件失败 -> [filename=%s] ; %w", remoteName, err)
 	}
+	logs.Info("百度网盘上传成功 -> %s", createFile)
 	return createFile, nil
 }
