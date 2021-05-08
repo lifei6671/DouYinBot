@@ -360,6 +360,7 @@ func (d *Netdisk) CreateFile(uploadFile *CreateFileParam) (*CreateFile, error) {
 	if err != nil {
 		return nil, err
 	}
+	d.printf("最终创建文件响应值 ->%s", string(body))
 	var createFile CreateFile
 	err = json.Unmarshal(body, &createFile)
 
