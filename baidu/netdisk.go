@@ -245,9 +245,15 @@ func (d *Netdisk) PreCreate(uploadFile *PreCreateUploadFileParam) (*PreCreateUpl
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		d.printf("读取预创建文件结果失败 -> %s", err)
+		return nil, err
+	}
 	var preUploadFile PreCreateUploadFile
 	err = json.Unmarshal(body, &preUploadFile)
-
+	if err != nil {
+		d.printf("解析预创建文件结果失败 -> %s", string(body))
+	}
 	return &preUploadFile, err
 }
 
@@ -261,12 +267,14 @@ func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, filename string) (
 	}
 	f, err := os.Open(filename)
 	if err != nil {
+		d.printf("打开文件失败 -> [filename=%s] %+v", filename, err)
 		return nil, err
 	}
 	defer f.Close()
 
 	superFiles, err := d.UploadFiles(uploadFile, f)
 	if err != nil {
+		d.printf("上传文件到百度网盘失败 -> %s - %+v", uploadFile, err)
 		return nil, fmt.Errorf("upload file fail: filename:%s; error:%w", filename, errors.Unwrap(err))
 	}
 	return superFiles, nil
