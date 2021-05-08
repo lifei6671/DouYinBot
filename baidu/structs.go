@@ -181,7 +181,7 @@ type PreCreateUploadFile struct {
 	Path       string         `json:"path"`
 	UploadId   string         `json:"uploadid"`
 	ReturnType int            `json:"return_type"`
-	BlockList  []string       `json:"block_list"`
+	BlockList  []int          `json:"block_list"`
 	Info       UploadFileInfo `json:"info,omitempty"`
 }
 
