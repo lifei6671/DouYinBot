@@ -70,6 +70,12 @@ func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remot
 	param := baidu.NewCreateFileParam(remoteName, uploadFile.Size, false)
 	param.BlockList = make([]string, len(superFiles))
 	param.UploadId = preUploadFile.UploadId
+	//文件命名策略，默认1
+	//0 为不重命名，返回冲突
+	//1 为只要path冲突即重命名
+	//2 为path冲突且block_list不同才重命名
+	//3 为覆盖
+	param.RType = 3
 
 	for i, f := range superFiles {
 		param.BlockList[i] = f.Md5
