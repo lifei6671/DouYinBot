@@ -16,6 +16,7 @@ var (
 
 type BaiduController struct {
 	web.Controller
+	display string
 }
 
 func (c *BaiduController) Prepare() {
@@ -23,6 +24,10 @@ func (c *BaiduController) Prepare() {
 		_ = c.Ctx.Output.Body([]byte("网站未开启百度网盘接入功能！"))
 		c.StopRun()
 		return
+	}
+	c.display = "mobile"
+	if !service.IsMobile(c.Ctx.Input.UserAgent()) {
+		c.display = "page"
 	}
 }
 func (c *BaiduController) Index() {
@@ -39,11 +44,8 @@ func (c *BaiduController) Index() {
 	}
 
 	registeredUrl := web.AppConfig.DefaultString("baiduregisteredurl", "")
-	display := "mobile"
-	if !service.IsMobile(c.Ctx.Input.UserAgent()) {
-		display = "page"
-	}
-	authorizeUrl := bd.AuthorizeURI(registeredUrl, display)
+
+	authorizeUrl := bd.AuthorizeURI(registeredUrl, c.display)
 	c.Redirect(authorizeUrl, http.StatusFound)
 	c.StopRun()
 }
@@ -65,7 +67,7 @@ func (c *BaiduController) Authorize() {
 
 	token, err := bd.GetAccessToken(code, registeredUrl)
 	if err != nil {
-		logs.Error("百度网盘授权失败 -> [code=%s] error=%+v", code, err)
+		logs.Error("百度网盘授权失败 -> [code=%s] error=%s", code, err)
 		_ = c.Ctx.Output.Body([]byte("获取百度网盘授权信息失败！"))
 		c.StopRun()
 		return
@@ -125,4 +127,5 @@ func init() {
 	signKey := web.AppConfig.DefaultString("baidusignkey", "")
 
 	bd = baidu.NewNetdisk(appId, appKey, secretKey, signKey)
+	bd.IsDebug(true)
 }
