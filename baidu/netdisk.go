@@ -320,10 +320,10 @@ func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader)
 		if err != nil {
 			return nil, fmt.Errorf("file index:%d;resp: %s; error:%w", i, string(respBody), err)
 		}
-		if superFile.ErrNo != 0 {
-			return nil, fmt.Errorf("分片上传文件失败 -> resp:%s errcode:%d", string(respBody), superFile.ErrNo)
+		if superFile.ErrorNo != 0 {
+			return nil, fmt.Errorf("分片上传文件失败 -> [resp:%s] [errcode:%d] [errormsg:%s]", string(respBody), superFile.ErrorNo, superFile.ErrorMsg)
 		}
-		d.printf("分片上传成功->[index:%d]  [size:%d] [resp:]", i, n, string(respBody))
+		d.printf("分片上传成功->[index:%d]  [size:%d] [resp:%s]", i, n, string(respBody))
 		superFiles = append(superFiles, superFile)
 	}
 	return superFiles, nil

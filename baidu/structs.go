@@ -128,7 +128,6 @@ func NewPreCreateUploadFileParam(filename string, path string) (*PreCreateUpload
 		AutoInit:   1,
 		RType:      3,
 		BlockList:  blockList,
-		UploadId:   blockList[0],
 		LocalCTime: info.ModTime().Unix(),
 		LocalMTime: time.Now().Unix(),
 	}, nil
@@ -227,7 +226,8 @@ func (s *SuperFileParam) Values() url.Values {
 }
 
 type SuperFile struct {
-	ErrNo     int    `json:"err_no"`
+	ErrorNo   int    `json:"error_no"`
+	ErrorMsg  string `json:"error_msg"`
 	Md5       string `json:"md5"`
 	RequestId int64  `json:"request_id"`
 }
