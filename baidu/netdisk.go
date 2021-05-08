@@ -39,6 +39,7 @@ type Netdisk struct {
 	isDebug   bool
 	token     *TokenResponse
 	user      *UserInfo
+	log       *log.Logger
 }
 
 func NewNetdisk(appId, appKey, secretKey, signKey string) *Netdisk {
@@ -47,6 +48,7 @@ func NewNetdisk(appId, appKey, secretKey, signKey string) *Netdisk {
 		appKey:    appKey,
 		secretKey: secretKey,
 		signKey:   signKey,
+		log:       log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile),
 	}
 }
 func (d *Netdisk) IsDebug(isDebug bool) {
@@ -89,36 +91,33 @@ func (d *Netdisk) GetAccessToken(code, registeredUrl string) (*TokenResponse, er
 
 	resp, err := http.Get(urlStr)
 	if err != nil {
-		d.printf("申请token失败:code=%s; registered_url=%s; error=%+v", code, registeredUrl, err)
+		d.printf("发起申请token请求失败:code=%s; registered_url=%s; error=%+v", code, registeredUrl, err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		d.printf("申请token失败:code=%s; registered_url=%s; response_body=%s,error=%+v", code, registeredUrl, string(body), err)
+		d.printf("读取申请token结果:code=%s; registered_url=%s; response_body=%s,error=%+v", code, registeredUrl, string(body), err)
 		return nil, err
 	}
 	var errResp ErrorResponse
 
 	err = json.Unmarshal(body, &errResp)
 	if err != nil {
-		d.printf("申请token失败:code=%s; registered_url=%s; response_body=%s,error=%+v", code, registeredUrl, string(body), err)
+		d.printf("解析响应结果失败:code=%s; registered_url=%s; response_body=%s,error=%+v", code, registeredUrl, string(body), err)
 
 		return nil, err
 	}
-	if errResp.Error == "" {
+	if errResp.Error != "" {
 		d.printf("申请token失败:code=%s; registered_url=%s; response_body=%s,error=%s", code, registeredUrl, string(body), errResp.String())
 		return nil, errors.New(errResp.Error + " " + errResp.ErrorDescription)
 	}
-	var tokenResp TokenResponse
-	err = json.Unmarshal(body, &tokenResp)
-	if err == nil {
-		tokenResp.CreateAt = time.Now().Unix()
-		tokenResp.RefreshTokenCreateAt = time.Now().Unix()
-		d.token = (&tokenResp).Clone()
-	} else {
-		d.printf("申请token失败:code=%s; registered_url=%s; response_body=%s,error=%+v", code, registeredUrl, string(body), err)
-	}
+	tokenResp := errResp.TokenResponse
+
+	tokenResp.CreateAt = time.Now().Unix()
+	tokenResp.RefreshTokenCreateAt = time.Now().Unix()
+	d.token = (&tokenResp).Clone()
+
 	return &tokenResp, err
 }
 
@@ -347,13 +346,9 @@ func (d *Netdisk) CreateFile(uploadFile *CreateFileParam) (*CreateFile, error) {
 func (d *Netdisk) printf(format string, v ...interface{}) {
 	if d.isDebug {
 		if len(v) == 0 {
-			log.Println(format)
+			d.log.Println(format)
 		} else {
-			log.Printf(format, v...)
+			d.log.Printf(format, v...)
 		}
 	}
-}
-
-func init() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
