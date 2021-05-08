@@ -37,6 +37,7 @@ func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remot
 			CreateAt:             token.Created.Unix(),
 			RefreshTokenCreateAt: token.RefreshTokenCreateAt.Unix(),
 		})
+		bd.IsDebug(true)
 		_ = bd.RefreshToken(false)
 
 		_ = baiduCache.Put(ctx, key, bd, time.Duration(token.ExpiresIn)*time.Second)
