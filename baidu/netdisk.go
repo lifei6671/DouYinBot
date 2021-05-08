@@ -75,7 +75,7 @@ func (d *Netdisk) GetAccessToken(code, registeredUrl string) (*TokenResponse, er
 		if d.token.IsExpired() {
 			d.printf("access_token已过期则刷新token:code=%s; registered_url=%s", code, registeredUrl)
 
-			if err := d.RefreshToken(); err == nil {
+			if err := d.RefreshToken(true); err == nil {
 				return d.token.Clone(), nil
 			} else {
 				d.printf("刷新token失败:code=%s; registered_url=%s; error=%+v", code, registeredUrl, err)
@@ -129,7 +129,7 @@ func (d *Netdisk) AutoRefreshToken(ctx context.Context) error {
 	if d.token == nil {
 		return ErrAccessTokenEmpty
 	}
-	err := d.RefreshToken()
+	err := d.RefreshToken(false)
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func (d *Netdisk) AutoRefreshToken(ctx context.Context) error {
 	for {
 		select {
 		case <-t.C:
-			err = d.RefreshToken()
+			err = d.RefreshToken(true)
 			if err != nil {
 				d.printf("刷新access_token失败 -> %+v", err)
 			} else {
@@ -153,10 +153,13 @@ func (d *Netdisk) AutoRefreshToken(ctx context.Context) error {
 }
 
 //RefreshToken 刷新access_token值.
-func (d *Netdisk) RefreshToken() error {
+func (d *Netdisk) RefreshToken(force bool) error {
 	if d.token == nil || d.token.IsRefreshTokenExpired() {
 		d.printf("access_token未授权或已过期")
 		return ErrRefreshTokenExpired
+	}
+	if !force && !d.token.IsExpired() {
+		return nil
 	}
 	urlStr := strings.ReplaceAll(refreshTokenUrl, "__REFRESH_TOKEN__", d.token.RefreshToken)
 	urlStr = strings.ReplaceAll(urlStr, "__CLIENT_ID__", d.appKey)
