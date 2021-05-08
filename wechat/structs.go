@@ -16,6 +16,11 @@ const (
 	WeiXinVideoMsgType WeiXinMsgType = "video"
 	WeiXinMusicMsgType WeiXinMsgType = "music"
 	WeiXinNewsMsgType  WeiXinMsgType = "news"
+	WeiXinEventMsgType WeiXinMsgType = "event"
+)
+const (
+	WeiXinSubscribeEvent   = "subscribe"
+	WeiXinUnsubscribeEvent = "unsubscribe"
 )
 
 type WeiXinMsgType string
@@ -31,6 +36,7 @@ type TextRequestBody struct {
 	MsgType      string
 	Content      string
 	MsgId        int
+	Event        string
 }
 
 type PassiveUserReplyMessage struct {

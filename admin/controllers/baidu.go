@@ -9,28 +9,35 @@ import (
 	"time"
 )
 
+var (
+	bd *baidu.Netdisk
+)
+
 type BaiduController struct {
 	web.Controller
-	bd *baidu.Netdisk
 }
 
 func (c *BaiduController) Prepare() {
 	if !web.AppConfig.DefaultBool("baidunetdiskenable", false) {
-		c.Ctx.Output.Body([]byte("网站未开启百度网盘接入功能！"))
+		_ = c.Ctx.Output.Body([]byte("网站未开启百度网盘接入功能！"))
 		c.StopRun()
 		return
 	}
-	appId := web.AppConfig.DefaultString("baiduappid", "")
-	appKey := web.AppConfig.DefaultString("baiduappkey", "")
-	secretKey := web.AppConfig.DefaultString("baidusecretkey", "")
-	signKey := web.AppConfig.DefaultString("baidusignkey", "")
-
-	bd := baidu.NewNetdisk(appId, appKey, secretKey, signKey)
-	c.bd = bd
 }
 func (c *BaiduController) Index() {
+	wid := c.Ctx.Input.Query("wid")
+	if wid == "" {
+		_ = c.Ctx.Output.Body([]byte("参数错误"))
+		c.StopRun()
+		return
+	}
+	if err := c.SetSession("wid", wid); err != nil {
+		_ = c.Ctx.Output.Body([]byte("保存参数失败"))
+		c.StopRun()
+		return
+	}
 	registeredUrl := web.AppConfig.DefaultString("baiduregisteredurl", "")
-	authorizeUrl := c.bd.AuthorizeURI(registeredUrl)
+	authorizeUrl := bd.AuthorizeURI(registeredUrl)
 	c.Redirect(authorizeUrl, http.StatusFound)
 	c.StopRun()
 }
@@ -38,47 +45,78 @@ func (c *BaiduController) Index() {
 func (c *BaiduController) Authorize() {
 	code := c.Ctx.Input.Query("code")
 	if code == "" {
-		c.Ctx.Output.Body([]byte("获取百度网盘授权信息失败！"))
+		_ = c.Ctx.Output.Body([]byte("获取百度网盘授权信息失败！"))
 		c.StopRun()
 		return
 	}
+	wid, ok := c.GetSession("wid").(string)
+	if !ok {
+		_ = c.Ctx.Output.Body([]byte("授权失败请重新发起授权"))
+		return
+	}
+
 	registeredUrl := web.AppConfig.DefaultString("baiduregisteredurl", "")
 
-	token, err := c.bd.GetAccessToken(code, registeredUrl)
+	token, err := bd.GetAccessToken(code, registeredUrl)
 	if err != nil {
 		logs.Error("百度网盘授权失败 -> [code=%s] error=%+v", code, err)
-		c.Ctx.Output.Body([]byte("获取百度网盘授权信息失败！"))
+		_ = c.Ctx.Output.Body([]byte("获取百度网盘授权信息失败！"))
 		c.StopRun()
 		return
 	}
-	userInfo, err := c.bd.UserInfo()
+	userInfo, err := bd.UserInfo()
 	if err != nil {
 		logs.Error("百度网盘用户信息失败 -> [code=%s] error=%+v", code, err)
-		c.Ctx.Output.Body([]byte("获取百度网盘用户信息失败！"))
+		_ = c.Ctx.Output.Body([]byte("获取百度网盘用户信息失败！"))
 		c.StopRun()
 		return
 	}
-	user := models.NewBaiduToken()
+
+	user, err := models.NewUser().FirstByWechatId(wid)
+	if err != nil {
+		_ = c.Ctx.Output.Body([]byte("您不是已注册用户不能绑定百度网盘"))
+		return
+	}
 	user.BaiduId = userInfo.UserId
-	user.BaiduName = userInfo.BaiduName
-	user.VipType = userInfo.VipType
-	user.NetdiskName = userInfo.NetdiskName
-	user.AvatarUrl = userInfo.AvatarUrl
-	user.AccessToken = token.AccessToken
-	user.RefreshToken = token.RefreshToken
-	user.ExpiresIn = token.ExpiresIn
-	user.Scope = token.Scope
-	user.Created = time.Unix(token.CreateAt, 0)
-	user.RefreshTokenCreateAt = time.Unix(token.RefreshTokenCreateAt, 0)
-	err = user.Save()
+	if err := user.Update("baidu_id"); err != nil {
+		logs.Error("更新用户BaiduId失败 -> %+v", err)
+		_ = c.Ctx.Output.Body([]byte("绑定用户网盘失败，请重试"))
+		return
+	}
+
+	baiduUser := models.NewBaiduToken()
+	baiduUser.BaiduId = userInfo.UserId
+	baiduUser.BaiduName = userInfo.BaiduName
+	baiduUser.VipType = userInfo.VipType
+	baiduUser.NetdiskName = userInfo.NetdiskName
+	baiduUser.AvatarUrl = userInfo.AvatarUrl
+	baiduUser.AccessToken = token.AccessToken
+	baiduUser.RefreshToken = token.RefreshToken
+	baiduUser.ExpiresIn = token.ExpiresIn
+	baiduUser.Scope = token.Scope
+	baiduUser.Created = time.Unix(token.CreateAt, 0)
+	baiduUser.RefreshTokenCreateAt = time.Unix(token.RefreshTokenCreateAt, 0)
+	err = baiduUser.Save()
 	if err != nil {
 		logs.Error("百度网盘用户信息失败 -> [code=%s] error=%+v", code, err)
-		c.Ctx.Output.Body([]byte("保存百度网盘用户信息失败！"))
+		_ = c.Ctx.Output.Body([]byte("保存百度网盘用户信息失败！"))
 		c.StopRun()
 		return
 	}
-	logs.Info("百度网盘授权成功 -> [code=%s] user:%+v", code, user)
-	c.Ctx.Output.Body([]byte("百度网盘授权成功！"))
+	logs.Info("百度网盘授权成功 -> [code=%s] baiduUser:%+v", code, baiduUser)
+	_ = c.Ctx.Output.Body([]byte("百度网盘授权成功！"))
 	c.StopRun()
 	return
+}
+
+func init() {
+	if !web.AppConfig.DefaultBool("baidunetdiskenable", false) {
+		return
+	}
+	appId := web.AppConfig.DefaultString("baiduappid", "")
+	appKey := web.AppConfig.DefaultString("baiduappkey", "")
+	secretKey := web.AppConfig.DefaultString("baidusecretkey", "")
+	signKey := web.AppConfig.DefaultString("baidusignkey", "")
+
+	bd = baidu.NewNetdisk(appId, appKey, secretKey, signKey)
 }

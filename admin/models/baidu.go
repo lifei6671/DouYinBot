@@ -28,7 +28,7 @@ func NewBaiduToken() *BaiduUser {
 	return &BaiduUser{}
 }
 
-func (b *BaiduUser) First(baiduId string) (*BaiduUser, error) {
+func (b *BaiduUser) First(baiduId int) (*BaiduUser, error) {
 	o := orm.NewOrm()
 
 	err := o.QueryTable(b.TableName()).Filter("baidu_id", baiduId).One(b)
@@ -43,4 +43,8 @@ func (b *BaiduUser) Save() (err error) {
 		_, err = o.Insert(b)
 	}
 	return
+}
+
+func init() {
+	orm.RegisterModel(new(BaiduUser))
 }

@@ -13,7 +13,7 @@ type User struct {
 	Email    string    `orm:"column(email);size(255);unique;description(用户邮箱)"`
 	Avatar   string    `orm:"column(avatar);default(/static/avatar/default.jpg);size(1000);" json:"avatar"`
 	WechatId string    `orm:"column(wechat_id);size(200);null;description(微信的用户ID)"`
-	BaiduId  string    `orm:"column(baidu_id);size(200);null;description(百度网盘用户Id)"`
+	BaiduId  int       `orm:"column(baidu_id);size(200);null;description(百度网盘用户Id)"`
 	Status   int       `orm:"column(status);type(tinyint);default(0);description(用户状态:0=正常/1=禁用/2=删除)" json:"status"`
 	Created  time.Time `orm:"column(created);auto_now_add;type(datetime);description(创建时间)"`
 	Updated  time.Time `orm:"column(updated);auto_now;type(datetime);description(修改时间)"`
@@ -47,6 +47,12 @@ func (u *User) Insert() error {
 	return nil
 }
 
+func (u *User) Update(cols ...string) error {
+	o := orm.NewOrm()
+	_, err := o.Update(u, cols...)
+	return err
+}
+
 func (u *User) First(account string) (*User, error) {
 	o := orm.NewOrm()
 	cond := orm.NewCondition().And("account", account).
@@ -59,6 +65,15 @@ func (u *User) First(account string) (*User, error) {
 	return u, err
 }
 
+func (u *User) FirstByWechatId(id string) (*User, error) {
+	err := orm.NewOrm().QueryTable(u.TableName()).Filter("wechat_id", id).One(u)
+
+	return u, err
+}
+
+func (u *User) ExistByWechatId(id string) bool {
+	return orm.NewOrm().QueryTable(u.TableName()).Filter("wechat_id", id).Exist()
+}
 func (u *User) String() string {
 	b, _ := json.Marshal(u)
 	return string(b)

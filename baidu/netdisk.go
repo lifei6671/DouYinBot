@@ -248,7 +248,7 @@ func (d *Netdisk) PreCreate(uploadFile *PreCreateUploadFileParam) (*PreCreateUpl
 }
 
 //UploadFile 上传指定路径的文件.
-func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, filename string) (*SuperFile, error) {
+func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, filename string) ([]SuperFile, error) {
 	if d.token == nil {
 		return nil, ErrAccessTokenEmpty
 	}
@@ -265,7 +265,7 @@ func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, filename string) (
 	if err != nil {
 		return nil, fmt.Errorf("upload file fail: filename:%s; error:%w", filename, errors.Unwrap(err))
 	}
-	return &superFiles[0], nil
+	return superFiles, nil
 }
 
 //UploadFiles 批量上传文件.
@@ -318,7 +318,7 @@ func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader)
 	return superFiles, nil
 }
 
-func (d *Netdisk) CreateFile(uploadFile *CreateFileParam, superFiles []SuperFile) (*CreateFile, error) {
+func (d *Netdisk) CreateFile(uploadFile *CreateFileParam) (*CreateFile, error) {
 	if d.token == nil {
 		return nil, ErrAccessTokenEmpty
 	}

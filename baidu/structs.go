@@ -206,6 +206,11 @@ type UploadFileInfo struct {
 	MTime    int64  `json:"mtime"`
 }
 
+func (f UploadFileInfo) String() string {
+	b, _ := json.Marshal(&f)
+	return string(b)
+}
+
 type SuperFileParam struct {
 	AccessToken string
 	Method      string
@@ -246,6 +251,14 @@ type CreateFileParam struct {
 	IsRevision int      `json:"is_revision"`
 	Mode       int      `json:"mode"`
 	ExifInfo   string   `json:"exif_info"`
+}
+
+func NewCreateFileParam(path string, size int, isDir bool) *CreateFileParam {
+	return &CreateFileParam{
+		Path:  path,
+		Size:  size,
+		IsDir: isDir,
+	}
 }
 
 func (p *CreateFileParam) Values() url.Values {
