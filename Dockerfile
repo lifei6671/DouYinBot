@@ -7,8 +7,8 @@ RUN apk add  --update-cache  libc-dev git gcc
 WORKDIR /go/src/app
 
 ADD . /go/src/app/DouYinBot/
-
-RUN cd DouYinBot && go build -o douyinbot main.go
+ENV GOPROXY="https://proxy.golang.org,direct"
+RUN cd DouYinBot && go mod download && go build -o douyinbot main.go
 
 FROM alpine:latest
 
