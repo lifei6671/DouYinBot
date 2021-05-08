@@ -352,9 +352,9 @@ func (d *Netdisk) CreateFile(uploadFile *CreateFileParam) (*CreateFile, error) {
 func (d *Netdisk) printf(format string, v ...interface{}) {
 	if d.isDebug {
 		if len(v) == 0 {
-			_ = d.log.Output(3, format)
+			_ = d.log.Output(2, format)
 		} else {
-			_ = d.log.Output(3, fmt.Sprintf(format, v...))
+			_ = d.log.Output(2, fmt.Sprintf(format, v...))
 		}
 	}
 }

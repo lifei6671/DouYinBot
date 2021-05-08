@@ -229,7 +229,7 @@ func (s *SuperFileParam) Values() url.Values {
 type SuperFile struct {
 	ErrNo     int    `json:"err_no"`
 	Md5       string `json:"md5"`
-	RequestId string `json:"request_id"`
+	RequestId int64  `json:"request_id"`
 }
 
 type CreateFileParam struct {
