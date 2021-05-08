@@ -63,8 +63,11 @@ func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remot
 		logs.Error("创建文件失败 -> [filename=%s] ; %+v", remoteName, err)
 		return nil, fmt.Errorf("创建文件失败 -> [filename=%s] ; %w", remoteName, err)
 	}
+	logs.Info("分片上传成功 -> %s", superFiles)
 	param := baidu.NewCreateFileParam(remoteName, uploadFile.Size, false)
 	param.BlockList = make([]string, len(superFiles))
+	param.UploadId = preUploadFile.UploadId
+
 	for i, f := range superFiles {
 		param.BlockList[i] = f.Md5
 	}
