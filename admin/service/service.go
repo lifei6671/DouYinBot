@@ -87,6 +87,7 @@ func execute(ctx context.Context) {
 				logs.Error("解析抖音视频地址失败 -> 【%s】- %+v", content, err)
 				continue
 			}
+			logs.Info("开始下载抖音视频->%s", video)
 			p, err := video.Download(savepath)
 			if err != nil {
 				logs.Error("下载抖音视频失败 -> 【%s】- %+v", content, err)
@@ -97,6 +98,7 @@ func execute(ctx context.Context) {
 			name := strings.TrimPrefix(p, savepath)
 
 			if bucket != nil {
+				logs.Info("开始上传到七牛云储存 -> %s", bucketName)
 				err = bucket.UploadFile(bucketName, name, p)
 				if err != nil {
 					logs.Error("上传文件到七牛储存空间失败 -> 【%s】 - %+v", content, err)
@@ -112,6 +114,7 @@ func execute(ctx context.Context) {
 				continue
 			}
 			if user.BaiduId > 0 {
+				logs.Info("开始上传到百度网盘 ->%s", user)
 				createFile, err := uploadBaiduNetdisk(ctx, user.BaiduId, p, name)
 				if err == nil {
 					backdata["baidu"] = createFile.UploadFileInfo.String()
