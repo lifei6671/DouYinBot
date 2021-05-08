@@ -58,7 +58,7 @@ func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remot
 	}
 	logs.Info("开始分片上传文件 -> %s", preUploadFile)
 
-	superFiles, err := bd.UploadFile(preUploadFile, remoteName)
+	superFiles, err := bd.UploadFile(preUploadFile, filename)
 	if err != nil {
 		logs.Error("创建文件失败 -> [filename=%s] ; %+v", remoteName, err)
 		return nil, fmt.Errorf("创建文件失败 -> [filename=%s] ; %w", remoteName, err)

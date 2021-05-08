@@ -258,16 +258,16 @@ func (d *Netdisk) PreCreate(uploadFile *PreCreateUploadFileParam) (*PreCreateUpl
 }
 
 //UploadFile 上传指定路径的文件.
-func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, filename string) ([]SuperFile, error) {
+func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, localFile string) ([]SuperFile, error) {
 	if d.token == nil {
 		return nil, ErrAccessTokenEmpty
 	}
 	if d.token.IsExpired() {
 		return nil, ErrAccessTokenExpired
 	}
-	f, err := os.Open(filename)
+	f, err := os.Open(localFile)
 	if err != nil {
-		d.printf("打开文件失败 -> [filename=%s] %+v", filename, err)
+		d.printf("打开文件失败 -> [filename=%s] %+v", localFile, err)
 		return nil, err
 	}
 	defer f.Close()
@@ -275,7 +275,7 @@ func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, filename string) (
 	superFiles, err := d.UploadFiles(uploadFile, f)
 	if err != nil {
 		d.printf("上传文件到百度网盘失败 -> %s - %+v", uploadFile, err)
-		return nil, fmt.Errorf("upload file fail: filename:%s; error:%w", filename, errors.Unwrap(err))
+		return nil, fmt.Errorf("upload file fail: filename:%s; error:%w", localFile, errors.Unwrap(err))
 	}
 	return superFiles, nil
 }
@@ -352,9 +352,9 @@ func (d *Netdisk) CreateFile(uploadFile *CreateFileParam) (*CreateFile, error) {
 func (d *Netdisk) printf(format string, v ...interface{}) {
 	if d.isDebug {
 		if len(v) == 0 {
-			d.log.Println(format)
+			_ = d.log.Output(3, format)
 		} else {
-			d.log.Printf(format, v...)
+			_ = d.log.Output(3, fmt.Sprintf(format, v...))
 		}
 	}
 }
