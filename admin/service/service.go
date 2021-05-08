@@ -158,8 +158,8 @@ func execute(ctx context.Context) {
 func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remoteName string) (*baidu.CreateFile, error) {
 	key := fmt.Sprintf("baidu::%d", baiduId)
 	val, _ := baiduCache.Get(ctx, key)
-	bd := val.(*baidu.Netdisk)
-	if bd == nil {
+	bd, ok := val.(*baidu.Netdisk)
+	if !ok || bd == nil {
 		token, err := models.NewBaiduToken().First(baiduId)
 		if err != nil {
 			return nil, fmt.Errorf("用户未绑定百度网盘：[baiduid=%d] - %w", baiduId, err)
