@@ -4,6 +4,7 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/lifei6671/douyinbot/admin/models"
+	"github.com/lifei6671/douyinbot/admin/service"
 	"github.com/lifei6671/douyinbot/baidu"
 	"net/http"
 	"time"
@@ -36,8 +37,13 @@ func (c *BaiduController) Index() {
 		c.StopRun()
 		return
 	}
+
 	registeredUrl := web.AppConfig.DefaultString("baiduregisteredurl", "")
-	authorizeUrl := bd.AuthorizeURI(registeredUrl)
+	display := "mobile"
+	if !service.IsMobile(c.Ctx.Input.UserAgent()) {
+		display = "page"
+	}
+	authorizeUrl := bd.AuthorizeURI(registeredUrl, display)
 	c.Redirect(authorizeUrl, http.StatusFound)
 	c.StopRun()
 }

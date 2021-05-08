@@ -54,10 +54,12 @@ func (d *Netdisk) IsDebug(isDebug bool) {
 }
 
 //AuthorizeURI 获取用户授权页面.
-func (d *Netdisk) AuthorizeURI(registeredUrl string) string {
+func (d *Netdisk) AuthorizeURI(registeredUrl string, display string) string {
 	urlStr := strings.ReplaceAll(authorizeUrl, "__CLIENT_ID__", d.appKey)
 	urlStr = strings.ReplaceAll(urlStr, "__REGISTERED_REDIRECT_URI__", registeredUrl)
-
+	if display != "" {
+		urlStr += "&display=" + display
+	}
 	return urlStr
 }
 
