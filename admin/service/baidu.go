@@ -76,6 +76,7 @@ func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remot
 	//2 为path冲突且block_list不同才重命名
 	//3 为覆盖
 	param.RType = 3
+	param.Path = "/apps/DouYinBot" + param.Path
 
 	for i, f := range superFiles {
 		param.BlockList[i] = f.Md5
