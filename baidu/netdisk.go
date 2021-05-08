@@ -323,6 +323,7 @@ func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader)
 		if superFile.ErrNo != 0 {
 			return nil, fmt.Errorf("分片上传文件失败 -> resp:%s errcode:%d", string(respBody), superFile.ErrNo)
 		}
+		d.printf("分片上传成功->[index:%d]  [size:%d] [resp:]", i, n, string(respBody))
 		superFiles = append(superFiles, superFile)
 	}
 	return superFiles, nil

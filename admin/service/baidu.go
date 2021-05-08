@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/beego/beego/v2/client/cache"
 	"github.com/beego/beego/v2/core/logs"
@@ -63,7 +64,9 @@ func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remot
 		logs.Error("创建文件失败 -> [filename=%s] ; %+v", remoteName, err)
 		return nil, fmt.Errorf("创建文件失败 -> [filename=%s] ; %w", remoteName, err)
 	}
-	logs.Info("分片上传成功 -> %s", superFiles)
+	b, _ := json.Marshal(&superFiles)
+	logs.Info("分片上传成功 -> %s", string(b))
+
 	param := baidu.NewCreateFileParam(remoteName, uploadFile.Size, false)
 	param.BlockList = make([]string, len(superFiles))
 	param.UploadId = preUploadFile.UploadId
