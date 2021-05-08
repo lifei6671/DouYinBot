@@ -229,7 +229,7 @@ type SuperFile struct {
 	ErrorNo   int    `json:"error_code"`
 	ErrorMsg  string `json:"error_msg"`
 	Md5       string `json:"md5"`
-	RequestId int64  `json:"request_id"`
+	RequestId uint64 `json:"request_id"`
 }
 
 type CreateFileParam struct {

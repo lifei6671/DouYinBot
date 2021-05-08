@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -304,9 +306,20 @@ func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader)
 		}
 		param.PartSeq = i
 		urlStr := uploadFileUrl + param.Values().Encode()
-		body := bytes.NewBufferString("file=")
-		body.Write(b[:n])
-		resp, err := http.Post(urlStr, "multipart/form-data", body)
+
+		body := bytes.NewBufferString("")
+		bodyWriter := multipart.NewWriter(body)
+		fileWriter, err := bodyWriter.CreateFormFile("file", filepath.Base(uploadFile.Path))
+		if err != nil {
+			d.printf("初始化文件shibai -> %+v", err)
+			return nil, err
+		}
+		_, err = fileWriter.Write(b[:n])
+		contentType := bodyWriter.FormDataContentType()
+		_ = bodyWriter.Close()
+
+		resp, err := http.Post(urlStr, contentType, body)
+
 		if err != nil {
 			return nil, fmt.Errorf("file index:%d, error:%w", i, err)
 		}
