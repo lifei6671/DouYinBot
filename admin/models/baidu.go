@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"github.com/beego/beego/v2/client/orm"
 	"time"
 )
@@ -37,7 +38,7 @@ func (b *BaiduUser) First(baiduId int) (*BaiduUser, error) {
 
 func (b *BaiduUser) Save() (err error) {
 	o := orm.NewOrm()
-	if b.BaiduId > 0 {
+	if o.QueryTable(b.TableName()).Filter("baidu_id", b.BaiduId).Exist() {
 		_, err = o.Update(b, "vip_type", "access_token", "expires_in", "refresh_token", "scope", "updated", "refresh_token_create_at")
 	} else {
 		_, err = o.Insert(b)
@@ -45,6 +46,10 @@ func (b *BaiduUser) Save() (err error) {
 	return
 }
 
+func (b *BaiduUser) String() string {
+	body, _ := json.Marshal(b)
+	return string(body)
+}
 func init() {
 	orm.RegisterModel(new(BaiduUser))
 }

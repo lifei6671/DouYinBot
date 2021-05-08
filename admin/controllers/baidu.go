@@ -106,7 +106,7 @@ func (c *BaiduController) Authorize() {
 	baiduUser.RefreshTokenCreateAt = time.Unix(token.RefreshTokenCreateAt, 0)
 	err = baiduUser.Save()
 	if err != nil {
-		logs.Error("百度网盘用户信息失败 -> [code=%s] error=%+v", code, err)
+		logs.Error("百度网盘用户信息失败 -> [user=%s] error=%+v", baiduUser, err)
 		_ = c.Ctx.Output.Body([]byte("保存百度网盘用户信息失败！"))
 		c.StopRun()
 		return
