@@ -115,7 +115,7 @@ func execute(ctx context.Context) {
 			}
 			if user.BaiduId > 0 {
 				logs.Info("开始上传到百度网盘 ->%s", user)
-				createFile, err := uploadBaiduNetdisk(ctx, user.BaiduId, p, name)
+				createFile, err := uploadBaiduNetdisk(ctx, user.BaiduId, p, "/"+name)
 				if err == nil {
 					backdata["baidu"] = createFile.UploadFileInfo.String()
 				} else {
