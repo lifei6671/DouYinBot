@@ -26,11 +26,11 @@ type Video struct {
 }
 
 func (v *Video) GetFilename() string {
-	return v.Author.Nickname + "-" + v.PlayId + ".mp4"
+	return FilterEmoji(v.Author.Nickname) + "-" + v.PlayId + ".mp4"
 }
 
 func (v *Video) Download(filename string) (string, error) {
-	name := filepath.Join(v.Author.Id, v.Author.Nickname+"-"+v.PlayId+".mp4")
+	name := filepath.Join(v.Author.Id, v.GetFilename())
 	f, err := os.Stat(filename)
 	if err == nil && f.IsDir() {
 		filename = filepath.Join(filename, name)

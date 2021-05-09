@@ -2,9 +2,10 @@ package douyin
 
 import (
 	"errors"
+	"fmt"
 	"github.com/tidwall/gjson"
 	"io"
-	"io/ioutil"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -18,6 +19,8 @@ var (
 
 type DouYin struct {
 	pattern *regexp.Regexp
+	isDebug bool
+	log     *log.Logger
 }
 
 func NewDouYin() *DouYin {
@@ -26,6 +29,10 @@ func NewDouYin() *DouYin {
 		panic(err)
 	}
 	return &DouYin{pattern: exp}
+}
+
+func (d *DouYin) IsDebug(debug bool) {
+	d.isDebug = debug
 }
 
 func (d *DouYin) GetRedirectUrl(urlStr string) (string, error) {
@@ -93,7 +100,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if err != nil {
 		return Video{}, err
 	}
-	ioutil.WriteFile("./log.txt", []byte(body), 0655)
+	d.printf("获取抖音视频成功 -> [resp=%s]", body)
 	item := gjson.Get(body, "item_list.0")
 
 	res := item.Get("video.play_addr.url_list.0")
@@ -103,6 +110,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	}
 
 	if !res.Exists() {
+		d.printf("解析抖音视频地址失败 -> [resp=%s]", body)
 		return video, errors.New("未找到视频地址 ->" + urlStr)
 	}
 
@@ -149,4 +157,14 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 		video.Author.AvatarLarger = res.Str
 	}
 	return video, nil
+}
+
+func (d *DouYin) printf(format string, v ...interface{}) {
+	if d.isDebug {
+		if len(v) == 0 {
+			_ = d.log.Output(2, format)
+		} else {
+			_ = d.log.Output(2, fmt.Sprintf(format, v...))
+		}
+	}
 }

@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	bd *baidu.Netdisk
+	bd *baidu.NetDisk
 )
 
 type BaiduController struct {
@@ -126,6 +126,6 @@ func init() {
 	secretKey := web.AppConfig.DefaultString("baidusecretkey", "")
 	signKey := web.AppConfig.DefaultString("baidusignkey", "")
 
-	bd = baidu.NewNetdisk(appId, appKey, secretKey, signKey)
+	bd = baidu.NewNetDisk(appId, appKey, secretKey, signKey)
 	bd.IsDebug(true)
 }

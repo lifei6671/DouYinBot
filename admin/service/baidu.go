@@ -23,13 +23,13 @@ var (
 func uploadBaiduNetdisk(ctx context.Context, baiduId int, filename string, remoteName string) (*baidu.CreateFile, error) {
 	key := fmt.Sprintf("baidu::%d", baiduId)
 	val, _ := baiduCache.Get(ctx, key)
-	bd, ok := val.(*baidu.Netdisk)
+	bd, ok := val.(*baidu.NetDisk)
 	if !ok || bd == nil {
 		token, err := models.NewBaiduToken().First(baiduId)
 		if err != nil {
 			return nil, fmt.Errorf("用户未绑定百度网盘：[baiduid=%d] - %w", baiduId, err)
 		}
-		bd = baidu.NewNetdisk(baiduAppId, baiduAppKey, baiduSecretKey, baiduSignKey)
+		bd = baidu.NewNetDisk(baiduAppId, baiduAppKey, baiduSecretKey, baiduSignKey)
 		bd.SetAccessToken(&baidu.TokenResponse{
 			AccessToken:          token.AccessToken,
 			ExpiresIn:            token.ExpiresIn,

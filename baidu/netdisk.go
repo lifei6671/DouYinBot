@@ -33,7 +33,7 @@ const (
 	createFileUrl = "https://pan.baidu.com/rest/2.0/xpan/file?method=create&access_token=__ACCESS_TOKEN__"
 )
 
-type Netdisk struct {
+type NetDisk struct {
 	appId     string
 	appKey    string
 	secretKey string
@@ -44,8 +44,8 @@ type Netdisk struct {
 	log       *log.Logger
 }
 
-func NewNetdisk(appId, appKey, secretKey, signKey string) *Netdisk {
-	return &Netdisk{
+func NewNetDisk(appId, appKey, secretKey, signKey string) *NetDisk {
+	return &NetDisk{
 		appId:     appId,
 		appKey:    appKey,
 		secretKey: secretKey,
@@ -53,12 +53,12 @@ func NewNetdisk(appId, appKey, secretKey, signKey string) *Netdisk {
 		log:       log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile),
 	}
 }
-func (d *Netdisk) IsDebug(isDebug bool) {
+func (d *NetDisk) IsDebug(isDebug bool) {
 	d.isDebug = isDebug
 }
 
 //AuthorizeURI 获取用户授权页面.
-func (d *Netdisk) AuthorizeURI(registeredUrl string, display string) string {
+func (d *NetDisk) AuthorizeURI(registeredUrl string, display string) string {
 	urlStr := strings.ReplaceAll(authorizeUrl, "__CLIENT_ID__", d.appKey)
 	urlStr = strings.ReplaceAll(urlStr, "__REGISTERED_REDIRECT_URI__", registeredUrl)
 	if display != "" {
@@ -68,7 +68,7 @@ func (d *Netdisk) AuthorizeURI(registeredUrl string, display string) string {
 }
 
 //GetAccessToken 获取access_token值.
-func (d *Netdisk) GetAccessToken(code, registeredUrl string) (*TokenResponse, error) {
+func (d *NetDisk) GetAccessToken(code, registeredUrl string) (*TokenResponse, error) {
 	d.printf("开始申请access_token:code=%s; registered_url=%s", code, registeredUrl)
 
 	if d.token != nil {
@@ -123,11 +123,11 @@ func (d *Netdisk) GetAccessToken(code, registeredUrl string) (*TokenResponse, er
 	return &tokenResp, err
 }
 
-func (d *Netdisk) SetAccessToken(token *TokenResponse) {
+func (d *NetDisk) SetAccessToken(token *TokenResponse) {
 	d.token = token.Clone()
 }
 
-func (d *Netdisk) AutoRefreshToken(ctx context.Context) error {
+func (d *NetDisk) AutoRefreshToken(ctx context.Context) error {
 	if d.token == nil {
 		return ErrAccessTokenEmpty
 	}
@@ -155,7 +155,7 @@ func (d *Netdisk) AutoRefreshToken(ctx context.Context) error {
 }
 
 //RefreshToken 刷新access_token值.
-func (d *Netdisk) RefreshToken(force bool) error {
+func (d *NetDisk) RefreshToken(force bool) error {
 	if d.token == nil || d.token.IsRefreshTokenExpired() {
 		d.printf("access_token未授权或已过期")
 		return ErrRefreshTokenExpired
@@ -201,7 +201,7 @@ func (d *Netdisk) RefreshToken(force bool) error {
 }
 
 //UserInfo 获取用户信息.
-func (d *Netdisk) UserInfo() (*UserInfo, error) {
+func (d *NetDisk) UserInfo() (*UserInfo, error) {
 	if d.user != nil {
 		return d.user.Clone(), nil
 	}
@@ -232,7 +232,7 @@ func (d *Netdisk) UserInfo() (*UserInfo, error) {
 }
 
 //PreCreate 预创建文件.
-func (d *Netdisk) PreCreate(uploadFile *PreCreateUploadFileParam) (*PreCreateUploadFile, error) {
+func (d *NetDisk) PreCreate(uploadFile *PreCreateUploadFileParam) (*PreCreateUploadFile, error) {
 	if d.token == nil {
 		return nil, ErrAccessTokenEmpty
 	}
@@ -260,7 +260,7 @@ func (d *Netdisk) PreCreate(uploadFile *PreCreateUploadFileParam) (*PreCreateUpl
 }
 
 //UploadFile 上传指定路径的文件.
-func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, localFile string) ([]SuperFile, error) {
+func (d *NetDisk) UploadFile(uploadFile *PreCreateUploadFile, localFile string) ([]SuperFile, error) {
 	if d.token == nil {
 		return nil, ErrAccessTokenEmpty
 	}
@@ -283,7 +283,7 @@ func (d *Netdisk) UploadFile(uploadFile *PreCreateUploadFile, localFile string) 
 }
 
 //UploadFiles 批量上传文件.
-func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader) ([]SuperFile, error) {
+func (d *NetDisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader) ([]SuperFile, error) {
 	if d.token == nil {
 		return nil, ErrAccessTokenEmpty
 	}
@@ -342,7 +342,7 @@ func (d *Netdisk) UploadFiles(uploadFile *PreCreateUploadFile, reader io.Reader)
 	return superFiles, nil
 }
 
-func (d *Netdisk) CreateFile(uploadFile *CreateFileParam) (*CreateFile, error) {
+func (d *NetDisk) CreateFile(uploadFile *CreateFileParam) (*CreateFile, error) {
 	if d.token == nil {
 		return nil, ErrAccessTokenEmpty
 	}
@@ -370,7 +370,7 @@ func (d *Netdisk) CreateFile(uploadFile *CreateFileParam) (*CreateFile, error) {
 	return &createFile, err
 }
 
-func (d *Netdisk) printf(format string, v ...interface{}) {
+func (d *NetDisk) printf(format string, v ...interface{}) {
 	if d.isDebug {
 		if len(v) == 0 {
 			_ = d.log.Output(2, format)
