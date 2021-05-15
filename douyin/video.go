@@ -26,7 +26,7 @@ type Video struct {
 }
 
 func (v *Video) GetFilename() string {
-	return FilterEmoji(v.Author.Nickname) + "-" + v.PlayId + ".mp4"
+	return v.PlayId + ".mp4"
 }
 
 func (v *Video) Download(filename string) (string, error) {

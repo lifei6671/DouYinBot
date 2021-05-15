@@ -40,6 +40,7 @@ func (c *VideoController) Index() {
 
 func (c *VideoController) sendFile(filename string) {
 	if _,err := os.Stat(filename); os.IsNotExist(err) {
+		logs.Warn("文件不存在 -> %s",filename)
 		if defaultVideoContent == nil || len(defaultVideoContent) == 0 {
 			c.Redirect(defaultVideoUrl,http.StatusFound)
 		} else {

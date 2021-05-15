@@ -135,7 +135,7 @@ func execute(ctx context.Context) {
 				VideoPlayAddr:    video.PlayAddr,
 				VideoId:          video.PlayId,
 				VideoCover:       video.OriginCover,
-				VideoLocalAddr:   "/video/" + name,
+				VideoLocalAddr:   "/" + name,
 				VideoBackAddr:    string(b),
 				Desc:             video.Desc,
 			}

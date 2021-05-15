@@ -17,6 +17,7 @@
                         <div class="btn-group">
                             <button data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}" data-id="{{.VideoId}}" class="btn btn-sm btn-outline-secondary">播放</button>
                             <a href="{{.VideoRawPlayAddr}}" target="_blank" class="btn btn-sm btn-outline-secondary">来源</a>
+                            <button data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{urlfor "VideoController.Index" "video_id" .VideoId }}" data-id="{{.VideoId}}" class="btn btn-sm btn-outline-secondary">本地播放</button>
                         </div>
                         <small class="text-muted">{{dateformat .Created "2006-01-02 15:04:05"}}</small>
                     </div>
