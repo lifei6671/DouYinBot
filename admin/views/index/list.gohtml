@@ -88,95 +88,11 @@
             <div class="search-head">
                 <strong class="search-title">显示"{{.Nickname}}"的视频列表</strong>
             </div>
-            <div class="row">
-                {{range .List}}
-                    <div class="col-lg-4 col-md-6 col-sm-12">
-                        <div class="card mb-4 shadow-sm">
-                            <div class="image-content">
-                                <img src="{{.VideoCover}}" alt="{{.Nickname}}" data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}">
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">{{.Desc}}.</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div class="btn-group">
-                                        <button data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}" class="btn btn-sm btn-outline-secondary">播放</button>
-                                        <a href="{{.VideoRawPlayAddr}}" target="_blank" class="btn btn-sm btn-outline-secondary">来源</a>
-                                    </div>
-                                    <small class="text-muted">{{dateformat .Created "2006-01-02 15:04:05"}}</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {{else}}
-                    <p>没有数据</p>
-                {{end}}
-            </div>
-            <div class="row">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item{{if eq .First "#"}} disabled{{end}}"><a class="page-link" href="{{.First}}">首页</a></li>
-                        <li class="page-item{{if eq .Previous "#"}} disabled{{end}}"><a class="page-link" href="{{.Previous}}">上一页</a></li>
-                        <li class="page-item{{if eq .Next "#"}} disabled{{end}}"><a class="page-link" href="{{.Next}}">下一页</a></li>
-                        <li class="page-item{{if eq .Last "#"}} disabled{{end}}"><a class="page-link" href="{{.Last}}">尾页</a></li>
-                    </ul>
-                </nav>
-            </div>
+            {{template "index/main.gohtml" .}}
         </div>
     </div>
-    <div class="modal fade" id="playVideoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">New message</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <video id="playVideo" autoplay="autoplay" width="100%" height="100%" controls="controls">
-                                您的浏览器不支持 video 标签。
-                            </video>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{template "index/video.gohtml" .}}
 </main>
-
-{{template "layout/footer.gohtml"}}
-<script type="text/javascript">
-    $(function () {
-        $('#playVideoModal').on('show.bs.modal', function (event) {
-            const button = $(event.relatedTarget);
-            const title = button.data('title');
-            const body = button.data('play')
-
-            const modal = $(this);
-            modal.find('.modal-title').text(title);
-            modal.find('#playVideo').attr('src',body)
-            const audio = document.getElementById('playVideo');
-            audio.play();
-            document.addEventListener("WeixinJSBridgeReady", function () {
-                audio.play();
-            }, false);
-        }).on("hide.bs.modal",function (event) {
-            let audio = document.getElementById('playVideo');
-            audio.pause();
-        });
-
-        if (/i(Phone|P(o|a)d)/.test(navigator.userAgent)) {
-            $(document).one('touchstart',
-                function(e) {
-                    $('#playVideo').get(0).touchstart = true;
-                    $('#playVideo').get(0).play();
-                    return false;
-                });
-        }
-    });
-
-</script>
+{{template "index/script.gohtml" .}}
 </body>
 </html>

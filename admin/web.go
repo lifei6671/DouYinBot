@@ -7,8 +7,10 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
+	"github.com/lifei6671/douyinbot/admin/controllers"
 	_ "github.com/lifei6671/douyinbot/admin/routers"
 	"github.com/lifei6671/douyinbot/admin/service"
+	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
@@ -37,19 +39,28 @@ func Run(addr string, configFile string) error {
 			return http.FS(Assets)
 		})
 		web.SetViewsPath("views")
+		if b,err := Assets.ReadFile("static/video/default.mp4");err == nil {
+			controllers.SetDefaultVideoContent(b)
+		}
 	} else {
 		web.SetViewsPath(filepath.Join(web.WorkPath, "views"))
+		if b,err := ioutil.ReadFile(filepath.Join(web.WorkPath,"static/video/default.mp4"));err == nil {
+			controllers.SetDefaultVideoContent(b)
+		}
 	}
 	web.Get("/static/*.*", func(ctx *context.Context) {
-		//读取文件
-		b, err := Assets.ReadFile(strings.TrimPrefix(ctx.Request.RequestURI, "/"))
-		if err != nil {
+		var b []byte
+		var err error
+		if web.BConfig.RunMode == web.PROD {
+			//读取文件
+			b, err = Assets.ReadFile(strings.TrimPrefix(ctx.Request.RequestURI, "/"))
+		} else {
 			b, err = os.ReadFile(filepath.Join(web.WorkPath, ctx.Request.RequestURI))
-			if err != nil {
-				logs.Error("文件不存在 -> %s", ctx.Request.RequestURI)
-				ctx.Output.SetStatus(404)
-				return
-			}
+		}
+		if err != nil {
+			logs.Error("文件不存在 -> %s", ctx.Request.RequestURI)
+			ctx.Output.SetStatus(404)
+			return
 		}
 		//解析文件类型
 		contentType := mime.TypeByExtension(filepath.Ext(ctx.Request.RequestURI))
@@ -73,6 +84,7 @@ func Run(addr string, configFile string) error {
 			logs.Error("写入数据到客户端失败 -> %+v", err)
 		}
 	})
+
 	savePath, err := web.AppConfig.String("auto-save-path")
 	if err == nil {
 		if _, err := os.Stat(savePath); os.IsNotExist(err) {
@@ -80,7 +92,7 @@ func Run(addr string, configFile string) error {
 				return err
 			}
 		}
-		web.SetStaticPath("/video", savePath)
+		//web.SetStaticPath("/video", savePath)
 	}
 	if err := service.Run(context2.Background()); err != nil {
 		return err

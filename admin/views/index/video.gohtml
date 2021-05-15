@@ -1,0 +1,21 @@
+<div class="modal fade" id="playVideoModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <video id="playVideo" autoplay="autoplay" width="100%" height="100%" controls="controls" onerror="playLocalVideo(this)">
+                            您的浏览器不支持 video 标签。
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

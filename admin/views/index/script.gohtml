@@ -1,0 +1,47 @@
+{{template "layout/footer.gohtml"}}
+<script type="text/javascript">
+    function playLocalVideo($obj){
+        const video = $($obj);
+        const videoId = video.data("id");
+        video.removeAttr("data-id");
+        if(videoId === "" || videoId === undefined){
+            return false;
+        }
+        video.attr("src","{{urlfor "VideoController.Index" "video_id" ""}}" + videoId)
+    }
+    $(function () {
+        $('#playVideoModal').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget);
+            const title = button.data('title');
+            const body = button.data('play')
+            const videoId = button.data("id")
+
+            const modal = $(this);
+            modal.find('.modal-title').text(title);
+            modal.find('#playVideo').attr('src',body);
+            modal.find("#playVideo").attr("data-id",videoId);
+
+            const audio = document.getElementById('playVideo');
+            audio.play();
+            document.addEventListener("WeixinJSBridgeReady", function () {
+                audio.play();
+            }, false);
+        }).on("hide.bs.modal",function (event) {
+            let audio = document.getElementById('playVideo');
+            audio.pause();
+            const modal = $(this);
+            modal.find('#playVideo').removeAttr('src');
+            modal.find("#playVideo").removeAttr("data-id");
+        });
+
+        if (/i(Phone|P(o|a)d)/.test(navigator.userAgent)) {
+            $(document).one('touchstart',
+                function(e) {
+                    $('#playVideo').get(0).touchstart = true;
+                    $('#playVideo').get(0).play();
+                    return false;
+                });
+        }
+    });
+
+</script>

@@ -1,0 +1,39 @@
+<div class="row">
+    {{range .List}}
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="card mb-4 shadow-sm">
+                <div class="image-content">
+                    <img src="{{.VideoCover}}" alt="{{.Nickname}}" data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}">
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        {{if $.Nickname}}
+                            {{else}}
+                                <a href="{{urlfor "IndexController.List" ":author_id" .AuthorId ":page" 1 }}">@{{.Nickname}}</a>
+                            {{end}}
+                        {{.Desc}}.
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group">
+                            <button data-toggle="modal" data-target="#playVideoModal" data-title="{{.Nickname}}" data-play="{{.VideoPlayAddr}}" data-id="{{.VideoId}}" class="btn btn-sm btn-outline-secondary">播放</button>
+                            <a href="{{.VideoRawPlayAddr}}" target="_blank" class="btn btn-sm btn-outline-secondary">来源</a>
+                        </div>
+                        <small class="text-muted">{{dateformat .Created "2006-01-02 15:04:05"}}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{else}}
+        <p>没有数据</p>
+    {{end}}
+</div>
+<div class="row">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item{{if eq .First "#"}} disabled{{end}}"><a class="page-link" href="{{.First}}">首页</a></li>
+            <li class="page-item{{if eq .Previous "#"}} disabled{{end}}"><a class="page-link" href="{{.Previous}}">上一页</a></li>
+            <li class="page-item{{if eq .Next "#"}} disabled{{end}}"><a class="page-link" href="{{.Next}}">下一页</a></li>
+            <li class="page-item{{if eq .Last "#"}} disabled{{end}}"><a class="page-link" href="{{.Last}}">尾页</a></li>
+        </ul>
+    </nav>
+</div>

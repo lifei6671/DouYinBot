@@ -17,4 +17,6 @@ func init() {
 
 	web.Router("/baidu/authorize", &controllers.BaiduController{}, "get:Index")
 	web.Router("/baidu", &controllers.BaiduController{}, "get:Authorize")
+
+	web.Router("/video/play",&controllers.VideoController{},"get:Index")
 }

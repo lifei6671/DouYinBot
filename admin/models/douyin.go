@@ -2,10 +2,11 @@ package models
 
 import (
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 	"time"
 )
 
-const PageSize = 15
+const PageSize = 18
 
 type DouYinVideo struct {
 	Id               int       `orm:"column(id);auto;pk"`
@@ -62,6 +63,16 @@ func (d *DouYinVideo) Save() error {
 	}
 
 	return err
+}
+
+func (d *DouYinVideo) FirstByVideoId(videoId string) (*DouYinVideo,error){
+	o := orm.NewOrm()
+	err := o.QueryTable(d.TableName()).Filter("video_id",videoId).One(d)
+	if err != nil && err != orm.ErrNoRows {
+		logs.Error("查询视频失败 -> video_id=%s ; error=%+v",videoId,err)
+		return nil, err
+	}
+	return d,nil
 }
 func init() {
 	// 需要在init中注册定义的model
