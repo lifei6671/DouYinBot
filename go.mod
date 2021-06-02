@@ -7,5 +7,6 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/qiniu/go-sdk/v7 v7.9.5
 	github.com/tidwall/gjson v1.7.5
+	go.uber.org/automaxprocs v1.4.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 )
