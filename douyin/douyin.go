@@ -3,6 +3,7 @@ package douyin
 import (
 	"errors"
 	"fmt"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/tidwall/gjson"
 	"io"
 	"log"
@@ -55,6 +56,7 @@ func (d *DouYin) GetRedirectUrl(urlStr string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	logs.Info("请求原始内容： %s", string(body))
 	exp, err := regexp.Compile("\\d+")
 	if err != nil {
 		return "", err
@@ -101,12 +103,14 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 		return Video{}, err
 	}
 	d.printf("获取抖音视频成功 -> [resp=%s]", body)
+
 	item := gjson.Get(body, "item_list.0")
 
 	res := item.Get("video.play_addr.url_list.0")
 	video := Video{
 		VideoRawAddr: urlStr,
 		PlayRawAddr:  rawUrlStr,
+		Images: []ImageItem{},
 	}
 
 	if !res.Exists() {
@@ -115,22 +119,51 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	}
 
 	video.PlayAddr = strings.ReplaceAll(res.Str, "playwm", "play")
+	res = item.Get("duration")
+	//获取播放时长，视频有播放时长，图文类无播放时长
+	if res.Exists() && res.Str != "0" {
+		video.VideoType = VideoPlayType
+	} else {
+		video.VideoType = ImagePlayType
+		res = item.Get("images")
+		if res.Exists() && res.IsArray() {
+			for _,image := range res.Array() {
+				imageRes := image.Get("url_list.0")
+				if imageRes.Exists() {
+					video.Images = append(video.Images,ImageItem{
+						ImageUrl: imageRes.Str,
+						ImageId:  image.Get("uri").Str,
+					})
+				}
+			}
+		}
+	}
+	//获取播放地址
 	res = item.Get("video.play_addr.uri")
 	if res.Exists() {
 		video.PlayId = res.Str
 	}
+	//获取视频唯一id
+	res = item.Get("aweme_id")
+	if res.Exists() {
+		video.VideoId = res.Str
+	}
+	//获取封面
 	res = item.Get("video.cover.url_list.0")
 	if res.Exists() {
 		video.Cover = res.Str
 	}
+	//获取原始封面
 	res = item.Get("video.origin_cover.url_list.0")
 	if res.Exists() {
 		video.OriginCover = res.Str
 	}
+	//获取音乐地址
 	res = item.Get("music.play_url.url_list.0")
 	if res.Exists() {
 		video.MusicAddr = res.Str
 	}
+	//获取作者id
 	res = item.Get("author.uid")
 	if res.Exists() {
 		video.Author.Id = res.Str
@@ -147,15 +180,17 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if res.Exists() {
 		video.Author.Signature = res.Str
 	}
-
+	//获取视频描述
 	res = item.Get("desc")
 	if res.Exists() {
 		video.Desc = res.Str
 	}
+	//回获取作者大头像
 	res = item.Get("author.avatar_larger.url_list.0")
 	if res.Exists() {
 		video.Author.AvatarLarger = res.Str
 	}
+	log.Println(video)
 	return video, nil
 }
 
