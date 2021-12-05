@@ -2,7 +2,6 @@ package douyin
 
 import (
 	"errors"
-	"fmt"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/tidwall/gjson"
 	"io"
@@ -29,7 +28,7 @@ func NewDouYin() *DouYin {
 	if err != nil {
 		panic(err)
 	}
-	return &DouYin{pattern: exp}
+	return &DouYin{pattern: exp, isDebug: true, log: log.Default()}
 }
 
 func (d *DouYin) IsDebug(debug bool) {
@@ -120,8 +119,9 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 
 	video.PlayAddr = strings.ReplaceAll(res.Str, "playwm", "play")
 	res = item.Get("duration")
+	d.printf("视频时长 [duration=%s]",res.Raw)
 	//获取播放时长，视频有播放时长，图文类无播放时长
-	if res.Exists() && res.Str != "0" {
+	if res.Exists() && res.Raw != "0" {
 		video.VideoType = VideoPlayType
 	} else {
 		video.VideoType = ImagePlayType
@@ -145,6 +145,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	}
 	//获取视频唯一id
 	res = item.Get("aweme_id")
+	d.printf("唯一ID [aweme_id=%s]", res.Raw)
 	if res.Exists() {
 		video.VideoId = res.Str
 	}
@@ -190,16 +191,12 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if res.Exists() {
 		video.Author.AvatarLarger = res.Str
 	}
-	log.Println(video)
+	d.printf("解析后数据 [video=%s]",video.String())
 	return video, nil
 }
 
 func (d *DouYin) printf(format string, v ...interface{}) {
 	if d.isDebug {
-		if len(v) == 0 {
-			_ = d.log.Output(2, format)
-		} else {
-			_ = d.log.Output(2, fmt.Sprintf(format, v...))
-		}
+		d.log.Printf(format,v...)
 	}
 }
