@@ -136,8 +136,9 @@ func execute(ctx context.Context) {
 			if baseDomain := web.AppConfig.DefaultString("douyin-base-url", ""); baseDomain != "" {
 				if uri, err := url.ParseRequestURI(video.OriginCover); err == nil {
 					originCover := strings.TrimPrefix(video.OriginCover, "https://")
-					originCover = strings.TrimPrefix(video.OriginCover, "http://")
-					originCover = strings.TrimPrefix(video.OriginCover, uri.Host)
+					originCover = strings.TrimPrefix(originCover, "http://")
+					originCover = strings.TrimPrefix(originCover, uri.Host)
+					originCover = strings.ReplaceAll(originCover, uri.RawQuery,"")
 					video.OriginCover = strings.ReplaceAll(baseDomain+originCover, "//", "/")
 				}
 			}

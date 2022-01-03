@@ -150,7 +150,13 @@ func (v *Video) Download(filename string) (string, error) {
 
 // DownloadCover 下载封面文件
 func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
-	filename = filepath.Join(filename, v.VideoId,filepath.Base(urlStr))
+	uri,err := url.ParseRequestURI(urlStr)
+	if err != nil {
+		logs.Error("解析封面文件失败: url[%s] filename[%s] %+v",urlStr,filename, err)
+		return "", err
+	}
+
+	filename = filepath.Join(filename, v.VideoId,"cover",uri.Path)
 
 	dir := filepath.Dir(filename)
 	if _,err := os.Stat(dir); os.IsNotExist(err) {
@@ -185,6 +191,7 @@ func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
 		logs.Error("保存图片失败: %s  %s",urlStr,err)
 		return "", err
 	}
+	logs.Info("保存封面成功: %s  %s",urlStr,err)
 	return filename,nil
 }
 
