@@ -98,7 +98,7 @@ func execute(ctx context.Context) {
 			coverPath := video.OriginCover
 
 			if cover, err := video.DownloadCover(video.OriginCover, savepath); err == nil {
-				coverPath = "/" + strings.TrimPrefix(cover, savepath)
+				coverPath = strings.ReplaceAll("/" + strings.TrimPrefix(cover, savepath),"//","/")
 			}
 
 			backdata := make(map[string]string)
@@ -138,8 +138,8 @@ func execute(ctx context.Context) {
 					originCover := strings.TrimPrefix(video.OriginCover, "https://")
 					originCover = strings.TrimPrefix(originCover, "http://")
 					originCover = strings.TrimPrefix(originCover, uri.Host)
-					originCover = strings.ReplaceAll(originCover, uri.RawQuery,"")
-					video.OriginCover = strings.ReplaceAll(baseDomain+originCover, "//", "/")
+					originCover = strings.ReplaceAll(originCover, uri.RawQuery, "")
+					video.OriginCover = baseDomain + strings.ReplaceAll(originCover, "//", "/")
 				}
 			}
 			m := models.DouYinVideo{

@@ -149,25 +149,25 @@ func (v *Video) Download(filename string) (string, error) {
 }
 
 // DownloadCover 下载封面文件
-func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
-	uri,err := url.ParseRequestURI(urlStr)
+func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
+	uri, err := url.ParseRequestURI(urlStr)
 	if err != nil {
-		logs.Error("解析封面文件失败: url[%s] filename[%s] %+v",urlStr,filename, err)
+		logs.Error("解析封面文件失败: url[%s] filename[%s] %+v", urlStr, filename, err)
 		return "", err
 	}
 
-	filename = filepath.Join(filename, v.VideoId,"cover",uri.Path)
+	filename = filepath.Join(filename, v.Author.Id, "cover", uri.Path)
 
 	dir := filepath.Dir(filename)
-	if _,err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir,0666);err != nil{
-			return "",err
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir, 0666); err != nil {
+			return "", err
 		}
 	}
-	f,err := os.Create(filename)
+	f, err := os.Create(filename)
 	if err != nil {
-		logs.Error("创建封面文件失败: url[%s] filename[%s] %+v",urlStr,filename, err)
-		return "",err
+		logs.Error("创建封面文件失败: url[%s] filename[%s] %+v", urlStr, filename, err)
+		return "", err
 	}
 	defer utils.SafeClose(f)
 
@@ -177,22 +177,22 @@ func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
 
 	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
 	if err != nil {
-		logs.Error("下载封面文件失败: url[%s] filename[%s] %+v",urlStr,filename, err)
-		return "",err
+		logs.Error("下载封面文件失败: url[%s] filename[%s] %+v", urlStr, filename, err)
+		return "", err
 	}
 	req.Header = header
 	resp, err := http.DefaultTransport.RoundTrip(req)
 	if err != nil {
-		return "",err
-	}
-	defer utils.SafeClose(resp.Body)
-	_,err = io.Copy(f,resp.Body)
-	if err != nil {
-		logs.Error("保存图片失败: %s  %+v",urlStr,err)
 		return "", err
 	}
-	logs.Info("保存封面成功: %s  %s",urlStr,filename)
-	return filename,nil
+	defer utils.SafeClose(resp.Body)
+	_, err = io.Copy(f, resp.Body)
+	if err != nil {
+		logs.Error("保存图片失败: %s  %+v", urlStr, err)
+		return "", err
+	}
+	logs.Info("保存封面成功: %s  %s", urlStr, filename)
+	return filename, nil
 }
 
 //GetDownloadUrl 获取下载链接
