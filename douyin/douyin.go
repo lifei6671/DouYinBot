@@ -107,6 +107,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 
 	res := item.Get("video.play_addr.url_list.0")
 	video := Video{
+		RawLink: shardContent,
 		VideoRawAddr: urlStr,
 		PlayRawAddr:  rawUrlStr,
 		Images: []ImageItem{},
@@ -158,6 +159,14 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	res = item.Get("video.origin_cover.url_list.0")
 	if res.Exists() {
 		video.OriginCover = res.Str
+	}
+	res = item.Get("video.origin_cover.url_list")
+	if res.Exists() {
+		 res.ForEach(func(key, value gjson.Result) bool {
+			 video.OriginCoverList = append(video.OriginCoverList,value.Raw)
+			 return true
+		})
+		 d.printf("所有原始封面： %+v", video.OriginCoverList)
 	}
 	//获取音乐地址
 	res = item.Get("music.play_url.url_list.0")

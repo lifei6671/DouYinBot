@@ -98,6 +98,8 @@ func Run(addr string, configFile string) error {
 		return err
 	}
 
+	go service.RunCron(context2.Background())
+
 	web.Run(addr)
 	return nil
 }

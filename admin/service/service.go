@@ -6,12 +6,15 @@ import (
 	"errors"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
+	"github.com/jasonlvhit/gocron"
 	"github.com/lifei6671/douyinbot/admin/models"
 	"github.com/lifei6671/douyinbot/douyin"
+	"github.com/lifei6671/douyinbot/internal/utils"
 	"github.com/lifei6671/douyinbot/qiniu"
 	"golang.org/x/crypto/bcrypt"
 	"os"
 	"strings"
+	"time"
 )
 
 var (
@@ -138,10 +141,32 @@ func execute(ctx context.Context) {
 				VideoLocalAddr:   "/" + name,
 				VideoBackAddr:    string(b),
 				Desc:             video.Desc,
+				RawLink:          video.RawLink,
 			}
 			if err := m.Save(); err != nil {
 				logs.Error("保存视频到数据库失败 -> 【%s】 - %+v", content, err)
 				continue
+			}
+			if len(video.OriginCoverList) > 0 {
+				expire, _ := utils.ParseExpireUnix(video.OriginCoverList[0])
+				cover := models.DouYinCover{
+					VideoId:    m.VideoId,
+					Cover:      video.OriginCoverList[0],
+					CoverImage: strings.Join(video.OriginCoverList, "|"),
+					Expires:    expire,
+				}
+				if err := cover.Save(m.VideoId); err != nil {
+					logs.Error("保存封面失败:【%s】 - %+v", content, err)
+				} else {
+					if expire > 0 {
+						t := time.Unix(int64(expire), 0)
+						//加入过期更新队列
+						err = gocron.Every(1).From(&t).Do(syncCover(m.VideoId))
+						if err != nil {
+							logs.Error("加入封面过期队列失败:【%s】- %+v", m.RawLink, err)
+						}
+					}
+				}
 			}
 			logs.Info("解析抖音视频成功 -> 【%s】- %s", content, m.VideoBackAddr)
 

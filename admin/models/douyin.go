@@ -23,6 +23,7 @@ type DouYinVideo struct {
 	VideoLocalAddr   string    `orm:"column(video_local_addr);size(2000);description(本地路径)"`
 	VideoBackAddr    string    `orm:"column(video_back_addr);size(2000);null;description(备份的地址)"`
 	Desc             string    `orm:"column(desc);size(1000);null;description(视频描述)"`
+	RawLink			 string		`orm:"column(raw_link);size(255);default('');description(原始分享内容)"`
 	Created          time.Time `orm:"auto_now_add;type(datetime);description(创建时间)"`
 }
 

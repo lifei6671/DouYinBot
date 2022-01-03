@@ -25,16 +25,18 @@ const (
 )
 
 type Video struct {
-	VideoId      string `json:"video_id"`
-	PlayId       string `json:"play_id"`
-	PlayAddr     string `json:"play_addr"`
-	VideoRawAddr string `json:"video_raw_addr"`
-	PlayRawAddr  string `json:"play_raw_addr"`
-	Cover        string `json:"cover"`
-	OriginCover  string `json:"origin_cover"`
-	MusicAddr    string `json:"music_addr"`
-	Desc         string `json:"desc"`
-	Author       struct {
+	VideoId         string   `json:"video_id"`
+	PlayId          string   `json:"play_id"`
+	PlayAddr        string   `json:"play_addr"`
+	VideoRawAddr    string   `json:"video_raw_addr"`
+	PlayRawAddr     string   `json:"play_raw_addr"`
+	Cover           string   `json:"cover"`
+	OriginCover     string   `json:"origin_cover"`
+	OriginCoverList []string `json:"origin_cover_list"`
+	MusicAddr       string   `json:"music_addr"`
+	Desc            string   `json:"desc"`
+	RawLink         string   `json:"raw_link"`
+	Author          struct {
 		Id           string `json:"id"`
 		ShortId      string `json:"short_id"`
 		Nickname     string `json:"nickname"`
@@ -64,12 +66,12 @@ func (v *Video) Download(filename string) (string, error) {
 		//	logs.Error("出现panic: [filename=%s] [errmsg=%s]", filename, err)
 		//}
 	}()
-	filename,err := filepath.Abs(filename)
+	filename, err := filepath.Abs(filename)
 	if err != nil {
-		log.Printf("获取报错地址失败 [filename=%s] [error=%+v]",filename, err)
+		log.Printf("获取报错地址失败 [filename=%s] [error=%+v]", filename, err)
 		return "", err
 	}
-	filename = filepath.Join(filename,v.Author.Id, v.GetFilename())
+	filename = filepath.Join(filename, v.Author.Id, v.GetFilename())
 	log.Printf("文件名： [filename=%s]", filename)
 	dir := filepath.Dir(filename)
 
@@ -81,30 +83,30 @@ func (v *Video) Download(filename string) (string, error) {
 	//如果是图片类，则将图片下载到指定目录
 	if v.VideoType == ImagePlayType {
 		imagePath := filepath.Join(dir, v.VideoId)
-		if err := os.MkdirAll(imagePath,0655); err != nil {
+		if err := os.MkdirAll(imagePath, 0655); err != nil {
 			log.Printf("创建目录失败 [path=%s]", imagePath)
 		}
 		for _, image := range v.Images {
 			ext := ".jpeg"
-			uri,err := url.Parse(image.ImageUrl)
+			uri, err := url.Parse(image.ImageUrl)
 			if err != nil {
-				log.Printf("解析图片地址失败 [image_url=%s] [errmsg=%+v]", image.ImageUrl,err)
+				log.Printf("解析图片地址失败 [image_url=%s] [errmsg=%+v]", image.ImageUrl, err)
 			} else {
 				ext = filepath.Ext(uri.Path)
 			}
-			imageId :=  strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(image.ImageId,"//",""),"\\\\","/"),"/","-")
-			imageName := filepath.Join(imagePath, imageId + ext)
+			imageId := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(image.ImageId, "//", ""), "\\\\", "/"), "/", "-")
+			imageName := filepath.Join(imagePath, imageId+ext)
 
-			log.Printf("图片数据 [image_url=%s] [image_name=%s]",image.ImageUrl, imageName)
+			log.Printf("图片数据 [image_url=%s] [image_name=%s]", image.ImageUrl, imageName)
 			req, err := http.NewRequest(http.MethodGet, image.ImageUrl, nil)
 			if err != nil {
-				logs.Error("下载图像出错 -> [play_id=%s] [image_url=%s] [errmsg=%+v]", v.PlayId, image.ImageUrl,err)
+				logs.Error("下载图像出错 -> [play_id=%s] [image_url=%s] [errmsg=%+v]", v.PlayId, image.ImageUrl, err)
 				continue
 			}
 			req.Header.Add("User-Agent", userAgent)
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
-				logs.Error("获取图像响应出错 -> [play_id=%s] [image_url=%s] [errmsg=%+v]", v.PlayId, image.ImageUrl,err)
+				logs.Error("获取图像响应出错 -> [play_id=%s] [image_url=%s] [errmsg=%+v]", v.PlayId, image.ImageUrl, err)
 				continue
 			}
 
@@ -137,7 +139,7 @@ func (v *Video) Download(filename string) (string, error) {
 
 	f1, err := os.Create(filename)
 	if err != nil {
-		log.Printf("创建文件失败 [filename=%s] [errmsg=%+v]", filename,err)
+		log.Printf("创建文件失败 [filename=%s] [errmsg=%+v]", filename, err)
 		return "", err
 	}
 	defer f1.Close()
