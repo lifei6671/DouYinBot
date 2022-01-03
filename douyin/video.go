@@ -188,10 +188,10 @@ func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
 	defer utils.SafeClose(resp.Body)
 	_,err = io.Copy(f,resp.Body)
 	if err != nil {
-		logs.Error("保存图片失败: %s  %s",urlStr,err)
+		logs.Error("保存图片失败: %s  %+v",urlStr,err)
 		return "", err
 	}
-	logs.Info("保存封面成功: %s  %s",urlStr,err)
+	logs.Info("保存封面成功: %s  %s",urlStr,filename)
 	return filename,nil
 }
 
