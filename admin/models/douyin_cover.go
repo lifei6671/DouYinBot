@@ -16,6 +16,7 @@ type DouYinCover struct {
 	Cover      string    `orm:"column(cover);size(255);description(第一张封面)"`
 	CoverImage string    `orm:"column(cover_image);size(2000);description(封面地址)"`
 	Expires    int       `orm:"column(expires);description(封面有效期)"`
+	Status     int       `orm:"column(status);default(0);description(状态：0=有效;1=无效)"`
 	Created    time.Time `orm:"auto_now_add;type(datetime);description(创建时间)"`
 }
 
@@ -78,13 +79,23 @@ func (d *DouYinCover) GetExpireList() ([]DouYinCover, error) {
 	o := orm.NewOrm()
 	var covers []DouYinCover
 
-	_, err := o.QueryTable(d.TableName()).Filter("expires__lte", time.Now().Unix() - 600).All(&covers)
+	_, err := o.QueryTable(d.TableName()).Filter("expires__gt", 0).Filter("expires__lte", time.Now().Unix()+600).All(&covers)
 	if err != nil {
 		logs.Error("查询过期封面失败： %+v", err)
 	}
 	return covers, err
 }
 
+func (d *DouYinCover) SetStatus(videoId string, status int) error {
+	o := orm.NewOrm()
+	_,err := o.QueryTable(d.TableName()).Filter("video_id", videoId).Update(orm.Params{
+		"status": status,
+	})
+	if err != nil {
+		logs.Error("更新封面状态失败：video_id[%s] %+v", videoId,err)
+	}
+	return err
+}
 func init() {
 	rand.Seed(uint64(time.Now().UnixNano()))
 	// 需要在init中注册定义的model

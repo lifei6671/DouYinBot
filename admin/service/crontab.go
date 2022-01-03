@@ -76,6 +76,8 @@ func syncCover(videoId string) error {
 	video, err := dy.Get(videoRecord.RawLink)
 	if err != nil {
 		logs.Error("解析抖音视频地址失败 -> 【%s】- %+v", videoRecord.RawLink, err)
+		//将状态更新为无效
+		_ = models.NewDouYinCover().SetStatus(videoId,1)
 		return err
 	}
 	if len(video.OriginCoverList) > 0 {
