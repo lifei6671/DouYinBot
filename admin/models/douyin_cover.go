@@ -46,7 +46,7 @@ func (d *DouYinCover) Save(videoId string) error {
 			d.Expires = expire
 		}
 	}
-	var cover *DouYinCover
+	var cover DouYinCover
 	err := o.QueryTable(d.TableName()).Filter("video_id", videoId).One(&cover)
 	if err == orm.ErrNoRows {
 		_, err = o.Insert(d)
