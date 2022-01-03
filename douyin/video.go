@@ -160,6 +160,7 @@ func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
 	}
 	f,err := os.Create(filename)
 	if err != nil {
+		logs.Error("创建封面文件失败: url[%s] filename[%s] %+v",urlStr,filename, err)
 		return "",err
 	}
 	defer utils.SafeClose(f)
@@ -170,6 +171,7 @@ func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
 
 	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
 	if err != nil {
+		logs.Error("下载封面文件失败: url[%s] filename[%s] %+v",urlStr,filename, err)
 		return "",err
 	}
 	req.Header = header
@@ -181,8 +183,9 @@ func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
 	_,err = io.Copy(f,resp.Body)
 	if err != nil {
 		logs.Error("保存图片失败: %s  %s",urlStr,err)
+		return "", err
 	}
-	return "",err
+	return filename,nil
 }
 
 //GetDownloadUrl 获取下载链接

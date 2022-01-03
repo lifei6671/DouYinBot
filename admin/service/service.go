@@ -98,7 +98,7 @@ func execute(ctx context.Context) {
 			coverPath := video.OriginCover
 
 			if cover, err := video.DownloadCover(video.OriginCover, savepath); err == nil {
-				coverPath = strings.TrimPrefix(cover, savepath)
+				coverPath = "/" + strings.TrimPrefix(cover, savepath)
 			}
 
 			backdata := make(map[string]string)
@@ -152,7 +152,7 @@ func execute(ctx context.Context) {
 				VideoPlayAddr:    video.PlayAddr,
 				VideoId:          video.PlayId,
 				VideoCover:       video.OriginCover,
-				VideoLocalCover:  "/" + coverPath,
+				VideoLocalCover:  coverPath,
 				VideoLocalAddr:   "/" + name,
 				VideoBackAddr:    string(b),
 				Desc:             video.Desc,
