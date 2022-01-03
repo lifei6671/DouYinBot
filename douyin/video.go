@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/lifei6671/douyinbot/internal/utils"
 	"io"
 	"io/ioutil"
 	"log"
@@ -59,12 +60,12 @@ func (v *Video) GetFilename() string {
 	return v.VideoId + ".mp4"
 }
 
-//Download 下载文件到指定目录
+// Download 下载视频文件到指定目录
 func (v *Video) Download(filename string) (string, error) {
 	defer func() {
-		//if err := recover(); err != nil {
-		//	logs.Error("出现panic: [filename=%s] [errmsg=%s]", filename, err)
-		//}
+		if err := recover(); err != nil {
+			logs.Error("出现panic: [filename=%s] [errmsg=%s]", filename, err)
+		}
 	}()
 	filename, err := filepath.Abs(filename)
 	if err != nil {
@@ -103,7 +104,7 @@ func (v *Video) Download(filename string) (string, error) {
 				logs.Error("下载图像出错 -> [play_id=%s] [image_url=%s] [errmsg=%+v]", v.PlayId, image.ImageUrl, err)
 				continue
 			}
-			req.Header.Add("User-Agent", userAgent)
+			req.Header.Add("User-Agent", DefaultUserAgent)
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
 				logs.Error("获取图像响应出错 -> [play_id=%s] [image_url=%s] [errmsg=%+v]", v.PlayId, image.ImageUrl, err)
@@ -130,7 +131,7 @@ func (v *Video) Download(filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("User-Agent", userAgent)
+	req.Header.Add("User-Agent", DefaultUserAgent)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
@@ -147,13 +148,50 @@ func (v *Video) Download(filename string) (string, error) {
 	return filename, err
 }
 
+// DownloadCover 下载封面文件
+func (v *Video) DownloadCover(urlStr string,filename string) (string,error) {
+	filename = filepath.Join(filename, v.VideoId,filepath.Base(urlStr))
+
+	dir := filepath.Dir(filename)
+	if _,err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dir,0666);err != nil{
+			return "",err
+		}
+	}
+	f,err := os.Create(filename)
+	if err != nil {
+		return "",err
+	}
+	defer utils.SafeClose(f)
+
+	header := http.Header{}
+	header.Add("User-Agent", DefaultUserAgent)
+	header.Add("Upgrade-Insecure-Requests", "1")
+
+	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
+	if err != nil {
+		return "",err
+	}
+	req.Header = header
+	resp, err := http.DefaultTransport.RoundTrip(req)
+	if err != nil {
+		return "",err
+	}
+	defer utils.SafeClose(resp.Body)
+	_,err = io.Copy(f,resp.Body)
+	if err != nil {
+		logs.Error("保存图片失败: %s  %s",urlStr,err)
+	}
+	return "",err
+}
+
 //GetDownloadUrl 获取下载链接
 func (v *Video) GetDownloadUrl() (string, error) {
 	req, err := http.NewRequest(http.MethodGet, v.PlayAddr, nil)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("User-Agent", userAgent)
+	req.Header.Add("User-Agent", DefaultUserAgent)
 	resp, err := http.DefaultTransport.RoundTrip(req)
 	if err != nil {
 		return "", err

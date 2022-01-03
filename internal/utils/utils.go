@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+	"io"
 	"net/url"
 	"strconv"
 )
@@ -19,4 +20,10 @@ func ParseExpireUnix(s string) (int,error) {
 		return expire,nil
 	}
 	return 0, errors.New("url is empty")
+}
+
+func SafeClose(closer io.Closer)  {
+	if closer != nil {
+		_ = closer.Close()
+	}
 }

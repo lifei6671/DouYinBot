@@ -20,6 +20,7 @@ type DouYinVideo struct {
 	VideoPlayAddr    string    `orm:"column(video_play_addr);size(2000);description(视频原播放地址)"`
 	VideoId          string    `orm:"column(video_id);size(255);unique;description(视频唯一ID)"`
 	VideoCover       string    `orm:"column(video_cover);size(2000);null;description(视频封面)"`
+	VideoLocalCover  string    `orm:"column(video_local_cover);size(2000);description(本地备份封面)"`
 	VideoLocalAddr   string    `orm:"column(video_local_addr);size(2000);description(本地路径)"`
 	VideoBackAddr    string    `orm:"column(video_back_addr);size(2000);null;description(备份的地址)"`
 	Desc             string    `orm:"column(desc);size(1000);null;description(视频描述)"`
@@ -52,6 +53,7 @@ func (d *DouYinVideo) GetList(pageIndex int, authorId int) (list []DouYinVideo, 
 
 func (d *DouYinVideo) Save() error {
 	o := orm.NewOrm()
+
 
 	var video DouYinVideo
 

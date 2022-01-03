@@ -11,6 +11,7 @@ import (
 	"github.com/lifei6671/douyinbot/internal/utils"
 	"github.com/lifei6671/douyinbot/qiniu"
 	"golang.org/x/crypto/bcrypt"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -94,6 +95,12 @@ func execute(ctx context.Context) {
 				logs.Error("下载抖音视频失败 -> 【%s】- %+v", content, err)
 				continue
 			}
+			coverPath := video.OriginCover
+
+			if cover, err := video.DownloadCover(video.OriginCover, savepath); err == nil {
+				coverPath = strings.TrimPrefix(cover, savepath)
+			}
+
 			backdata := make(map[string]string)
 
 			name := strings.TrimPrefix(p, savepath)
@@ -123,8 +130,17 @@ func execute(ctx context.Context) {
 					logs.Error("上传百度网盘失败 -> [%s] %s", name, err)
 				}
 			}
+
 			b, _ := json.Marshal(&backdata)
 
+			if baseDomain := web.AppConfig.DefaultString("douyin-base-url", ""); baseDomain != "" {
+				if uri, err := url.ParseRequestURI(video.OriginCover); err == nil {
+					originCover := strings.TrimPrefix(video.OriginCover, "https://")
+					originCover = strings.TrimPrefix(video.OriginCover, "http://")
+					originCover = strings.TrimPrefix(video.OriginCover, uri.Host)
+					video.OriginCover = strings.ReplaceAll(baseDomain+originCover, "//", "/")
+				}
+			}
 			m := models.DouYinVideo{
 				UserId:           user.Id,
 				Nickname:         video.Author.Nickname,
@@ -136,6 +152,7 @@ func execute(ctx context.Context) {
 				VideoPlayAddr:    video.PlayAddr,
 				VideoId:          video.PlayId,
 				VideoCover:       video.OriginCover,
+				VideoLocalCover:  "/" + coverPath,
 				VideoLocalAddr:   "/" + name,
 				VideoBackAddr:    string(b),
 				Desc:             video.Desc,

@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	patternStr = `http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+`
-	userAgent  = `Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1`
-	relRrlStr  = `https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=`
+	patternStr       = `http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+`
+	DefaultUserAgent = `Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1`
+	relRrlStr        = `https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?item_ids=`
 )
 
 type DouYin struct {
@@ -37,7 +37,7 @@ func (d *DouYin) IsDebug(debug bool) {
 
 func (d *DouYin) GetRedirectUrl(urlStr string) (string, error) {
 	header := http.Header{}
-	header.Add("User-Agent", userAgent)
+	header.Add("User-Agent", DefaultUserAgent)
 	header.Add("Upgrade-Insecure-Requests", "1")
 
 	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
@@ -72,7 +72,7 @@ func (d *DouYin) GetVideoInfo(urlStr string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("User-Agent", userAgent)
+	req.Header.Add("User-Agent", DefaultUserAgent)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
