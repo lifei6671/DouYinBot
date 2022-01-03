@@ -163,7 +163,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	res = item.Get("video.origin_cover.url_list")
 	if res.Exists() {
 		 res.ForEach(func(key, value gjson.Result) bool {
-			 video.OriginCoverList = append(video.OriginCoverList,value.Raw)
+			 video.OriginCoverList = append(video.OriginCoverList,value.Str)
 			 return true
 		})
 		 d.printf("所有原始封面： %+v", video.OriginCoverList)
