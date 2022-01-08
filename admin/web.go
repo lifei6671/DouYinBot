@@ -10,6 +10,7 @@ import (
 	"github.com/lifei6671/douyinbot/admin/controllers"
 	_ "github.com/lifei6671/douyinbot/admin/routers"
 	"github.com/lifei6671/douyinbot/admin/service"
+	"github.com/lifei6671/fink-download/fink"
 	"io/ioutil"
 	"mime"
 	"net/http"
@@ -39,12 +40,12 @@ func Run(addr string, configFile string) error {
 			return http.FS(Assets)
 		})
 		web.SetViewsPath("views")
-		if b,err := Assets.ReadFile("static/video/default.mp4");err == nil {
+		if b, err := Assets.ReadFile("static/video/default.mp4"); err == nil {
 			controllers.SetDefaultVideoContent(b)
 		}
 	} else {
 		web.SetViewsPath(filepath.Join(web.WorkPath, "views"))
-		if b,err := ioutil.ReadFile(filepath.Join(web.WorkPath,"static/video/default.mp4"));err == nil {
+		if b, err := ioutil.ReadFile(filepath.Join(web.WorkPath, "static/video/default.mp4")); err == nil {
 			controllers.SetDefaultVideoContent(b)
 		}
 	}
@@ -94,6 +95,19 @@ func Run(addr string, configFile string) error {
 		}
 		//web.SetStaticPath("/video", savePath)
 	}
+	imagePath, err := web.AppConfig.String("image-save-path")
+
+	if err == nil {
+		if _, err := os.Stat(savePath); os.IsNotExist(err) {
+			if err := os.MkdirAll(savePath, 0655); err != nil {
+				return err
+			}
+		}
+		if err := fink.Run(context2.Background(), imagePath); err != nil {
+			panic(err)
+		}
+	}
+
 	if err := service.Run(context2.Background()); err != nil {
 		return err
 	}

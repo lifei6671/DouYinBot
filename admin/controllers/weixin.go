@@ -8,6 +8,8 @@ import (
 	"github.com/beego/beego/v2/server/web"
 	"github.com/lifei6671/douyinbot/admin/service"
 	"github.com/lifei6671/douyinbot/wechat"
+	"github.com/lifei6671/fink-download/fink"
+	"strings"
 	"time"
 )
 
@@ -110,10 +112,14 @@ func (c *WeiXinController) Dispatch() {
 			}
 			return
 		}
-		service.Push(context.Background(), service.MediaContent{
-			Content: c.body.Content,
-			UserId:  c.body.FromUserName,
-		})
+		if i := strings.Index(c.body.Content,"www.finkapp.cn"); i >= 0 {
+			fink.Push(c.body.Content)
+		} else {
+			service.Push(context.Background(), service.MediaContent{
+				Content: c.body.Content,
+				UserId:  c.body.FromUserName,
+			})
+		}
 
 		_ = c.response("处理成功")
 		return
