@@ -103,9 +103,11 @@ func Run(addr string, configFile string) error {
 				return err
 			}
 		}
-		if err := fink.Run(context2.Background(), imagePath); err != nil {
-			panic(err)
-		}
+		go func() {
+			if err := fink.Run(context2.Background(), imagePath); err != nil {
+				panic(err)
+			}
+		}()
 	}
 
 	if err := service.Run(context2.Background()); err != nil {
