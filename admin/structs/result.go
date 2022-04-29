@@ -1,7 +1,7 @@
 package structs
 
-type JsonResult struct {
-	ErrCode int         `json:"errcode"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+type JsonResult[T any] struct {
+	ErrCode int    `json:"errcode"`
+	Message string `json:"message"`
+	Data    T      `json:"data,omitempty"`
 }

@@ -2,13 +2,14 @@ package douyin
 
 import (
 	"errors"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/tidwall/gjson"
 	"io"
 	"log"
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/tidwall/gjson"
 )
 
 var (
@@ -107,10 +108,10 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 
 	res := item.Get("video.play_addr.url_list.0")
 	video := Video{
-		RawLink: shardContent,
+		RawLink:      shardContent,
 		VideoRawAddr: urlStr,
 		PlayRawAddr:  rawUrlStr,
-		Images: []ImageItem{},
+		Images:       []ImageItem{},
 	}
 
 	if !res.Exists() {
@@ -120,7 +121,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 
 	video.PlayAddr = strings.ReplaceAll(res.Str, "playwm", "play")
 	res = item.Get("duration")
-	d.printf("视频时长 [duration=%s]",res.Raw)
+	d.printf("视频时长 [duration=%s]", res.Raw)
 	//获取播放时长，视频有播放时长，图文类无播放时长
 	if res.Exists() && res.Raw != "0" {
 		video.VideoType = VideoPlayType
@@ -128,10 +129,10 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 		video.VideoType = ImagePlayType
 		res = item.Get("images")
 		if res.Exists() && res.IsArray() {
-			for _,image := range res.Array() {
+			for _, image := range res.Array() {
 				imageRes := image.Get("url_list.0")
 				if imageRes.Exists() {
-					video.Images = append(video.Images,ImageItem{
+					video.Images = append(video.Images, ImageItem{
 						ImageUrl: imageRes.Str,
 						ImageId:  image.Get("uri").Str,
 					})
@@ -162,11 +163,11 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	}
 	res = item.Get("video.origin_cover.url_list")
 	if res.Exists() {
-		 res.ForEach(func(key, value gjson.Result) bool {
-			 video.OriginCoverList = append(video.OriginCoverList,value.Str)
-			 return true
+		res.ForEach(func(key, value gjson.Result) bool {
+			video.OriginCoverList = append(video.OriginCoverList, value.Str)
+			return true
 		})
-		 d.printf("所有原始封面： %+v", video.OriginCoverList)
+		d.printf("所有原始封面： %+v", video.OriginCoverList)
 	}
 	//获取音乐地址
 	res = item.Get("music.play_url.url_list.0")
@@ -200,12 +201,12 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if res.Exists() {
 		video.Author.AvatarLarger = res.Str
 	}
-	d.printf("解析后数据 [video=%s]",video.String())
+	d.printf("解析后数据 [video=%s]", video.String())
 	return video, nil
 }
 
-func (d *DouYin) printf(format string, v ...interface{}) {
+func (d *DouYin) printf(format string, v ...any) {
 	if d.isDebug {
-		d.log.Printf(format,v...)
+		d.log.Printf(format, v...)
 	}
 }

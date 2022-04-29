@@ -1,10 +1,11 @@
 package controllers
 
 import (
+	"strings"
+
 	"github.com/beego/beego/v2/server/web"
 	"github.com/lifei6671/douyinbot/admin/structs"
 	"github.com/lifei6671/douyinbot/douyin"
-	"strings"
 )
 
 var douYin = douyin.NewDouYin()
@@ -22,7 +23,7 @@ func (c *HomeController) Index() {
 	} else {
 		douYinContent := c.Ctx.Input.Query("douYinContent")
 		if douYinContent == "" {
-			c.Data["json"] = &structs.JsonResult{
+			c.Data["json"] = &structs.JsonResult[string]{
 				ErrCode: 1,
 				Message: "解析内容失败",
 				Data:    douYinContent,
@@ -30,12 +31,12 @@ func (c *HomeController) Index() {
 		} else {
 			video, err := douYin.Get(douYinContent)
 			if err != nil {
-				c.Data["json"] = &structs.JsonResult{
+				c.Data["json"] = &structs.JsonResult[string]{
 					ErrCode: 1,
 					Message: err.Error(),
 				}
 			} else {
-				c.Data["json"] = &structs.JsonResult{
+				c.Data["json"] = &structs.JsonResult[string]{
 					ErrCode: 0,
 					Message: "ok",
 					Data:    strings.ReplaceAll(videoHtml, "{{__VIDEO__}}", video.PlayAddr),
@@ -49,14 +50,14 @@ func (c *HomeController) Index() {
 func (c *HomeController) Download() {
 	urlStr := c.Ctx.Input.Query("url")
 	if urlStr == "" {
-		c.Data["json"] = &structs.JsonResult{
+		c.Data["json"] = &structs.JsonResult[string]{
 			ErrCode: 1,
 			Message: "获取抖音地址失败",
 		}
 	} else {
 		video, err := douYin.Get(urlStr)
 		if err != nil {
-			c.Data["json"] = &structs.JsonResult{
+			c.Data["json"] = &structs.JsonResult[string]{
 				ErrCode: 1,
 				Message: err.Error(),
 			}
@@ -64,7 +65,7 @@ func (c *HomeController) Download() {
 			if c.Ctx.Input.IsAjax() {
 				location, _ := video.GetDownloadUrl()
 
-				c.Data["json"] = &structs.JsonResult{
+				c.Data["json"] = &structs.JsonResult[map[string]string]{
 					ErrCode: 0,
 					Message: "ok",
 					Data: map[string]string{
@@ -76,7 +77,7 @@ func (c *HomeController) Download() {
 			} else {
 				filename, err := web.AppConfig.String("auto-save-path")
 				if err != nil {
-					c.Data["json"] = &structs.JsonResult{
+					c.Data["json"] = &structs.JsonResult[string]{
 						ErrCode: 2,
 						Message: "未找到文件保存目录",
 						Data:    video.PlayAddr,
@@ -84,12 +85,12 @@ func (c *HomeController) Download() {
 				} else {
 					_, err = video.Download(filename)
 					if err != nil {
-						c.Data["json"] = &structs.JsonResult{
+						c.Data["json"] = &structs.JsonResult[string]{
 							ErrCode: 1,
 							Message: err.Error(),
 						}
 					} else {
-						c.Data["json"] = &structs.JsonResult{
+						c.Data["json"] = &structs.JsonResult[string]{
 							ErrCode: 0,
 							Message: "ok",
 							Data:    video.PlayAddr,
