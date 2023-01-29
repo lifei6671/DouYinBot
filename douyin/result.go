@@ -467,5 +467,8 @@ type DouYinResult struct {
 	LogPb struct {
 		ImprId string `json:"impr_id"`
 	} `json:"log_pb"`
-	StatusCode int `json:"status_code"`
+	StatusCode   int `json:"status_code"`
+	FilterDetail struct {
+		DetailMsg string `json:"detail_msg"`
+	} `json:"filter_detail"`
 }

@@ -139,6 +139,11 @@ func (d *DouYin) generateRandomStr(n int) string {
 }
 
 func (d *DouYin) Get(shardContent string) (Video, error) {
+	defer func() {
+		if err := recover();err != nil {
+			d.printf("解析抖音结果失败 -> [err=%s]", err)
+		}
+	}()
 	urlStr := d.pattern.FindString(shardContent)
 	if urlStr == "" {
 		return Video{}, errors.New("获取视频链接失败")
@@ -159,7 +164,10 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 		d.printf("解析抖音结果失败 -> [err=%s]", err)
 		return Video{}, err
 	}
-
+	if len(result.AwemeDetail.Video.PlayAddr.UrlList) == 0 {
+		d.printf("解析抖音结果失败 -> [err=%s]", result.FilterDetail.DetailMsg)
+		return Video{}, err
+	}
 	video := Video{
 		RawLink:      shardContent,
 		VideoRawAddr: urlStr,
