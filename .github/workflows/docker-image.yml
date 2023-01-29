@@ -25,10 +25,21 @@ jobs:
        password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag my-image-name:v$(date +%s)
+    - name: Extract Docker metadata
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.IMAGE_NAME }}
+        tags: |
+          # set latest tag for default branch
+          type=raw,value=latest,enable={{is_default_branch}}
+          # tag event
+          type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
     - name: Push Docker Image
       uses: docker/build-push-action@v3
       with:
         context: .
         push: ${{ github.event_name != 'pull_request' }}
         platforms: linux/amd64,linux/arm64,linux/arm
-        tags: lifei6671/douyinbot:v$(date +%s)
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
