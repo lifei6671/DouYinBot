@@ -32,6 +32,9 @@ jobs:
        registry: ${{env.REGISTRY}}
        username: ${{ secrets.DOCKERHUB_USERNAME }}
        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Get current date # get the date of the build
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d--%M-%S')"
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag lifei6671/douyinbot:${{ steps.date.outputs.date }}
     - name: Extract Docker metadata
