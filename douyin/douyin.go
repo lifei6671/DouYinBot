@@ -1,25 +1,29 @@
 package douyin
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
+	"fmt"
+	"github.com/go-resty/resty/v2"
+	"github.com/tidwall/gjson"
 	"log"
 	"math/rand"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
-
-	"github.com/beego/beego/v2/core/logs"
 )
 
 var (
 	patternStr       = `http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+`
-	DefaultUserAgent = `Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1`
+	DefaultUserAgent = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36`
 	//relRrlStr        = `https://www.iesdouyin.com/web/api/v2/aweme/iteminfo/?reflow_source=reflow_page&item_ids=`
-	relRrlStr = `https://www.iesdouyin.com/aweme/v1/web/aweme/detail/?aid=1128&version_name=23.5.0&device_platform=android&os_version=2333&aweme_id=`
+	//relRrlStr = `https://www.iesdouyin.com/aweme/v1/web/aweme/detail/?aid=1128&version_name=23.5.0&device_platform=android&os_version=2333&aweme_id=`
+	relRrlStr = `https://www.douyin.com/aweme/v1/web/aweme/detail/?aid=1128&version_name=23.5.0&device_platform=android&os_version=2333&aweme_id=`
 	//apiStr    = `https://aweme.snssdk.com/aweme/v1/play/?radio=1080p&line=0&video_id=`
 	src = rand.NewSource(time.Now().UnixNano())
+	//代码来源 https://github.com/wujunwei928/parse-video/blob/main/parser/douyin.go
 )
 
 const (
@@ -49,78 +53,6 @@ func (d *DouYin) IsDebug(debug bool) {
 	d.isDebug = debug
 }
 
-func (d *DouYin) GetRedirectUrl(urlStr string) (string, error) {
-	header := http.Header{}
-	header.Add("User-Agent", DefaultUserAgent)
-	header.Add("Upgrade-Insecure-Requests", "1")
-
-	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
-	if err != nil {
-		return "", err
-	}
-	req.Header = header
-	resp, err := http.DefaultTransport.RoundTrip(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	logs.Info("请求原始内容： %s", string(body))
-	exp, err := regexp.Compile("\\d+")
-	if err != nil {
-		return "", err
-	}
-	result := exp.FindString(string(body))
-	if result == "" {
-		return "", errors.New("解析参数失败 ->" + string(body))
-	}
-	//videoUrl := apiStr + result
-	//
-	//req, err = http.NewRequest(http.MethodGet, videoUrl, nil)
-	//req.Header = header
-	//resp, err = http.DefaultTransport.RoundTrip(req)
-	//if err != nil {
-	//	return "", err
-	//}
-	//defer resp.Body.Close()
-	//
-	//body, err = io.ReadAll(resp.Body)
-	//if err != nil {
-	//	return "", err
-	//}
-	//log.Println(string(body))
-
-	return relRrlStr + result, nil
-}
-
-func (d *DouYin) GetVideoInfo(urlStr string) (string, error) {
-	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
-	if err != nil {
-		return "", err
-	}
-	req.Header.Add("User-Agent", DefaultUserAgent)
-	cookie := &http.Cookie{Name: "msToken", Value: d.generateRandomStr(107), HttpOnly: true}
-
-	req.AddCookie(cookie)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(body), nil
-}
-
 func (d *DouYin) generateRandomStr(n int) string {
 	b := make([]byte, n)
 	// A rand.Int63() generates 63 random bits, enough for letterIdMax letters!
@@ -140,7 +72,7 @@ func (d *DouYin) generateRandomStr(n int) string {
 
 func (d *DouYin) Get(shardContent string) (Video, error) {
 	defer func() {
-		if err := recover();err != nil {
+		if err := recover(); err != nil {
 			d.printf("解析抖音结果失败 -> [err=%s]", err)
 		}
 	}()
@@ -148,13 +80,19 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if urlStr == "" {
 		return Video{}, errors.New("获取视频链接失败")
 	}
-	rawUrlStr, err := d.GetRedirectUrl(urlStr)
+
+	videoId, err := d.parseShareUrl(urlStr)
+	if err != nil {
+		return Video{}, err
+	}
+	rawUrlStr, err := d.getDetailUrlByVideoId(videoId)
 	if err != nil {
 		return Video{}, err
 	}
 	d.printf("视频链接地址 -> [url=%s]", rawUrlStr)
 	body, err := d.GetVideoInfo(rawUrlStr)
 	if err != nil {
+		log.Println(err)
 		return Video{}, err
 	}
 	d.printf("获取抖音视频成功 -> [resp=%s]", body)
@@ -177,7 +115,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 
 	video.PlayAddr = result.AwemeDetail.Video.PlayAddr.UrlList[0]
 
-	d.printf("视频时长 [duration=%s]", result.AwemeDetail.Duration)
+	d.printf("视频时长 [duration=%d]", result.AwemeDetail.Duration)
 	//获取播放时长，视频有播放时长，图文类无播放时长
 	if result.AwemeDetail.Duration > 0 {
 		video.VideoType = VideoPlayType
@@ -220,6 +158,72 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 
 	d.printf("解析后数据 [video=%s]", video.String())
 	return video, nil
+}
+
+func (d *DouYin) generateTtwid() string {
+	u := "https://ttwid.bytedance.com/ttwid/union/register/"
+	data := `{"region":"cn","aid":1768,"needFid":false,"service":"www.ixigua.com","migrate_info":{"ticket":"","source":"node"},"cbUrlProtocol":"https","union":true}`
+	resp, err := http.Post(u, "application/json", bytes.NewReader([]byte(data)))
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+	for _, cookie := range resp.Cookies() {
+		return cookie.Value
+	}
+	return ""
+}
+
+func (d *DouYin) GetVideoInfo(reqUrl string) (string, error) {
+	client := resty.New()
+	res, err := client.R().
+		SetHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36").
+		SetHeader("referer", "https://www.douyin.com/").
+		SetHeader("Cookie", fmt.Sprintf(`msToken=%s;odin_tt=324fb4ea4a89c0c05827e18a1ed9cf9bf8a17f7705fcc793fec935b637867e2a5a9b8168c885554d029919117a18ba69; ttwid=1%%7CWBuxH_bhbuTENNtACXoesI5QHV2Dt9-vkMGVHSRRbgY%%7C1677118712%%7C1d87ba1ea2cdf05d80204aea2e1036451dae638e7765b8a4d59d87fa05dd39ff; bd_ticket_guard_client_data=eyJiZC10aWNrZXQtZ3VhcmQtdmVyc2lvbiI6MiwiYmQtdGlja2V0LWd1YXJkLWNsaWVudC1jc3IiOiItLS0tLUJFR0lOIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLVxyXG5NSUlCRFRDQnRRSUJBREFuTVFzd0NRWURWUVFHRXdKRFRqRVlNQllHQTFVRUF3d1BZbVJmZEdsamEyVjBYMmQxXHJcbllYSmtNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUVKUDZzbjNLRlFBNUROSEcyK2F4bXAwNG5cclxud1hBSTZDU1IyZW1sVUE5QTZ4aGQzbVlPUlI4NVRLZ2tXd1FJSmp3Nyszdnc0Z2NNRG5iOTRoS3MvSjFJc3FBc1xyXG5NQ29HQ1NxR1NJYjNEUUVKRGpFZE1Cc3dHUVlEVlIwUkJCSXdFSUlPZDNkM0xtUnZkWGxwYmk1amIyMHdDZ1lJXHJcbktvWkl6ajBFQXdJRFJ3QXdSQUlnVmJkWTI0c0RYS0c0S2h3WlBmOHpxVDRBU0ROamNUb2FFRi9MQnd2QS8xSUNcclxuSURiVmZCUk1PQVB5cWJkcytld1QwSDZqdDg1czZZTVNVZEo5Z2dmOWlmeTBcclxuLS0tLS1FTkQgQ0VSVElGSUNBVEUgUkVRVUVTVC0tLS0tXHJcbiJ9`, d.generateRandomStr(107))).
+		Get(reqUrl)
+	if err != nil {
+		return "", err
+	}
+	return string(res.Body()), nil
+}
+
+func (d *DouYin) getDetailUrlByVideoId(videoId string) (string, error) {
+	postData := map[string]interface{}{
+		"url":        fmt.Sprintf("https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=%s&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333", videoId),
+		"user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+	}
+
+	client := resty.New()
+	res, err := client.R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(postData).
+		Post("https://tiktok.iculture.cc/X-Bogus")
+	if err != nil {
+		return "", err
+	}
+
+	return gjson.GetBytes(res.Body(), "param").String(), nil
+}
+
+func (d *DouYin) parseShareUrl(shareUrl string) (string, error) {
+	client := resty.New()
+	client.SetRedirectPolicy(resty.NoRedirectPolicy())
+	res, _ := client.R().
+		SetHeader("User-Agent", DefaultUserAgent).
+		Get(shareUrl)
+	// 这里会返回err, auto redirect is disabled
+
+	locationRes, err := res.RawResponse.Location()
+	if err != nil {
+		return "", err
+	}
+
+	videoId := strings.ReplaceAll(strings.Trim(locationRes.Path, "/"), "share/video/", "")
+	if len(videoId) <= 0 {
+		return "", errors.New("parse video id from share url fail")
+	}
+	log.Println(videoId)
+	return videoId, nil
 }
 
 func (d *DouYin) printf(format string, v ...any) {
