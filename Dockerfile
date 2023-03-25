@@ -8,7 +8,7 @@ WORKDIR /go/src/app
 
 ADD . /go/src/app/DouYinBot/
 
-RUN cd DouYinBot && export GOPROXY="https://goproxy.cn,direct" && go mod download && go build -o douyinbot main.go
+RUN cd DouYinBot && go mod download && go build -o douyinbot main.go
 
 FROM alpine:latest
 
