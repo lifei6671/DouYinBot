@@ -88,7 +88,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if err != nil {
 		return Video{}, err
 	}
-	rawUrlStr, err := d.getDetailUrlByVideoId(videoId)
+	rawUrlStr, err := d.GetDetailUrlByVideoId(videoId)
 	if err != nil {
 		return Video{}, err
 	}
@@ -190,7 +190,7 @@ func (d *DouYin) GetVideoInfo(reqUrl string) (string, error) {
 	return string(res.Body()), nil
 }
 
-func (d *DouYin) getDetailUrlByVideoId(videoId string) (string, error) {
+func (d *DouYin) GetDetailUrlByVideoId(videoId string) (string, error) {
 	postData := &XBogusParam{
 		AwemeURL:  fmt.Sprintf("https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=%s&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333", videoId),
 		UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",

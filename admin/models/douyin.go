@@ -19,12 +19,13 @@ type DouYinVideo struct {
 	VideoRawPlayAddr string    `orm:"column(video_raw_play_addr);size(2000);description(原视频地址)"`
 	VideoPlayAddr    string    `orm:"column(video_play_addr);size(2000);description(视频原播放地址)"`
 	VideoId          string    `orm:"column(video_id);size(255);unique;description(视频唯一ID)"`
+	AwemeId          string    `orm:"column(aweme_id);size(255);description(原始awemeid)"`
 	VideoCover       string    `orm:"column(video_cover);size(2000);null;description(视频封面)"`
 	VideoLocalCover  string    `orm:"column(video_local_cover);size(2000);description(本地备份封面)"`
 	VideoLocalAddr   string    `orm:"column(video_local_addr);size(2000);description(本地路径)"`
 	VideoBackAddr    string    `orm:"column(video_back_addr);size(2000);null;description(备份的地址)"`
 	Desc             string    `orm:"column(desc);size(1000);null;description(视频描述)"`
-	RawLink			 string		`orm:"column(raw_link);size(255);default('');description(原始分享内容)"`
+	RawLink          string    `orm:"column(raw_link);size(255);default('');description(原始分享内容)"`
 	Created          time.Time `orm:"auto_now_add;type(datetime);description(创建时间)"`
 }
 
@@ -54,7 +55,6 @@ func (d *DouYinVideo) GetList(pageIndex int, authorId int) (list []DouYinVideo, 
 func (d *DouYinVideo) Save() error {
 	o := orm.NewOrm()
 
-
 	var video DouYinVideo
 
 	err := o.QueryTable(d.TableName()).Filter("video_id", d.VideoId).One(&video)
@@ -68,14 +68,14 @@ func (d *DouYinVideo) Save() error {
 	return err
 }
 
-func (d *DouYinVideo) FirstByVideoId(videoId string) (*DouYinVideo,error){
+func (d *DouYinVideo) FirstByVideoId(videoId string) (*DouYinVideo, error) {
 	o := orm.NewOrm()
-	err := o.QueryTable(d.TableName()).Filter("video_id",videoId).One(d)
+	err := o.QueryTable(d.TableName()).Filter("video_id", videoId).One(d)
 	if err != nil && err != orm.ErrNoRows {
-		logs.Error("查询视频失败 -> video_id=%s ; error=%+v",videoId,err)
+		logs.Error("查询视频失败 -> video_id=%s ; error=%+v", videoId, err)
 		return nil, err
 	}
-	return d,nil
+	return d, nil
 }
 func init() {
 	// 需要在init中注册定义的model

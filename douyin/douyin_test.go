@@ -2,6 +2,7 @@ package douyin
 
 import (
 	"github.com/smartystreets/goconvey/convey"
+	"github.com/tidwall/gjson"
 	"log"
 	"testing"
 )
@@ -43,4 +44,26 @@ func TestDouYin_XBogus(t *testing.T) {
 func TestMain(m *testing.M) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	m.Run()
+}
+
+func TestDouYin_GetVideoInfo(t *testing.T) {
+	convey.Convey("", t, func() {
+		dy := NewDouYin()
+		content := "{9.25 Xzg:/ 复制打开抖音，看看【第十八年冬.的作品】“我从来不信什么天道，只信我自己”# 台词 # 好... https://v.douyin.com/BeSveAc/ oxBCQt9rsUybLpUJ0BqHYk1SWZR4}"
+		convey.Convey("", func() {
+			urlStr := dy.pattern.FindString(content)
+			convey.So(urlStr, convey.ShouldNotBeEmpty)
+
+			videoId, err := dy.parseShareUrl(urlStr)
+			convey.So(err, convey.ShouldBeNil)
+			log.Println(videoId)
+
+			rawUrlStr, err := dy.GetDetailUrlByVideoId(videoId)
+			convey.So(err, convey.ShouldBeNil)
+			b, err := dy.GetVideoInfo(rawUrlStr)
+			convey.So(err, convey.ShouldBeNil)
+			playURL := gjson.Get(b, "aweme_detail.video.play_addr.url_list.0").String()
+			convey.So(playURL, convey.ShouldNotBeEmpty)
+		})
+	})
 }

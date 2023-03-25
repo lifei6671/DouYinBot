@@ -18,5 +18,6 @@ func init() {
 	web.Router("/baidu/authorize", &controllers.BaiduController{}, "get:Index")
 	web.Router("/baidu", &controllers.BaiduController{}, "get:Authorize")
 
-	web.Router("/video/play",&controllers.VideoController{},"get:Index")
+	web.Router("/video/local/play", &controllers.VideoController{}, "get:Index")
+	web.Router("/video/remote/play", &controllers.VideoController{}, "get:Play")
 }

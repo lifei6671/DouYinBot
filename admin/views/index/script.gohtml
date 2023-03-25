@@ -3,11 +3,12 @@
     function playLocalVideo($obj){
         const video = $($obj);
         const videoId = video.data("id");
+        const body = video.data('play')
         video.removeAttr("data-id");
         if(videoId === "" || videoId === undefined){
             return false;
         }
-        video.attr("src","{{urlfor "VideoController.Index" "video_id" ""}}" + videoId)
+        video.attr("src",body)
     }
     $(function () {
         $('#playVideoModal').on('show.bs.modal', function (event) {
