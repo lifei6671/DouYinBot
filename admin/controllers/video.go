@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"context"
+	"github.com/beego/beego/v2/client/cache"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/lifei6671/douyinbot/admin/models"
@@ -9,11 +11,13 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 var (
 	defaultVideoUrl     = "https://api.amemv.com/aweme/v1/play/?video_id=v0200f480000br2flq7iv420dp6l9js0&ratio=480p&line=1"
 	defaultVideoContent []byte
+	bm, _               = cache.NewCache("memory", `{"interval":60}`)
 )
 
 type VideoController struct {
@@ -48,6 +52,12 @@ func (c *VideoController) Play() {
 		c.Ctx.Abort(404, "param err")
 		return
 	}
+	cid, err := bm.Get(context.Background(), videoId)
+	if err == nil {
+		c.Ctx.Redirect(301, cid.(string))
+		c.StopRun()
+	}
+
 	video, err := models.NewDouYinVideo().FirstByVideoId(videoId)
 	if err != nil {
 		c.Ctx.Abort(404, "param err")
@@ -69,6 +79,9 @@ func (c *VideoController) Play() {
 		c.Ctx.Abort(500, "get video failed")
 	}
 	playURL := gjson.Get(b, "aweme_detail.video.play_addr.url_list.0").String()
+	if len(playURL) > 0 {
+		_ = bm.Put(context.Background(), videoId, playURL, time.Hour*24)
+	}
 	c.Ctx.Redirect(301, playURL)
 	c.StopRun()
 }
