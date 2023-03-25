@@ -1,10 +1,12 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+#  push:
+#    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
+  release:
+    types: [created]
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -18,6 +20,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Get Release Info
+      run: |
+        {
+          echo "RELEASE_TAG=${GITHUB_REF/refs\/tags\//}"
+          echo "REPOSITORY_NAME=${GITHUB_REPOSITORY#*/}"
+          echo "OS_NAME=${{ matrix.goos }}"
+        } >> "$GITHUB_ENV"
     - uses: actions/checkout@v3
       with:
        submodules: 'true'
@@ -36,7 +45,7 @@ jobs:
       id: date
       run: echo "::set-output name=date::$(date +'%Y-%m-%d--%M-%S')"
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag lifei6671/douyinbot:${{ steps.date.outputs.date }}
+      run: docker build . --file Dockerfile --tag lifei6671/douyinbot:${{ env.RELEASE_TAG }}
     - name: Extract Docker metadata
       id: meta
       uses: docker/metadata-action@v4
