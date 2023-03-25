@@ -77,7 +77,7 @@ func (d *DouYin) generateRandomStr(n int) string {
 func (d *DouYin) Get(shardContent string) (Video, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			d.printf("解析抖音结果失败 -> [err=%s]", err)
+			logs.Error("解析抖音结果失败 -> [err=%s]", err)
 		}
 	}()
 	urlStr := d.pattern.FindString(shardContent)
@@ -119,7 +119,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 
 	video.PlayAddr = result.AwemeDetail.Video.PlayAddr.UrlList[0]
 
-	d.printf("视频时长 [duration=%d]", result.AwemeDetail.Duration)
+	logs.Info("视频时长 [duration=%d]", result.AwemeDetail.Duration)
 	//获取播放时长，视频有播放时长，图文类无播放时长
 	if result.AwemeDetail.Duration > 0 {
 		video.VideoType = VideoPlayType
@@ -130,7 +130,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	video.PlayId = result.AwemeDetail.Video.PlayAddr.Uri
 
 	//获取视频唯一id
-	d.printf("唯一ID [aweme_id=%s]", result.AwemeDetail.AwemeId)
+	logs.Info("唯一ID [aweme_id=%s]", result.AwemeDetail.AwemeId)
 	video.VideoId = result.AwemeDetail.AwemeId
 
 	//获取封面
@@ -140,7 +140,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	video.OriginCover = result.AwemeDetail.Video.OriginCover.UrlList[0]
 
 	video.OriginCoverList = result.AwemeDetail.Video.OriginCover.UrlList
-	d.printf("所有原始封面： %+v", video.OriginCoverList)
+	logs.Info("所有原始封面： %+v", video.OriginCoverList)
 
 	//获取音乐地址
 	video.MusicAddr = result.AwemeDetail.Music.PlayUrl.UrlList[0]
@@ -160,7 +160,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	//回获取作者大头像
 	video.Author.AvatarLarger = result.AwemeDetail.Author.AvatarThumb.UrlList[0]
 
-	d.printf("解析后数据 [video=%s]", video.String())
+	logs.Info("解析后数据 [video=%s]", video.String())
 	return video, nil
 }
 
@@ -251,14 +251,8 @@ func (d *DouYin) XBogus(param *XBogusParam) string {
 	}
 	res, err := sign(goja.Undefined(), vm.ToValue(u.RawQuery), vm.ToValue(param.UserAgent))
 	if err != nil {
-		log.Println("XBogus RunString Sign Err", err)
+		logs.Error("XBogus RunString Sign Err:%s", err)
 		return ""
 	}
 	return res.String()
-}
-
-func (d *DouYin) printf(format string, v ...any) {
-	if d.isDebug {
-		d.log.Printf(format, v...)
-	}
 }
