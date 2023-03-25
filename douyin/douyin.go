@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/beego/beego/v2/core/logs"
 	"github.com/dop251/goja"
 	"github.com/go-resty/resty/v2"
 	"log"
@@ -92,22 +93,22 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	if err != nil {
 		return Video{}, err
 	}
-	d.printf("视频链接地址 -> [url=%s]", rawUrlStr)
+	logs.Info("视频链接地址 -> [url=%s]", rawUrlStr)
 	body, err := d.GetVideoInfo(rawUrlStr)
 	if err != nil {
 		log.Println(err)
 		return Video{}, err
 	}
-	d.printf("获取抖音视频成功 -> [resp=%s]", body)
+	logs.Info("获取抖音视频成功 -> [resp=%s]", body)
 	var result DouYinResult
 
 	if err := json.Unmarshal([]byte(body), &result); err != nil {
-		d.printf("解析抖音结果失败 -> [err=%s]", err)
+		logs.Error("解析抖音结果失败 -> [err=%s]", err)
 		return Video{}, err
 	}
 	if len(result.AwemeDetail.Video.PlayAddr.UrlList) == 0 {
-		d.printf("解析抖音结果失败 -> [err=%s]", result.FilterDetail.DetailMsg)
-		return Video{}, err
+		logs.Error("解析抖音结果失败 -> [err=%s]", result.FilterDetail.DetailMsg)
+		return Video{}, errors.New(result.FilterDetail.DetailMsg)
 	}
 	video := Video{
 		RawLink:      shardContent,

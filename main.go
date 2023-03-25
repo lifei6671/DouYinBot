@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/beego/beego/v2/core/logs"
 	"log"
 	"path/filepath"
 
@@ -41,4 +42,5 @@ func main() {
 
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	logs.EnableFuncCallDepth(true)
 }

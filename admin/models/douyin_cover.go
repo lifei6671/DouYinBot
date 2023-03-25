@@ -79,7 +79,7 @@ func (d *DouYinCover) GetExpireList() ([]DouYinCover, error) {
 	o := orm.NewOrm()
 	var covers []DouYinCover
 
-	_, err := o.QueryTable(d.TableName()).Filter("expires__gt", 0).Filter("expires__lte", time.Now().Unix()+600).All(&covers)
+	_, err := o.QueryTable(d.TableName()).Filter("expires__gt", 0).Filter("expires__lte", time.Now().Unix()+600).Filter("status", 0).All(&covers)
 	if err != nil {
 		logs.Error("查询过期封面失败： %+v", err)
 	}
