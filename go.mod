@@ -4,24 +4,25 @@ go 1.18
 
 require (
 	github.com/beego/beego/v2 v2.0.7
+	github.com/dop251/goja v0.0.0-20230304130813-e2f543bf4b4c
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/lifei6671/fink-download v0.0.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/qiniu/go-sdk/v7 v7.9.5
 	github.com/smartystreets/goconvey v1.7.2
+	github.com/tidwall/gjson v1.14.4
 	go.uber.org/automaxprocs v1.4.0
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 )
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bradfitz/gomemcache v0.0.0-20190913173617-a41fca850d0b // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
-	github.com/dop251/goja v0.0.0-20230304130813-e2f543bf4b4c // indirect
-	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
@@ -37,7 +38,6 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/shiena/ansicolor v0.0.0-20200904210342-c7312218db18 // indirect
 	github.com/smartystreets/assertions v1.2.0 // indirect
-	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
