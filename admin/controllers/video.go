@@ -6,7 +6,6 @@ import (
 	"github.com/lifei6671/douyinbot/admin/models"
 	"github.com/lifei6671/douyinbot/douyin"
 	"github.com/tidwall/gjson"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -54,7 +53,6 @@ func (c *VideoController) Play() {
 		c.Ctx.Abort(404, "param err")
 		return
 	}
-	log.Println(video.AwemeId)
 	if len(video.AwemeId) == 0 {
 		c.Ctx.Abort(404, "")
 		return
@@ -70,10 +68,7 @@ func (c *VideoController) Play() {
 		logs.Error(err)
 		c.Ctx.Abort(500, "get video failed")
 	}
-	log.Println(string(b))
 	playURL := gjson.Get(b, "aweme_detail.video.play_addr.url_list.0").String()
-	log.Println(playURL)
-
 	c.Ctx.Redirect(301, playURL)
 	c.StopRun()
 }
