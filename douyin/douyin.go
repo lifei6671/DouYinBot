@@ -2,16 +2,19 @@ package douyin
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/dop251/goja"
 	"github.com/go-resty/resty/v2"
-	"github.com/tidwall/gjson"
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -188,21 +191,14 @@ func (d *DouYin) GetVideoInfo(reqUrl string) (string, error) {
 }
 
 func (d *DouYin) getDetailUrlByVideoId(videoId string) (string, error) {
-	postData := map[string]interface{}{
-		"url":        fmt.Sprintf("https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=%s&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333", videoId),
-		"user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+	postData := &XBogusParam{
+		AwemeURL:  fmt.Sprintf("https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id=%s&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333", videoId),
+		UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
 	}
 
-	client := resty.New()
-	res, err := client.R().
-		SetHeader("Content-Type", "application/json").
-		SetBody(postData).
-		Post("https://tiktok.iculture.cc/X-Bogus")
-	if err != nil {
-		return "", err
-	}
+	xBogus := d.XBogus(postData)
 
-	return gjson.GetBytes(res.Body(), "param").String(), nil
+	return postData.AwemeURL + "&X-Bogus=" + xBogus, nil
 }
 
 func (d *DouYin) parseShareUrl(shareUrl string) (string, error) {
@@ -222,8 +218,42 @@ func (d *DouYin) parseShareUrl(shareUrl string) (string, error) {
 	if len(videoId) <= 0 {
 		return "", errors.New("parse video id from share url fail")
 	}
-	log.Println(videoId)
 	return videoId, nil
+}
+
+type XBogusParam struct {
+	AwemeURL  string `json:"aweme_url"`
+	UserAgent string `json:"user_agent"`
+}
+
+//go:embed X-Bogus.js
+var XBogusScript string
+var xBogusOnce = sync.Once{}
+var vm *goja.Runtime
+
+func (d *DouYin) XBogus(param *XBogusParam) string {
+	xBogusOnce.Do(func() {
+		vm = goja.New()
+		_, err := vm.RunString(XBogusScript)
+		if err != nil {
+			log.Println("XBogus RunString Err", err)
+		}
+	})
+	sign, ok := goja.AssertFunction(vm.Get("sign"))
+	if !ok {
+		return ""
+	}
+	u, err := url.Parse(param.AwemeURL)
+	if err != nil {
+		log.Println("XBogus RunString AwemeURL Err", err)
+		return ""
+	}
+	res, err := sign(goja.Undefined(), vm.ToValue(u.RawQuery), vm.ToValue(param.UserAgent))
+	if err != nil {
+		log.Println("XBogus RunString Sign Err", err)
+		return ""
+	}
+	return res.String()
 }
 
 func (d *DouYin) printf(format string, v ...any) {

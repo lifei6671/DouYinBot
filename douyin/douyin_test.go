@@ -21,6 +21,25 @@ func TestDouYin_Get(t *testing.T) {
 	})
 }
 
+func TestDouYin_XBogus(t *testing.T) {
+	convey.Convey("DouYin_XBogus", t, func() {
+		dy := NewDouYin()
+
+		convey.Convey("DouYin_XBogus_OK", func() {
+			param := &XBogusParam{
+				AwemeURL:  "https://www.douyin.com/aweme/v1/web/aweme/detail",
+				UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
+			}
+
+			sign := dy.XBogus(param)
+
+			convey.So(sign, convey.ShouldNotBeEmpty)
+			log.Println(sign)
+		})
+
+	})
+}
+
 func TestMain(m *testing.M) {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	m.Run()
