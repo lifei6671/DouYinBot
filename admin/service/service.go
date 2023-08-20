@@ -100,6 +100,7 @@ func execute(ctx context.Context) {
 			if cover, err := video.DownloadCover(video.OriginCover, savepath); err == nil {
 				coverPath = strings.ReplaceAll("/"+strings.TrimPrefix(cover, savepath), "//", "/")
 			}
+			coverPath = "/cover" + coverPath
 
 			backdata := make(map[string]string)
 

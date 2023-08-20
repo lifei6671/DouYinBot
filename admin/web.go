@@ -95,6 +95,36 @@ func Run(addr string, configFile string) error {
 		}
 		//web.SetStaticPath("/video", savePath)
 	}
+	web.Get("/cover/*.*", func(ctx *context.Context) {
+		filename := filepath.Join(savePath, strings.TrimPrefix(ctx.Request.RequestURI, "/cover"))
+		b, err := os.ReadFile(filename)
+		if err != nil {
+			logs.Error("文件不存在 -> %s", ctx.Request.RequestURI)
+			ctx.Output.SetStatus(404)
+			return
+		}
+		//解析文件类型
+		contentType := mime.TypeByExtension(filepath.Ext(filename))
+		if contentType != "" {
+			ctx.Output.Header("Content-Type", contentType)
+		}
+		//解析客户端文件版本
+		modified := ctx.Request.Header.Get("If-Modified-Since")
+		if last, err := time.Parse(modifiedFormat, modified); err == nil {
+			if RunTime.Before(last) {
+				ctx.Output.SetStatus(304)
+				return
+			}
+		}
+		//写入缓冲时间
+		ctx.Output.Header("Cache-Control", fmt.Sprintf("max-age=%d", 3600*30*24))
+		ctx.Output.Header("Last-Modified", RunTime.Format(modifiedFormat))
+
+		err = ctx.Output.Body(b)
+		if err != nil {
+			logs.Error("写入数据到客户端失败 -> %+v", err)
+		}
+	})
 	imagePath, err := web.AppConfig.String("image-save-path")
 
 	if err == nil {
