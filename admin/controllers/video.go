@@ -67,7 +67,7 @@ func (c *VideoController) Play() {
 		c.Ctx.Abort(404, "")
 		return
 	}
-	dy := douyin.NewDouYin()
+	dy := douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
 	awemeId, err := dy.GetDetailUrlByVideoId(video.AwemeId)
 	if err != nil {
 		logs.Error(err)

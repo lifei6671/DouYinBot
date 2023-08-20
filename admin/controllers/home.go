@@ -8,7 +8,7 @@ import (
 	"github.com/lifei6671/douyinbot/douyin"
 )
 
-var douYin = douyin.NewDouYin()
+var douYin = douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
 var (
 	videoHtml = `<video controls="controls" autoplay="autoplay" width="100%"><source src="{{__VIDEO__}}" type="video/mp4"></video>`
 )

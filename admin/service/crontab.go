@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 	"github.com/lifei6671/douyinbot/admin/models"
 	"github.com/lifei6671/douyinbot/douyin"
 	"github.com/lifei6671/douyinbot/internal/utils"
@@ -81,8 +82,8 @@ func RunCron(ctx context.Context) {
 // syncCover 同步过期的封面
 func syncCover(videoId string) error {
 	defer func() {
-		if err := recover();err != nil {
-			logs.Error("syncCover_Panic:%s",err)
+		if err := recover(); err != nil {
+			logs.Error("syncCover_Panic:%s", err)
 		}
 	}()
 	videoRecord, err := models.NewDouYinVideo().FirstByVideoId(videoId)
@@ -90,7 +91,7 @@ func syncCover(videoId string) error {
 		return err
 	}
 	logs.Info("开始解析抖音视频任务 -> %s", videoRecord.VideoRawPlayAddr)
-	dy := douyin.NewDouYin()
+	dy := douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
 
 	video, err := dy.Get(videoRecord.VideoRawPlayAddr)
 	if err != nil {

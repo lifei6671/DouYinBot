@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"strings"
 	"sync"
 	"time"
 )
@@ -41,16 +40,17 @@ const (
 
 type DouYin struct {
 	pattern *regexp.Regexp
+	proxy   string
 	isDebug bool
 	log     *log.Logger
 }
 
-func NewDouYin() *DouYin {
+func NewDouYin(proxy string) *DouYin {
 	exp, err := regexp.Compile(patternStr)
 	if err != nil {
 		panic(err)
 	}
-	return &DouYin{pattern: exp, isDebug: true, log: log.Default()}
+	return &DouYin{pattern: exp, isDebug: true, log: log.Default(), proxy: proxy}
 }
 
 func (d *DouYin) IsDebug(debug bool) {
@@ -85,20 +85,12 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 		return Video{}, errors.New("获取视频链接失败")
 	}
 
-	videoId, err := d.parseShareUrl(urlStr)
+	body, err := d.parseShareUrl(urlStr)
 	if err != nil {
+		logs.Error("解析抖音结果失败 -> [err=%s]", err)
 		return Video{}, err
 	}
-	rawUrlStr, err := d.GetDetailUrlByVideoId(videoId)
-	if err != nil {
-		return Video{}, err
-	}
-	logs.Info("视频链接地址 -> [url=%s]", rawUrlStr)
-	body, err := d.GetVideoInfo(rawUrlStr)
-	if err != nil {
-		log.Println(err)
-		return Video{}, err
-	}
+
 	logs.Info("获取抖音视频成功 -> [resp=%s]", body)
 	var result DouYinResult
 
@@ -106,59 +98,63 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 		logs.Error("解析抖音结果失败 -> [err=%s]", err)
 		return Video{}, err
 	}
-	if len(result.AwemeDetail.Video.PlayAddr.UrlList) == 0 {
-		logs.Error("解析抖音结果失败 -> [err=%s]", result.FilterDetail.DetailMsg)
-		return Video{}, errors.New(result.FilterDetail.DetailMsg)
+	if len(result.VideoData.NwmVideoUrlHQ) == 0 && len(result.VideoData.NwmVideoUrl) == 0 {
+		logs.Error("解析抖音结果失败 -> [err=%s]", body)
+		return Video{}, errors.New(body)
 	}
+
 	video := Video{
 		RawLink:      shardContent,
 		VideoRawAddr: urlStr,
-		PlayRawAddr:  rawUrlStr,
+		PlayRawAddr:  result.Url,
 		Images:       []ImageItem{},
 	}
 
-	video.PlayAddr = result.AwemeDetail.Video.PlayAddr.UrlList[0]
+	video.PlayAddr = result.VideoData.NwmVideoUrl
+	if len(result.VideoData.NwmVideoUrlHQ) > 0 {
+		video.PlayAddr = result.VideoData.NwmVideoUrlHQ
+	}
 
-	logs.Info("视频时长 [duration=%d]", result.AwemeDetail.Duration)
+	logs.Info("视频时长 [duration=%d]", result.Music.Duration)
 	//获取播放时长，视频有播放时长，图文类无播放时长
-	if result.AwemeDetail.Duration > 0 {
+	if result.Type == "video" {
 		video.VideoType = VideoPlayType
 	} else {
 		video.VideoType = ImagePlayType
 	}
 	//获取播放地址
-	video.PlayId = result.AwemeDetail.Video.PlayAddr.Uri
+	video.PlayId = result.Url
 
 	//获取视频唯一id
-	logs.Info("唯一ID [aweme_id=%s]", result.AwemeDetail.AwemeId)
-	video.VideoId = result.AwemeDetail.AwemeId
+	logs.Info("唯一ID [aweme_id=%s]", result.AwemeId)
+	video.VideoId = result.AwemeId
 
 	//获取封面
-	video.Cover = result.AwemeDetail.Video.Cover.UrlList[0]
+	video.Cover = result.CoverData.Cover.UrlList[0]
 
 	//获取原始封面
-	video.OriginCover = result.AwemeDetail.Video.OriginCover.UrlList[0]
+	video.OriginCover = result.CoverData.OriginCover.UrlList[0]
 
-	video.OriginCoverList = result.AwemeDetail.Video.OriginCover.UrlList
+	video.OriginCoverList = result.CoverData.OriginCover.UrlList
 	logs.Info("所有原始封面： %+v", video.OriginCoverList)
 
 	//获取音乐地址
-	video.MusicAddr = result.AwemeDetail.Music.PlayUrl.UrlList[0]
+	video.MusicAddr = result.Music.PlayUrl.UrlList[0]
 
 	//获取作者id
-	video.Author.Id = result.AwemeDetail.Author.Uid
+	video.Author.Id = result.Author.Uid
 
-	video.Author.ShortId = result.AwemeDetail.Author.ShortId
+	video.Author.ShortId = result.Author.ShortId
 
-	video.Author.Nickname = result.AwemeDetail.Author.Nickname
+	video.Author.Nickname = result.Author.Nickname
 
-	video.Author.Signature = result.AwemeDetail.Author.Signature
+	video.Author.Signature = result.Author.Signature
 
 	//获取视频描述
-	video.Desc = result.AwemeDetail.Desc
+	video.Desc = result.Desc
 
 	//回获取作者大头像
-	video.Author.AvatarLarger = result.AwemeDetail.Author.AvatarThumb.UrlList[0]
+	video.Author.AvatarLarger = result.Author.AvatarThumb.UrlList[0]
 
 	logs.Info("解析后数据 [video=%s]", video.String())
 	return video, nil
@@ -203,23 +199,17 @@ func (d *DouYin) GetDetailUrlByVideoId(videoId string) (string, error) {
 }
 
 func (d *DouYin) parseShareUrl(shareUrl string) (string, error) {
+	proxyURL := d.proxy + "?url=" + shareUrl
 	client := resty.New()
 	client.SetRedirectPolicy(resty.NoRedirectPolicy())
-	res, _ := client.R().
+	res, err := client.R().
 		SetHeader("User-Agent", DefaultUserAgent).
-		Get(shareUrl)
+		Get(proxyURL)
 	// 这里会返回err, auto redirect is disabled
-
-	locationRes, err := res.RawResponse.Location()
 	if err != nil {
 		return "", err
 	}
-
-	videoId := strings.ReplaceAll(strings.Trim(locationRes.Path, "/"), "share/video/", "")
-	if len(videoId) <= 0 {
-		return "", errors.New("parse video id from share url fail")
-	}
-	return videoId, nil
+	return string(res.Body()), nil
 }
 
 type XBogusParam struct {
