@@ -17,59 +17,45 @@ type DouYinResult struct {
 	CreateTime int    `json:"create_time"`
 	Author     struct {
 		AvatarThumb struct {
-			Height  int      `json:"height"`
+			Height  float64  `json:"height"`
 			Uri     string   `json:"uri"`
 			UrlList []string `json:"url_list"`
-			Width   int      `json:"width"`
+			Width   float64  `json:"width"`
 		} `json:"avatar_thumb"`
 		CfList          interface{} `json:"cf_list"`
 		CloseFriendType int         `json:"close_friend_type"`
 		ContactsStatus  int         `json:"contacts_status"`
 		ContrailList    interface{} `json:"contrail_list"`
 		CoverUrl        []struct {
-			Height  int      `json:"height"`
+			Height  float64  `json:"height"`
 			Uri     string   `json:"uri"`
 			UrlList []string `json:"url_list"`
-			Width   int      `json:"width"`
+			Width   float64  `json:"width"`
 		} `json:"cover_url"`
-		CreateTime                             int         `json:"create_time"`
-		CustomVerify                           string      `json:"custom_verify"`
-		DataLabelList                          interface{} `json:"data_label_list"`
-		EndorsementInfoList                    interface{} `json:"endorsement_info_list"`
-		EnterpriseVerifyReason                 string      `json:"enterprise_verify_reason"`
-		FamiliarVisitorUser                    interface{} `json:"familiar_visitor_user"`
-		FavoritingCount                        int         `json:"favoriting_count"`
-		FollowStatus                           int         `json:"follow_status"`
-		FollowStatusErrCode                    int         `json:"follow_status_err_code"`
-		FollowerCount                          int         `json:"follower_count"`
-		FollowerListSecondaryInformationStruct interface{} `json:"follower_list_secondary_information_struct"`
-		FollowerStatus                         int         `json:"follower_status"`
-		FollowingCount                         int         `json:"following_count"`
-		ImRoleIds                              interface{} `json:"im_role_ids"`
-		IsAdFake                               bool        `json:"is_ad_fake"`
-		IsBan                                  bool        `json:"is_ban"`
-		IsBlockedV2                            bool        `json:"is_blocked_v2"`
-		IsBlockingV2                           bool        `json:"is_blocking_v2"`
-		IsCf                                   int         `json:"is_cf"`
-		LiveHighValue                          int         `json:"live_high_value"`
-		MaxFollowerCount                       int         `json:"max_follower_count"`
-		Nickname                               string      `json:"nickname"`
-		NotSeenItemIdList                      interface{} `json:"not_seen_item_id_list"`
-		NotSeenItemIdListV2                    interface{} `json:"not_seen_item_id_list_v2"`
-		OfflineInfoList                        interface{} `json:"offline_info_list"`
-		PersonalTagList                        interface{} `json:"personal_tag_list"`
-		PreventDownload                        bool        `json:"prevent_download"`
-		RiskNoticeText                         string      `json:"risk_notice_text"`
-		SecUid                                 string      `json:"sec_uid"`
-		Secret                                 int         `json:"secret"`
-		ShareInfo                              struct {
+		CustomVerify           string      `json:"custom_verify"`
+		DataLabelList          interface{} `json:"data_label_list"`
+		EndorsementInfoList    interface{} `json:"endorsement_info_list"`
+		EnterpriseVerifyReason string      `json:"enterprise_verify_reason"`
+		FamiliarVisitorUser    interface{} `json:"familiar_visitor_user"`
+		ImRoleIds              interface{} `json:"im_role_ids"`
+		IsAdFake               bool        `json:"is_ad_fake"`
+		IsBan                  bool        `json:"is_ban"`
+		IsBlockedV2            bool        `json:"is_blocked_v2"`
+		IsBlockingV2           bool        `json:"is_blocking_v2"`
+		Nickname               string      `json:"nickname"`
+		NotSeenItemIdList      interface{} `json:"not_seen_item_id_list"`
+		NotSeenItemIdListV2    interface{} `json:"not_seen_item_id_list_v2"`
+		OfflineInfoList        interface{} `json:"offline_info_list"`
+		PersonalTagList        interface{} `json:"personal_tag_list"`
+		PreventDownload        bool        `json:"prevent_download"`
+		RiskNoticeText         string      `json:"risk_notice_text"`
+		SecUid                 string      `json:"sec_uid"`
+		ShareInfo              struct {
 			ShareDesc      string `json:"share_desc"`
 			ShareDescInfo  string `json:"share_desc_info"`
 			ShareQrcodeUrl struct {
-				Height  int      `json:"height"`
 				Uri     string   `json:"uri"`
 				UrlList []string `json:"url_list"`
-				Width   int      `json:"width"`
 			} `json:"share_qrcode_url"`
 			ShareTitle       string `json:"share_title"`
 			ShareTitleMyself string `json:"share_title_myself"`
@@ -155,8 +141,7 @@ type DouYinResult struct {
 			Width   int      `json:"width"`
 		} `json:"cover_thumb"`
 		DmvAutoShow          bool          `json:"dmv_auto_show"`
-		DspStatus            int           `json:"dsp_status"`
-		Duration             int           `json:"duration"`
+		Duration             float64       `json:"duration"`
 		EndTime              int           `json:"end_time"`
 		ExternalSongInfo     []interface{} `json:"external_song_info"`
 		Extra                string        `json:"extra"`
@@ -180,14 +165,11 @@ type DouYinResult struct {
 		MusicChartRanks                interface{} `json:"music_chart_ranks"`
 		MusicCollectCount              int         `json:"music_collect_count"`
 		MusicCoverAtmosphereColorValue string      `json:"music_cover_atmosphere_color_value"`
-		MusicStatus                    int         `json:"music_status"`
 		MusicianUserInfos              interface{} `json:"musician_user_infos"`
-		MuteShare                      bool        `json:"mute_share"`
 		OfflineDesc                    string      `json:"offline_desc"`
 		OwnerHandle                    string      `json:"owner_handle"`
 		OwnerId                        string      `json:"owner_id"`
 		OwnerNickname                  string      `json:"owner_nickname"`
-		PgcMusicType                   int         `json:"pgc_music_type"`
 		PlayUrl                        struct {
 			Height  int      `json:"height"`
 			Uri     string   `json:"uri"`
@@ -195,15 +177,9 @@ type DouYinResult struct {
 			UrlList []string `json:"url_list"`
 			Width   int      `json:"width"`
 		} `json:"play_url"`
-		Position                  interface{} `json:"position"`
-		PreventDownload           bool        `json:"prevent_download"`
-		PreventItemDownloadStatus int         `json:"prevent_item_download_status"`
-		PreviewEndTime            int         `json:"preview_end_time"`
-		PreviewStartTime          int         `json:"preview_start_time"`
-		ReasonType                int         `json:"reason_type"`
-		Redirect                  bool        `json:"redirect"`
-		SchemaUrl                 string      `json:"schema_url"`
-		SearchImpr                struct {
+		Redirect   bool   `json:"redirect"`
+		SchemaUrl  string `json:"schema_url"`
+		SearchImpr struct {
 			EntityId string `json:"entity_id"`
 		} `json:"search_impr"`
 		SecUid        string `json:"sec_uid"`
@@ -219,10 +195,7 @@ type DouYinResult struct {
 			IdStr         string      `json:"id_str"`
 			Title         string      `json:"title"`
 		} `json:"song"`
-		SourcePlatform int `json:"source_platform"`
-		StartTime      int `json:"start_time"`
-		Status         int `json:"status"`
-		StrongBeatUrl  struct {
+		StrongBeatUrl struct {
 			Height  int      `json:"height"`
 			Uri     string   `json:"uri"`
 			UrlList []string `json:"url_list"`
