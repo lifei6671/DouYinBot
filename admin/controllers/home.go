@@ -2,13 +2,16 @@ package controllers
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/beego/beego/v2/server/web"
 	"github.com/lifei6671/douyinbot/admin/structs"
 	"github.com/lifei6671/douyinbot/douyin"
 )
 
-var douYin = douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
+var douYin *douyin.DouYin
+var once sync.Once
+
 var (
 	videoHtml = `<video controls="controls" autoplay="autoplay" width="100%"><source src="{{__VIDEO__}}" type="video/mp4"></video>`
 )
@@ -18,6 +21,9 @@ type HomeController struct {
 }
 
 func (c *HomeController) Index() {
+	once.Do(func() {
+		douYin = douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
+	})
 	if c.Ctx.Input.IsGet() {
 		c.TplName = "home/index.gohtml"
 	} else {

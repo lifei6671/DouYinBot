@@ -201,10 +201,11 @@ func (d *DouYin) GetDetailUrlByVideoId(videoId string) (string, error) {
 func (d *DouYin) parseShareUrl(shareUrl string) (string, error) {
 	proxyURL := d.proxy + "?url=" + shareUrl
 	client := resty.New()
-	client.SetRedirectPolicy(resty.NoRedirectPolicy())
+	//client.SetRedirectPolicy(resty.NoRedirectPolicy())
 	res, err := client.R().
 		SetHeader("User-Agent", DefaultUserAgent).
 		Get(proxyURL)
+
 	// 这里会返回err, auto redirect is disabled
 	if err != nil {
 		return "", err
