@@ -37,7 +37,34 @@ go build -o douyinbot main.go
 
 ### Docker 使用
 
+#### 部署 [ChromeDouYin](https://github.com/lifei6671/ChromeDouYin) 项目
+
+```go
+go install github.com/lifei6671/ChromeDouYin
+
+```
+
+默认情况下 [ChromeDouYin](https://github.com/lifei6671/ChromeDouYin) 会自动下载一个无头浏览器，并通过无头浏览器抓取抖音信息。
+
+但是不保证所有系统都能成功，因此建议使用Docker部署：
+
 ```shell
-docker pull lifei6671/douyinbot:1.0.0
-docker run -p 9080:9080 -v /data/conf:/var/www/douyinbot/conf /data/data:/var/www/douyinbot/data -v /data/douyin:/var/www/douyinbot/douyin -d lifei6671/douyinbot:1.0.0
+docker run -p 7317:7317 ghcr.io/go-rod/rod
+```
+
+部署成功后，  [ChromeDouYin](https://github.com/lifei6671/ChromeDouYin) 会自动连接到该实例。
+
+#### 部署 DouYinBot
+
+```shell
+docker pull lifei6671/douyinbot:v1.0.17
+docker run -p 9080:9080 -v /data/conf:/var/www/douyinbot/conf /data/data:/var/www/douyinbot/data -v /data/douyin:/var/www/douyinbot/douyin -d lifei6671/douyinbot:v1.0.18
+```
+
+需要修改配置文件中的代理信息：
+
+```
+douyinproxy=ChromeDouYin的访问接口，如果配置了认证信息只支持https访问
+douyinproxyusername=认证用户名
+douyinproxypassword=认证密码
 ```
