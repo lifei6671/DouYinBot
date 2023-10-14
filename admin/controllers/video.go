@@ -67,18 +67,17 @@ func (c *VideoController) Play() {
 		c.Ctx.Abort(404, "")
 		return
 	}
-	dy := douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
-	awemeId, err := dy.GetDetailUrlByVideoId(video.AwemeId)
+	dy := douyin.NewDouYin(
+		web.AppConfig.DefaultString("douyinproxy", ""),
+		web.AppConfig.DefaultString("douyinproxyusername", ""),
+		web.AppConfig.DefaultString("douyinproxypassword", ""),
+	)
+	b, err := dy.GetVideoInfo(video.VideoRawPlayAddr)
 	if err != nil {
 		logs.Error(err)
 		c.Ctx.Abort(500, "get video failed")
 	}
-	b, err := dy.GetVideoInfo(awemeId)
-	if err != nil {
-		logs.Error(err)
-		c.Ctx.Abort(500, "get video failed")
-	}
-	playURL := gjson.Get(b, "aweme_detail.video.play_addr.url_list.0").String()
+	playURL := gjson.Get(b, "video_data.wm_video_url_HQ").String()
 	if len(playURL) > 0 {
 		_ = bm.Put(context.Background(), videoId, playURL, time.Hour*24)
 	}
@@ -87,7 +86,7 @@ func (c *VideoController) Play() {
 }
 
 func (c *VideoController) sendFile(filename string) {
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
+	if stat, err := os.Stat(filename); os.IsNotExist(err) || stat.IsDir() {
 		logs.Warn("文件不存在 -> %s", filename)
 		if defaultVideoContent == nil || len(defaultVideoContent) == 0 {
 			c.Redirect(defaultVideoUrl, http.StatusFound)

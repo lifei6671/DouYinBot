@@ -74,7 +74,11 @@ func Run(ctx context.Context) (err error) {
 }
 
 func execute(ctx context.Context) {
-	dy := douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
+	dy := douyin.NewDouYin(
+		web.AppConfig.DefaultString("douyinproxy", ""),
+		web.AppConfig.DefaultString("douyinproxyusername", ""),
+		web.AppConfig.DefaultString("douyinproxypassword", ""),
+	)
 	bucket := qiniu.NewBucket(accessKey, secretKey)
 
 	for {

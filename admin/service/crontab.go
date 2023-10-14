@@ -86,7 +86,11 @@ func syncCover(videoId string) error {
 		return err
 	}
 	logs.Info("开始解析抖音视频任务 -> %s", videoRecord.VideoRawPlayAddr)
-	dy := douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
+	dy := douyin.NewDouYin(
+		web.AppConfig.DefaultString("douyinproxy", ""),
+		web.AppConfig.DefaultString("douyinproxyusername", ""),
+		web.AppConfig.DefaultString("douyinproxypassword", ""),
+	)
 
 	video, err := dy.Get(videoRecord.VideoRawPlayAddr)
 	if err != nil {

@@ -51,5 +51,7 @@ baidusignkey=
 baiduregisteredurl=
 
 # 抖音解析代理
-# https://github.com/Evil0ctal/Douyin_TikTok_Download_API/tree/edf1a93aa54b1442e6512ea5820e5519da02c5bd
+# https://github.com/lifei6671/ChromeDouYin
 douyinproxy=
+douyinproxyusername=
+douyinproxypassword=

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 
@@ -22,7 +23,11 @@ type HomeController struct {
 
 func (c *HomeController) Index() {
 	once.Do(func() {
-		douYin = douyin.NewDouYin(web.AppConfig.DefaultString("douyinproxy", ""))
+		douYin = douyin.NewDouYin(
+			web.AppConfig.DefaultString("douyinproxy", ""),
+			web.AppConfig.DefaultString("douyinproxyusername", ""),
+			web.AppConfig.DefaultString("douyinproxypassword", ""),
+		)
 	})
 	if c.Ctx.Input.IsGet() {
 		c.TplName = "home/index.gohtml"
@@ -32,7 +37,6 @@ func (c *HomeController) Index() {
 			c.Data["json"] = &structs.JsonResult[string]{
 				ErrCode: 1,
 				Message: "解析内容失败",
-				Data:    douYinContent,
 			}
 		} else {
 			video, err := douYin.Get(douYinContent)
@@ -41,13 +45,32 @@ func (c *HomeController) Index() {
 					ErrCode: 1,
 					Message: err.Error(),
 				}
-			} else {
+			} else if video.VideoType == douyin.VideoPlayType {
 				c.Data["json"] = &structs.JsonResult[string]{
 					ErrCode: 0,
 					Message: "ok",
 					Data:    strings.ReplaceAll(videoHtml, "{{__VIDEO__}}", video.PlayAddr),
 				}
+			} else if video.VideoType == douyin.ImagePlayType {
+				var imageHtml string
+
+				for _, image := range video.Images {
+					imageHtml += fmt.Sprintf(`<p><a href="%s" target="_blank"><img src="%s"></a></p>`,
+						image.ImageUrl, image.ImageUrl,
+					)
+				}
+				c.Data["json"] = &structs.JsonResult[string]{
+					ErrCode: 0,
+					Message: "ok",
+					Data:    imageHtml,
+				}
+			} else {
+				c.Data["json"] = &structs.JsonResult[string]{
+					ErrCode: 1,
+					Message: "无法解析",
+				}
 			}
+
 		}
 		c.ServeJSON()
 	}

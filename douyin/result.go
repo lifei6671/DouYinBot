@@ -250,4 +250,12 @@ type DouYinResult struct {
 		NwmVideoUrl   string `json:"nwm_video_url"`
 		NwmVideoUrlHQ string `json:"nwm_video_url_HQ"`
 	} `json:"video_data"`
+	Images []Image `json:"images"`
+}
+
+type Image struct {
+	Height  int      `json:"height"`
+	Width   int      `json:"width"`
+	URLList []string `json:"url_list"`
+	URI     string   `json:"uri"`
 }
