@@ -146,9 +146,9 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	video.Cover = utils.First(result.CoverData.Cover.UrlList)
 
 	//获取原始封面
-	video.OriginCover = utils.First(result.CoverData.OriginCover.UrlList)
+	video.OriginCover = utils.First(result.CoverData.Cover.UrlList)
 
-	video.OriginCoverList = result.CoverData.OriginCover.UrlList
+	video.OriginCoverList = result.CoverData.Cover.UrlList
 	logs.Info("所有原始封面： %+v", video.OriginCoverList)
 
 	//获取音乐地址
