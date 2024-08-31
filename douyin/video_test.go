@@ -27,10 +27,12 @@ func TestVideo_Download(t *testing.T) {
 
 func TestVideo_DownloadCover(t *testing.T) {
 	convey.Convey("Video_DownloadCove", t, func() {
-		urlStr := "https://p3-sign.douyinpic.com/tos-cn-p-0015/d584b1df940f44d2a9aff73e7935a718_1641203848~tplv-dy-360p.jpeg?x-expires=1642413600&x-signature=zACK8k4JJR4eaWkdIi0CW3nSHOs%3D&from=4257465056&s=&se=false&sh=&sc=&l=202201031834420102121450193E098A1D&biz_tag=feed_cover"
+		urlStr := "http://v3-web.douyinvod.com/46dcfa120d9045b22915eef9685a83b2/66d2a43e/video/tos/cn/tos-cn-ve-15/oIA5EmZBAe2EAUF9KZEQ5AANwYgfw16S9n0IzD/?a=6383\u0026ch=26\u0026cr=3\u0026dr=0\u0026lr=all\u0026cd=0%7C0%7C0%7C3\u0026cv=1\u0026br=3285\u0026bt=3285\u0026cs=0\u0026ds=4\u0026ft=4TMWc6Dnppft2zLd.sd.C_bAja-CInniuGtc6B3U~JP2SYpHDDaPd.m-ZGgzLusZ.\u0026mime_type=video_mp4\u0026qs=0\u0026rc=NDc0O2g0NTVmZDtlZjkzaEBpM3M0Onc5cmdzdTMzNGkzM0BiMzI2Nl9iXzIxM15fMDMzYSNscDQtMmRjbzVgLS1kLWFzcw%3D%3D\u0026btag=80000e00008000\u0026cquery=100w_100B_100x_100z_100o\u0026dy_q=1725069826\u0026feature_id=46a7bb47b4fd1280f3d3825bf2b29388\u0026l=2024083110034682A8613EB0FDE26EF8C2"
 
 		video := Video{VideoId: "a"}
-		video.DownloadCover(urlStr, "/aaa/")
+		cover, err := video.DownloadCover(urlStr, "./aaa/")
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(cover, convey.ShouldNotBeNil)
 
 	})
 }
