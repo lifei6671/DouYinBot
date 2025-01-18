@@ -134,15 +134,20 @@ func (v *Video) Download(filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("User-Agent", DefaultUserAgent)
 	req.Header.Add("Accept", "*/*")
-	req.Header.Add("Accept-Encoding", "identity;q=1, *;q=0")
+	req.Header.Add("User-Agent", DefaultUserAgent)
 	req.Header.Add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,mt;q=0.5,ru;q=0.4,de;q=0.3")
-	req.Header.Add("referer", v.PlayAddr)
+	req.Header.Add("Referer", v.PlayAddr)
+	req.Header.Add("Accept-Encoding", "identity;q=1, *;q=0")
+	req.Header.Add("Pragma", "no-cache")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
+	}
+	if resp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("http error: status_code[%d] err_msg[%s]", resp.StatusCode, string(b))
 	}
 	defer resp.Body.Close()
 
@@ -183,8 +188,12 @@ func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
 	defer utils.SafeClose(f)
 
 	header := http.Header{}
+	header.Add("Accept", "*/*")
+	header.Add("Accept-Encoding", "identity;q=1, *;q=0")
 	header.Add("User-Agent", DefaultUserAgent)
-	header.Add("Upgrade-Insecure-Requests", "1")
+	header.Add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,mt;q=0.5,ru;q=0.4,de;q=0.3")
+	header.Add("Referer", urlStr)
+	header.Add("Pragma", "no-cache")
 
 	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
 	if err != nil {
@@ -197,6 +206,10 @@ func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
 		return "", err
 	}
 	defer utils.SafeClose(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		b, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("http error: status_code[%d] err_msg[%s]", resp.StatusCode, string(b))
+	}
 	_, err = io.Copy(f, resp.Body)
 	if err != nil {
 		logs.Error("保存图片失败: %s  %+v", urlStr, err)
