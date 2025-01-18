@@ -1,12 +1,11 @@
 package douyin
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/lifei6671/douyinbot/internal/utils"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -14,6 +13,10 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/beego/beego/v2/core/logs"
+
+	"github.com/lifei6671/douyinbot/internal/utils"
 )
 
 type VideoType int
@@ -77,14 +80,14 @@ func (v *Video) Download(filename string) (string, error) {
 	dir := filepath.Dir(filename)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, 0655); err != nil {
+		if err := os.MkdirAll(dir, 0755); err != nil {
 			return "", err
 		}
 	}
 	//如果是图片类，则将图片下载到指定目录
 	if v.VideoType == ImagePlayType {
 		imagePath := filepath.Join(dir, v.VideoId)
-		if err := os.MkdirAll(imagePath, 0655); err != nil {
+		if err := os.MkdirAll(imagePath, 0755); err != nil {
 			log.Printf("创建目录失败 [path=%s]", imagePath)
 		}
 		for _, image := range v.Images {
@@ -117,7 +120,7 @@ func (v *Video) Download(filename string) (string, error) {
 				continue
 			}
 			_ = resp.Body.Close()
-			err = ioutil.WriteFile(imageName, b, 0655)
+			err = os.WriteFile(imageName, b, 0755)
 			if err != nil {
 				logs.Error("保存图像出错 -> [play_id=%s] [image_url=%s]", v.PlayId, image.ImageUrl)
 				continue
@@ -132,6 +135,11 @@ func (v *Video) Download(filename string) (string, error) {
 		return "", err
 	}
 	req.Header.Add("User-Agent", DefaultUserAgent)
+	req.Header.Add("Accept", "*/*")
+	req.Header.Add("Accept-Encoding", "identity;q=1, *;q=0")
+	req.Header.Add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,mt;q=0.5,ru;q=0.4,de;q=0.3")
+	req.Header.Add("referer", v.PlayAddr)
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
@@ -156,11 +164,14 @@ func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
 		return "", err
 	}
 
-	filename = filepath.Join(filename, v.Author.Id, "cover", uri.Path)
+	hash := md5.Sum([]byte(uri.Path))
+	hashStr := hex.EncodeToString(hash[:])
+
+	filename = filepath.Join(filename, v.Author.Id, "cover", hashStr+filepath.Ext(uri.Path))
 
 	dir := filepath.Dir(filename)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, 0666); err != nil {
+		if err := os.MkdirAll(dir, 0755); err != nil {
 			return "", err
 		}
 	}
@@ -195,7 +206,7 @@ func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
 	return filename, nil
 }
 
-//GetDownloadUrl 获取下载链接
+// GetDownloadUrl 获取下载链接
 func (v *Video) GetDownloadUrl() (string, error) {
 	req, err := http.NewRequest(http.MethodGet, v.PlayAddr, nil)
 	if err != nil {

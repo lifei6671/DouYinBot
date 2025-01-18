@@ -4,20 +4,21 @@ import (
 	context2 "context"
 	"embed"
 	"fmt"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
-	"github.com/beego/beego/v2/server/web/context"
-	"github.com/lifei6671/douyinbot/admin/controllers"
-	_ "github.com/lifei6671/douyinbot/admin/routers"
-	"github.com/lifei6671/douyinbot/admin/service"
-	"github.com/lifei6671/fink-download/fink"
-	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego/v2/server/web/context"
+	"github.com/lifei6671/fink-download/fink"
+
+	"github.com/lifei6671/douyinbot/admin/controllers"
+	_ "github.com/lifei6671/douyinbot/admin/routers"
+	"github.com/lifei6671/douyinbot/admin/service"
 )
 
 //go:embed views static
@@ -31,7 +32,7 @@ func Run(addr string, configFile string) error {
 		err := web.LoadAppConfig("ini", configFile)
 		if err != nil {
 			logs.Error("加载配置文件失败 -> %s - %+v", configFile, err)
-			return err
+			return fmt.Errorf("load config file failed: %s - %w", configFile, err)
 		}
 	}
 
@@ -45,7 +46,7 @@ func Run(addr string, configFile string) error {
 		}
 	} else {
 		web.SetViewsPath(filepath.Join(web.WorkPath, "views"))
-		if b, err := ioutil.ReadFile(filepath.Join(web.WorkPath, "static/video/default.mp4")); err == nil {
+		if b, err := os.ReadFile(filepath.Join(web.WorkPath, "static/video/default.mp4")); err == nil {
 			controllers.SetDefaultVideoContent(b)
 		}
 	}
@@ -89,8 +90,8 @@ func Run(addr string, configFile string) error {
 	savePath, err := web.AppConfig.String("auto-save-path")
 	if err == nil {
 		if _, err := os.Stat(savePath); os.IsNotExist(err) {
-			if err := os.MkdirAll(savePath, 0655); err != nil {
-				return err
+			if err := os.MkdirAll(savePath, 0755); err != nil {
+				return fmt.Errorf("mkdir fail ->%s - %w", savePath, err)
 			}
 		}
 		//web.SetStaticPath("/video", savePath)
@@ -129,13 +130,13 @@ func Run(addr string, configFile string) error {
 
 	if err == nil {
 		if _, err := os.Stat(savePath); os.IsNotExist(err) {
-			if err := os.MkdirAll(savePath, 0655); err != nil {
-				return err
+			if err := os.MkdirAll(savePath, 0755); err != nil {
+				return fmt.Errorf("mk dir err %s - %+w", savePath, err)
 			}
 		}
 		go func() {
 			if err := fink.Run(context2.Background(), imagePath); err != nil {
-				panic(err)
+				panic(fmt.Errorf("create image path err %s - %w", savePath, err))
 			}
 		}()
 	}

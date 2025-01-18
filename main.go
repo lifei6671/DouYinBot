@@ -2,14 +2,16 @@ package main
 
 import (
 	"flag"
-	"github.com/beego/beego/v2/core/logs"
 	"log"
 	"path/filepath"
 
+	"github.com/beego/beego/v2/core/logs"
+
 	"github.com/beego/beego/v2/server/web"
+	_ "go.uber.org/automaxprocs"
+
 	"github.com/lifei6671/douyinbot/admin"
 	"github.com/lifei6671/douyinbot/admin/models"
-	_ "go.uber.org/automaxprocs"
 )
 
 var (

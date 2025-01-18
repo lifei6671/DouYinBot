@@ -2,18 +2,22 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
+	"fmt"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/lifei6671/douyinbot/admin/models"
 	"github.com/lifei6671/douyinbot/douyin"
 	"github.com/lifei6671/douyinbot/internal/utils"
-	"github.com/lifei6671/douyinbot/qiniu"
-	"golang.org/x/crypto/bcrypt"
-	"net/url"
-	"os"
-	"strings"
+	"github.com/lifei6671/douyinbot/storage"
 )
 
 var (
@@ -25,6 +29,8 @@ var (
 	bucketName        = ""
 	domain            = ""
 	savepath          = ""
+
+	fileClient storage.Storage
 )
 
 type MediaContent struct {
@@ -43,7 +49,19 @@ func Run(ctx context.Context) (err error) {
 	if num, err := web.AppConfig.Int("workernumber"); err == nil && num > 0 {
 		workerNum = num
 	}
-	if web.AppConfig.DefaultBool("qiniuenable", false) {
+	if web.AppConfig.DefaultBool("s3_enable", false) {
+		fileClient, err = storage.Factory("cloudflare",
+			storage.WithBucketName(web.AppConfig.DefaultString("s3_bucket_name", "")),
+			storage.WithAccountID(web.AppConfig.DefaultString("s3_account_id", "")),
+			storage.WithAccessKeyID(web.AppConfig.DefaultString("s3_access_key_id", "")),
+			storage.WithAccessKeySecret(web.AppConfig.DefaultString("s3_access_key_secret", "")),
+			storage.WithEndpoint(web.AppConfig.DefaultString("s3_endpoint", "")),
+			storage.WithDomain(web.AppConfig.DefaultString("s3_domain", "")),
+		)
+		if err != nil {
+			return fmt.Errorf("init storage err: %w", err)
+		}
+	} else if web.AppConfig.DefaultBool("qiniuenable", false) {
 		accessKey, err = web.AppConfig.String("qiuniuaccesskey")
 		if err != nil {
 			logs.Error("获取七牛配置失败 -> [qiuniuaccesskey] - %+v", err)
@@ -62,7 +80,7 @@ func Run(ctx context.Context) (err error) {
 			return err
 		}
 	}
-	savepath, err = web.AppConfig.String("auto-save-path")
+	savepath, err = filepath.Abs(web.AppConfig.DefaultString("auto-save-path", "./"))
 	if err != nil {
 		logs.Error("获取本地储存目录失败 ->[auto-save-path] %+v", err)
 		return err
@@ -79,7 +97,6 @@ func execute(ctx context.Context) {
 		web.AppConfig.DefaultString("douyinproxyusername", ""),
 		web.AppConfig.DefaultString("douyinproxypassword", ""),
 	)
-	bucket := qiniu.NewBucket(accessKey, secretKey)
 
 	for {
 		select {
@@ -94,49 +111,41 @@ func execute(ctx context.Context) {
 				continue
 			}
 			logs.Info("开始下载抖音视频->%s", video)
-			p, err := video.Download(savepath)
+			videoPath, err := video.Download(savepath)
 			if err != nil {
 				logs.Error("下载抖音视频失败 -> 【%s】- %+v", content, err)
 				continue
 			}
-			coverPath := video.OriginCover
+			coverURL := video.OriginCover
 
-			if cover, err := video.DownloadCover(video.OriginCover, savepath); err == nil {
-				coverPath = strings.ReplaceAll("/"+strings.TrimPrefix(cover, savepath), "//", "/")
+			coverPath, err := video.DownloadCover(video.OriginCover, savepath)
+			if err == nil {
+				coverURL = strings.ReplaceAll("/"+strings.TrimPrefix(coverPath, savepath), "//", "/")
 			}
-			coverPath = "/cover" + coverPath
+			coverURL = "/cover" + coverURL
 
-			backdata := make(map[string]string)
+			name := strings.TrimPrefix(videoPath, savepath)
 
-			name := strings.TrimPrefix(p, savepath)
+			// 将视频上传到S3服务器
+			if urlStr, err := uploadFile(ctx, coverPath); err == nil {
+				coverURL = urlStr
+			}
 
-			if bucket != nil {
-				logs.Info("开始上传到七牛云储存 -> %s", bucketName)
-				err = bucket.UploadFile(bucketName, name, p)
-				if err != nil {
-					logs.Error("上传文件到七牛储存空间失败 -> 【%s】 - %+v", content, err)
-					_ = os.Remove(p)
-					continue
-				}
-				backdata["qiniu"] = domain + name
+			// 将封面上传到S3服务器
+			if urlStr, err := uploadFile(ctx, videoPath); err == nil {
+				video.PlayAddr = urlStr
 			}
 
 			user, err := models.NewUser().First(content.UserId)
 			if err != nil {
-				logs.Error("获取用户失败 -> %s - %+v", content, err)
-				continue
-			}
-			if user.BaiduId > 0 {
-				logs.Info("开始上传到百度网盘 ->%s", user)
-				createFile, err := uploadBaiduNetdisk(ctx, user.BaiduId, p, "/"+name)
-				if err == nil {
-					backdata["baidu"] = createFile.UploadFileInfo.String()
+				if errors.Is(err, orm.ErrNoRows) {
+					user = models.NewUser()
+					user.Id = 1
 				} else {
-					logs.Error("上传百度网盘失败 -> [%s] %s", name, err)
+					logs.Error("获取用户失败 -> %s - %+v", content, err)
+					continue
 				}
 			}
-
-			b, _ := json.Marshal(&backdata)
 
 			if baseDomain := web.AppConfig.DefaultString("douyin-base-url", ""); baseDomain != "" {
 				if uri, err := url.ParseRequestURI(video.OriginCover); err == nil {
@@ -159,9 +168,9 @@ func execute(ctx context.Context) {
 				VideoId:          video.PlayId,
 				AwemeId:          video.VideoId,
 				VideoCover:       video.OriginCover,
-				VideoLocalCover:  coverPath,
+				VideoLocalCover:  coverURL,
 				VideoLocalAddr:   "/" + name,
-				VideoBackAddr:    string(b),
+				VideoBackAddr:    string(""),
 				Desc:             video.Desc,
 				RawLink:          video.RawLink,
 			}
@@ -216,4 +225,26 @@ func Register(content, wechatId string) error {
 		return nil
 	}
 	return ErrNoUserRegister
+}
+
+// 上传文件到S3服务器
+func uploadFile(ctx context.Context, filename string) (string, error) {
+	if fileClient == nil {
+		return filename, nil
+	}
+	f, err := os.Open(filename)
+	if err != nil {
+		logs.Error("打开文件失败 -> %s - %+v", filename, err)
+		return filename, err
+	}
+	defer f.Close()
+
+	remoteFilename := strings.TrimPrefix(filename, savepath)
+
+	urlStr, err := fileClient.WriteFile(ctx, f, strings.TrimPrefix(remoteFilename, "/"))
+	if err != nil {
+		logs.Error("上传文件失败 -> %s - %+v", filename, err)
+		return "", err
+	}
+	return urlStr, nil
 }

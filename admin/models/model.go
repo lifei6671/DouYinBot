@@ -2,11 +2,12 @@ package models
 
 import (
 	"errors"
-	"github.com/beego/beego/v2/client/orm"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/beego/beego/v2/client/orm"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
@@ -22,7 +23,7 @@ func Init(dataSource string) error {
 	}
 	dir := filepath.Dir(filename)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dir, 0655); err != nil {
+		if err := os.MkdirAll(dir, 0755); err != nil {
 			return err
 		}
 	}

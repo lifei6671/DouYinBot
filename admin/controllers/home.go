@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/beego/beego/v2/server/web"
+
 	"github.com/lifei6671/douyinbot/admin/structs"
 	"github.com/lifei6671/douyinbot/douyin"
 )

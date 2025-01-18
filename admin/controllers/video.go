@@ -2,16 +2,18 @@ package controllers
 
 import (
 	"context"
-	"github.com/beego/beego/v2/client/cache"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
-	"github.com/lifei6671/douyinbot/admin/models"
-	"github.com/lifei6671/douyinbot/douyin"
-	"github.com/tidwall/gjson"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/beego/beego/v2/client/cache"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
+	"github.com/tidwall/gjson"
+
+	"github.com/lifei6671/douyinbot/admin/models"
+	"github.com/lifei6671/douyinbot/douyin"
 )
 
 var (

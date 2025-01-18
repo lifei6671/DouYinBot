@@ -3,14 +3,17 @@ package controllers
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
-	"github.com/lifei6671/douyinbot/admin/service"
-	"github.com/lifei6671/douyinbot/wechat"
-	"github.com/lifei6671/fink-download/fink"
 	"strings"
 	"time"
+
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
+	"github.com/lifei6671/fink-download/fink"
+
+	"github.com/lifei6671/douyinbot/admin/service"
+	"github.com/lifei6671/douyinbot/wechat"
 )
 
 var (
@@ -104,7 +107,7 @@ func (c *WeiXinController) Dispatch() {
 			}
 			return
 		}
-		if err := service.Register(c.body.Content, c.body.FromUserName); err != service.ErrNoUserRegister {
+		if err := service.Register(c.body.Content, c.body.FromUserName); !errors.Is(err, service.ErrNoUserRegister) {
 			if err != nil {
 				_ = c.response(err.Error())
 			} else {
@@ -112,7 +115,7 @@ func (c *WeiXinController) Dispatch() {
 			}
 			return
 		}
-		if i := strings.Index(c.body.Content,"www.finkapp.cn"); i >= 0 {
+		if i := strings.Index(c.body.Content, "www.finkapp.cn"); i >= 0 {
 			fink.Push(c.body.Content)
 		} else {
 			service.Push(context.Background(), service.MediaContent{

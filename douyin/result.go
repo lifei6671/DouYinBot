@@ -110,7 +110,6 @@ type DouYinResult struct {
 		Climax            struct {
 			StartPoint int `json:"start_point"`
 		} `json:"climax"`
-		CollectStat   int `json:"collect_stat"`
 		CoverColorHsv struct {
 			H int `json:"h"`
 			S int `json:"s"`

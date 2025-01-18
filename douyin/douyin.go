@@ -3,13 +3,15 @@ package douyin
 import (
 	"encoding/json"
 	"errors"
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/go-resty/resty/v2"
-	"github.com/lifei6671/douyinbot/internal/utils"
 	"log"
 	"math/rand"
 	"regexp"
 	"time"
+
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/go-resty/resty/v2"
+
+	"github.com/lifei6671/douyinbot/internal/utils"
 )
 
 var (
