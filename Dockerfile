@@ -6,10 +6,10 @@ RUN apk add  --update-cache  libc-dev git gcc musl-dev sqlite-dev
 
 WORKDIR /go/src/app
 
-ADD . .
+ADD . /go/src/app/DouYinBot/
 
 ENV GOPROXY=https://proxy.golang.org,direct
-RUN cd DouYinBot &&\
+RUN cd /go/src/app/DouYinBot/ &&\
     go mod download && \
     go build -ldflags="-s -w" -o douyinbot main.go
 
