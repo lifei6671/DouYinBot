@@ -63,10 +63,10 @@ jobs:
       - name: Push Docker Image
         run: |
           # 添加 latest 标签
-          docker tag docker.io/${{ secrets.DOCKER_USERNAME }}/douyinbot:${{ env.tag }} docker.io/${{ secrets.DOCKER_USERNAME }}/douyinbot:latest
+          docker tag docker.io/${{ secrets.DOCKERHUB_USERNAME }}/douyinbot:${{ env.tag }} docker.io/${{ secrets.DOCKERHUB_USERNAME }}/douyinbot:latest
 
           # 推送带版本号的标签
-          docker push docker.io/${{ secrets.DOCKER_USERNAME }}/douyinbot:${{ env.tag }}
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/douyinbot:${{ env.tag }}
 
           # 推送 latest 标签
-          docker push docker.io/${{ secrets.DOCKER_USERNAME }}/douyinbot:latest
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/douyinbot:latest
