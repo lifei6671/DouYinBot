@@ -129,6 +129,9 @@ func (d *DouYinTag) FormatTagHtml(text string) (string, error) {
 	for _, m := range matches {
 		tags = append(tags, strings.TrimSpace(strings.Trim(m, "#")))
 	}
+	if len(tags) == 0 {
+		return text, nil
+	}
 	var list []*DouYinTag
 	_, err := orm.NewOrm().QueryTable(d.TableName()).Filter("name__in", tags...).All(&list)
 	if err != nil {
