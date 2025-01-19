@@ -1,23 +1,23 @@
-FROM golang:1.23.5-alpine3.21  as build
+FROM golang:1.23.5-alpine3.21 as build
 
 LABEL maintainer="longfei6671@163.com"
 
-RUN apk add  --update-cache  libc-dev git gcc musl-dev sqlite-dev
+RUN apk add  --update-cache  libc-dev git gcc musl-dev sqlite-dev sqlite-static
 
-WORKDIR /go/src/app
+WORKDIR /go/src/app/
 
-ADD . /go/src/app/DouYinBot/
+COPY . .
 
-ENV GOPROXY=https://proxy.golang.org,direct
-RUN cd /go/src/app/DouYinBot/ &&\
-    go mod download && \
-    go build -ldflags="-s -w" -o douyinbot main.go
+ENV GOPROXY=https://goproxy.cn,direct
+
+RUN go mod download &&\
+    go build -ldflags='-s -w -extldflags "-static"' -tags "libsqlite3 linux" -o douyinbot main.go
 
 FROM alpine:3.21
 
 LABEL maintainer="longfei6671@163.com"
 
-COPY --from=build /go/src/app/DouYinBot/douyinbot /var/www/douyinbot/
+COPY --from=build /go/src/app/douyinbot /var/www/douyinbot/
 
 RUN apk add --no-cache sqlite-libs
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2

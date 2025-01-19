@@ -11,7 +11,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.8
 	github.com/go-resty/resty/v2 v2.16.3
 	github.com/lifei6671/fink-download v0.0.1
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/qiniu/go-sdk/v7 v7.9.5
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/tidwall/gjson v1.17.0
