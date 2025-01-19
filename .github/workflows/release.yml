@@ -30,20 +30,20 @@ jobs:
       - name: Build Binaries
         run: |
           mkdir -p dist
-          GOOS=linux GOARCH=amd64 go build -o dist/app-linux-amd64 main.go
-          GOOS=linux GOARCH=arm64 go build -o dist/app-linux-arm64 main.go
-          GOOS=windows GOARCH=amd64 go build -o dist/app-windows-amd64.exe main.go
-          GOOS=windows GOARCH=arm64 go build -o dist/app-windows-arm64.exe main.go
+          GOOS=linux GOARCH=amd64 go build -o dist/douyinbot-linux-amd64 main.go
+          GOOS=linux GOARCH=arm64 go build -o dist/douyinbot-linux-arm64 main.go
+          GOOS=windows GOARCH=amd64 go build -o dist/douyinbot-windows-amd64.exe main.go
+          GOOS=windows GOARCH=arm64 go build -o dist/douyinbot-windows-arm64.exe main.go
 
       # 创建 Release 并上传二进制文件
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/app-linux-amd64
-            dist/app-linux-arm64
-            dist/app-windows-amd64.exe
-            dist/app-windows-arm64.exe
+            dist/douyinbot-linux-amd64
+            dist/douyinbot-linux-arm64
+            dist/douyinbot-windows-amd64.exe
+            dist/douyinbot-windows-arm64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -57,9 +57,9 @@ jobs:
       # 构建 Docker 镜像
       - name: Build Docker Image
         run: |
-          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/app:${{ env.tag }} .
+          docker build -t docker.io/${{ secrets.DOCKERHUB_USERNAME }}/douyinbot:${{ env.tag }} .
 
       # 推送 Docker 镜像
       - name: Push Docker Image
         run: |
-          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/app:${{ env.tag }}
+          docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/douyinbot:${{ env.tag }}
