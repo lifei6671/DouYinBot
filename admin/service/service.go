@@ -178,6 +178,11 @@ func execute(ctx context.Context) {
 				logs.Error("保存视频到数据库失败 -> 【%s】 - %+v", content, err)
 				continue
 			}
+
+			if tagErr := models.NewDouYinTag().Create(video.Desc, m.VideoId); tagErr != nil {
+				logs.Error("初始视频标签出错 -> %+v", tagErr)
+			}
+
 			if len(video.OriginCoverList) > 0 {
 				expire, _ := utils.ParseExpireUnix(video.OriginCoverList[0])
 				cover := models.DouYinCover{

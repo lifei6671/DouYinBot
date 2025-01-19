@@ -11,7 +11,9 @@
                             {{else}}
                                 <a href="{{urlfor "IndexController.List" ":author_id" .AuthorId ":page" 1 }}">@{{.Nickname}}</a>
                             {{end}}
-                        {{.Desc}}.
+                        {{if .Desc}}
+                            {{str2html  .Desc}}.
+                        {{end}}
                     </p>
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="btn-group">

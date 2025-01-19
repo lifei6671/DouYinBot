@@ -1,11 +1,13 @@
 package controllers
 
 import (
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
-	"github.com/lifei6671/douyinbot/admin/models"
 	"math"
 	"strconv"
+
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
+
+	"github.com/lifei6671/douyinbot/admin/models"
 )
 
 type IndexController struct {
@@ -13,7 +15,6 @@ type IndexController struct {
 }
 
 func (c *IndexController) Index() {
-
 	page := c.Ctx.Input.Param(":page")
 	pageIndex := 1
 	if page != "" {
@@ -29,6 +30,14 @@ func (c *IndexController) Index() {
 	list, total, err := models.NewDouYinVideo().GetList(pageIndex, 0)
 	if err != nil {
 		logs.Error("获取数据列表失败 -> +%+v", err)
+	}
+	for i, video := range list {
+		if desc, err := models.NewDouYinTag().FormatTagHtml(video.Desc); err == nil {
+			video.Desc = desc
+			list[i] = video
+		} else {
+			logs.Error("渲染标签失败 ->%d - %+v", video.Id, err)
+		}
 	}
 	c.Data["List"] = list
 	totalPage := int(math.Ceil(float64(total) / float64(models.PageSize)))

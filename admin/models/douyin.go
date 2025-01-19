@@ -1,9 +1,11 @@
 package models
 
 import (
+	"errors"
+	"time"
+
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"time"
 )
 
 const PageSize = 18
@@ -58,7 +60,7 @@ func (d *DouYinVideo) Save() error {
 	var video DouYinVideo
 
 	err := o.QueryTable(d.TableName()).Filter("video_id", d.VideoId).One(&video)
-	if err == orm.ErrNoRows {
+	if errors.Is(err, orm.ErrNoRows) {
 		_, err = o.Insert(d)
 	} else if err == nil {
 		d.Id = video.Id
@@ -71,7 +73,7 @@ func (d *DouYinVideo) Save() error {
 func (d *DouYinVideo) FirstByVideoId(videoId string) (*DouYinVideo, error) {
 	o := orm.NewOrm()
 	err := o.QueryTable(d.TableName()).Filter("video_id", videoId).One(d)
-	if err != nil && err != orm.ErrNoRows {
+	if err != nil && !errors.Is(err, orm.ErrNoRows) {
 		logs.Error("查询视频失败 -> video_id=%s ; error=%+v", videoId, err)
 		return nil, err
 	}
