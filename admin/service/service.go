@@ -235,7 +235,7 @@ func Register(content, wechatId string) error {
 // 上传文件到S3服务器
 func uploadFile(ctx context.Context, filename string) (string, error) {
 	if fileClient == nil {
-		return filename, nil
+		return filename, errors.New("file client is nil")
 	}
 	f, err := os.Open(filename)
 	if err != nil {

@@ -38,6 +38,15 @@ func (c *TagController) Index() {
 
 	if len(list) > 0 {
 		c.Data["Nickname"] = tagName
+
+		for i, video := range list {
+			if desc, err := models.NewDouYinTag().FormatTagHtml(video.Desc); err == nil {
+				video.Desc = desc
+				list[i] = video
+			} else {
+				logs.Error("渲染标签失败 ->%d - %+v", video.Id, err)
+			}
+		}
 	}
 	c.Data["List"] = list
 	totalPage := int(math.Ceil(float64(total) / float64(models.PageSize)))
@@ -56,6 +65,8 @@ func (c *TagController) Index() {
 		c.Data["Next"] = c.URLFor("TagController.List", ":tag_id", tagID, ":page", pageIndex+1)
 		c.Data["Last"] = c.URLFor("TagController.List", ":tag_id", tagID, ":page", totalPage)
 	}
+	c.Ctx.Output.Header("Cache-Control", "max-age=1440, s-maxage=1440")
+	c.Ctx.Output.Header("Cloudflare-CDN-Cache-Control", "max-age=86400")
 
 	c.TplName = "index/list.gohtml"
 }

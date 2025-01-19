@@ -3,18 +3,19 @@ package models
 import (
 	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
+	"unicode/utf8"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
 )
 
 var incrID atomic.Int64
+var tagReg = regexp.MustCompile(`#([^#\s]+)`)
 
 type DouYinTag struct {
 	Id      int       `orm:"column(id);auto;pk"`
@@ -40,10 +41,8 @@ func NewDouYinTag() *DouYinTag {
 }
 
 func (d *DouYinTag) Create(text string, videoId string) error {
-	re := regexp.MustCompile(`#\S+`)
-
 	// 使用 FindAllString 提取所有匹配的内容
-	matches := re.FindAllString(text, -1)
+	matches := tagReg.FindAllString(text, -1)
 
 	if len(matches) == 0 {
 		return nil
@@ -52,6 +51,9 @@ func (d *DouYinTag) Create(text string, videoId string) error {
 
 	for _, m := range matches {
 		tagName := strings.TrimSpace(strings.Trim(m, "#"))
+		if strings.Contains(tagName, "#") || utf8.RuneCountInString(tagName) > 10 {
+			continue
+		}
 		var tag DouYinTag
 		err := o.QueryTable(d.TableName()).Filter("name", tagName).One(&tag)
 
@@ -63,12 +65,11 @@ func (d *DouYinTag) Create(text string, videoId string) error {
 		//如果没查到
 		if errors.Is(err, orm.ErrNoRows) {
 			newTag.TagID = strconv.FormatInt(incrID.Add(1), 10)
-			if _, err := o.Insert(newTag); err != nil {
-				return err
-			}
 		} else if err == nil {
 			newTag.TagID = tag.TagID
-			if _, err := o.Update(&newTag); err != nil {
+		}
+		if newTag.TagID != "" {
+			if _, err := o.Insert(&newTag); err != nil {
 				return err
 			}
 		}
@@ -121,11 +122,8 @@ func (d *DouYinTag) Insert() (int, error) {
 }
 
 func (d *DouYinTag) FormatTagHtml(text string) (string, error) {
-	// 定义正则表达式，匹配以#开头，后面接任意非空白字符，直到空格或句号结束
-	re := regexp.MustCompile(`#\S+`)
-
 	// 使用 FindAllString 提取所有匹配的内容
-	matches := re.FindAllString(text, -1)
+	matches := tagReg.FindAllString(text, -1)
 
 	var tags []any
 	for _, m := range matches {
@@ -139,7 +137,7 @@ func (d *DouYinTag) FormatTagHtml(text string) (string, error) {
 	for _, v := range list {
 		text = strings.ReplaceAll(text, "#"+v.Name+" ", fmt.Sprintf(`<a href="%s" title="%s">#%s</a> `, web.URLFor("TagController.Index", ":tag_id", v.TagID, ":page", 1), v.Name, v.Name))
 	}
-	log.Println(text)
+
 	return text, nil
 }
 
