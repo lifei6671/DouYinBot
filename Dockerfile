@@ -10,8 +10,11 @@ COPY . .
 
 ENV GOPROXY=https://goproxy.cn,direct
 ENV CGO_ENABLED=1
-ENV CC=musl-gcc
-CGO_LDFLAGS="-static"
+ENV CC="musl-gcc"
+ENV CGO_LDFLAGS="-static"
+ENV CGO_CFLAGS="-I/usr/include"
+ENV CGO_LDFLAGS="-L/usr/lib -lwebp -static"
+
 RUN go mod download &&\
     go build -ldflags='-s -w -extldflags "-static"' -tags "libsqlite3 linux" -o douyinbot main.go
 
