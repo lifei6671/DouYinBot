@@ -116,7 +116,7 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	}
 
 	video.PlayAddr = result.VideoData.NwmVideoUrl
-	if len(result.VideoData.NwmVideoUrlHQ) > 0 {
+	if result.VideoData.NwmVideoUrlHQ != "" {
 		video.PlayAddr = result.VideoData.NwmVideoUrlHQ
 	}
 
@@ -145,12 +145,21 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	}
 
 	//获取封面
-	video.Cover = utils.First(result.CoverData.Cover.UrlList)
+	video.Cover = utils.First(result.CoverData.DynamicCover.UrlList)
+
+	if video.Cover == "" {
+		video.Cover = utils.First(result.CoverData.Cover.UrlList)
+	}
 
 	//获取原始封面
-	video.OriginCover = utils.First(result.CoverData.Cover.UrlList)
+	video.OriginCover = utils.First(result.CoverData.DynamicCover.UrlList)
+
+	if video.OriginCover == "" {
+		video.OriginCover = utils.First(result.CoverData.OriginCover.UrlList)
+	}
 
 	video.OriginCoverList = result.CoverData.Cover.UrlList
+
 	logs.Info("所有原始封面： %+v", video.OriginCoverList)
 
 	//获取音乐地址

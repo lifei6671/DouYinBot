@@ -40,6 +40,11 @@ func (c *HomeController) Index() {
 				Message: "解析内容失败",
 			}
 		} else {
+			//service.Push(context.TODO(), service.MediaContent{
+			//	Content: douYinContent,
+			//	UserId:  "lifei6671",
+			//})
+			//return
 			video, err := douYin.Get(douYinContent)
 			if err != nil {
 				c.Data["json"] = &structs.JsonResult[string]{

@@ -2,12 +2,16 @@ package service
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -156,6 +160,11 @@ func execute(ctx context.Context) {
 					video.OriginCover = baseDomain + strings.ReplaceAll(originCover, "//", "/")
 				}
 			}
+			if m, err := web.AppConfig.GetSection("nickname"); err == nil {
+				if nickname, ok := m[video.Author.Id]; ok {
+					video.Desc = "#" + nickname + " " + strings.TrimRight(video.Desc, ".") + " ."
+				}
+			}
 			m := models.DouYinVideo{
 				UserId:           user.Id,
 				Nickname:         video.Author.Nickname,
@@ -195,6 +204,9 @@ func execute(ctx context.Context) {
 					logs.Error("保存封面失败:【%s】 - %+v", content, err)
 				}
 			}
+
+			_, _ = downloadAvatar(ctx, &video)
+
 			logs.Info("解析抖音视频成功 -> 【%s】- %s", content, m.VideoBackAddr)
 
 		case <-ctx.Done():
@@ -252,4 +264,70 @@ func uploadFile(ctx context.Context, filename string) (string, error) {
 		return "", err
 	}
 	return urlStr, nil
+}
+
+func downloadAvatar(ctx context.Context, video *douyin.Video) (string, error) {
+	avatarURL := video.Author.AvatarLarger
+	avatarPath, err := video.DownloadCover(video.Author.AvatarLarger, savepath)
+	if err == nil {
+		avatarURL = strings.ReplaceAll("/"+strings.TrimPrefix(avatarPath, savepath), "//", "/")
+	}
+	avatarURL = "/cover" + avatarURL
+
+	var user *models.DouYinUser
+	var hashValue string
+	if hashValue, err = calculateFileMD5(avatarPath); err == nil {
+		user, err = models.NewDouYinUser().GetById(video.Author.Id)
+		if err != nil && !errors.Is(err, orm.ErrNoRows) {
+			logs.Error("查询用户信息失败 -> %+v", err)
+			return avatarURL, err
+		}
+		if user != nil && user.HashValue == hashValue {
+			return user.AvatarLarger, nil
+		}
+	}
+	if user == nil {
+		user = models.NewDouYinUser()
+		user.Signature = video.Author.Signature
+		user.AvatarLarger = avatarURL
+		user.Created = time.Now()
+	}
+	user.AvatarLarger = avatarURL
+	user.HashValue = hashValue
+	user.Nickname = video.Author.Nickname
+	user.AuthorId = video.Author.Id
+
+	// 将封面上传到S3服务器
+	if urlStr, err := uploadFile(ctx, avatarPath); err == nil {
+		user.AvatarCDNURL = urlStr
+	}
+	if user.Id > 0 {
+		err := user.Update()
+		if err != nil {
+			return "", err
+		}
+	} else if _, err = user.Create(); err != nil {
+		return "", err
+	}
+	return user.AvatarLarger, nil
+}
+
+func calculateFileMD5(filePath string) (string, error) {
+	// 打开文件
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// 创建 MD5 哈希对象
+	hash := md5.New()
+
+	// 将文件内容写入哈希对象
+	if _, err := io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	// 计算哈希值并返回十六进制表示
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }

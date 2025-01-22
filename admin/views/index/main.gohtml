@@ -9,7 +9,8 @@
                     <p class="card-text">
                         {{if $.Nickname}}
                             {{else}}
-                                <a href="{{urlfor "IndexController.List" ":author_id" .AuthorId ":page" 1 }}">@{{.Nickname}}</a>
+                                <a href="{{urlfor "IndexController.List" ":author_id" .AuthorId ":page" 1 }}"
+                                   title="{{.Nickname}}">@{{.Nickname}}</a>
                             {{end}}
                         {{if .Desc}}
                             {{str2html  .Desc}}.

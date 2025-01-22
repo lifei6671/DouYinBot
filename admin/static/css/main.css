@@ -1,0 +1,103 @@
+body {
+    position: relative;
+    font-family: Helvetica, -apple-system, "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft Yahei", "Helvetica Neue", Helvetica;
+}
+
+.bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+@media (min-width: 768px) {
+    .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+    }
+}
+
+.image-content {
+    height: 425px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden
+}
+
+.image-content > img {
+    width: 100%;
+    vertical-align: middle;
+}
+
+main .card {
+    height: 570px
+}
+
+main .card .card-body > .card-text {
+    height: 70px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-head {
+    margin: 10px auto;
+    padding-bottom: 15px;
+    line-height: 1.5em;
+    border-bottom: 3px solid #EEEEEE;
+}
+
+.search-head .search-title {
+    font-size: 22px;
+    font-weight: 300;
+}
+
+.image-content {
+    height: 425px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden
+}
+
+.image-content > img {
+    width: 100%;
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+
+main .card-body .author > a {
+    color: #0886E9;
+}
+
+main .card-body .author > a:hover {
+    text-decoration: none;
+}
+
+.author-desc {
+    margin: 15px auto;
+    background-color: white;
+    /*display: -webkit-box;*/
+    /*-webkit-line-clamp: 3;*/
+    /*-webkit-box-orient: vertical;*/
+    /*overflow: hidden;*/
+    /*text-overflow: ellipsis;*/
+    /*!*border: 1px solid rgba(0,0,0,.125);*!*/
+    /*border: solid #f8f9fa;*/
+    /*border-radius:.25rem;*/
+    /*padding: 15px 10px;*/
+    /*margin-bottom: 10px;*/
+
+}
+
+.author-desc > img {
+    width: 100px;
+    height: 100px;
+}

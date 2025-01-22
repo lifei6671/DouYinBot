@@ -4,62 +4,14 @@
     <meta name="referrer" content="never">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="抖音无水印工具_最新抖音在线无水印解析">
+    <meta name="description" content="{{.Nickname}}_抖音无水印工具_最新抖音在线无水印解析">
     <title>{{.Nickname}}_抖音无水印工具_最新抖音在线无水印解析</title>
     <link href="/static/bootstrap/v4.6.0/css/bootstrap.min.css" rel="stylesheet">
     <!-- Favicons -->
     <link rel="icon" href="/static/favicons/favicon.ico">
-
-    <style>
-        body {
-            position: relative;
-            font-family: Helvetica, -apple-system, "Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Microsoft Yahei","Helvetica Neue",Helvetica;
-        }
-
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
-        @media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
-            }
-        }
-        .image-content{
-            height: 425px;
-            width: 100%;display:flex;
-            justify-content:center;
-            align-items:center;
-            overflow: hidden
-        }
-        .image-content>img{
-            width:100%;
-            vertical-align: middle;
-        }
-        main .card{
-            height: 570px
-        }
-        main .card .card-body>.card-text{
-            height:60px;
-        }
-        .search-head{
-            margin: 10px auto;
-            padding-bottom: 15px;
-            line-height: 1.5em;
-            border-bottom: 3px solid #EEEEEE;
-        }
-        .search-head .search-title{
-            font-size: 22px;
-            font-weight: 300;
-        }
-    </style>
     <!-- Custom styles for this template -->
     <link href="/static/css/navbar.css" rel="stylesheet">
+    <link href="/static/css/main.css" rel="stylesheet">
 </head>
 <body class="d-flex flex-column h-100">
 
@@ -87,6 +39,15 @@
             <div class="search-head">
                 <strong class="search-title">显示"{{.Nickname}}"的视频列表</strong>
             </div>
+            {{if .Desc}}
+                <div class="media author-desc">
+                    <img src="{{.AvatarURL}}" class="mr-3" alt="{{.Nickname}}">
+                    <div class="media-body">
+                        <h5 class="mt-0">{{.Nickname}}</h5>
+                        <p>{{.Desc}}</p>
+                    </div>
+                </div>
+            {{end}}
             {{template "index/main.gohtml" .}}
         </div>
     </div>

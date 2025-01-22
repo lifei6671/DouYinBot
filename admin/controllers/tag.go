@@ -55,15 +55,15 @@ func (c *TagController) Index() {
 		c.Data["Previous"] = "#"
 		c.Data["First"] = "#"
 	} else {
-		c.Data["Previous"] = c.URLFor("TagController.List", ":tag_id", tagID, ":page", pageIndex-1)
-		c.Data["First"] = c.URLFor("TagController.List", ":tag_id", tagID, ":page", 1)
+		c.Data["Previous"] = c.URLFor("TagController.Index", ":tag_id", tagID, ":page", pageIndex-1)
+		c.Data["First"] = c.URLFor("TagController.Index", ":tag_id", tagID, ":page", 1)
 	}
 	if pageIndex >= totalPage {
 		c.Data["Next"] = "#"
 		c.Data["Last"] = "#"
 	} else {
-		c.Data["Next"] = c.URLFor("TagController.List", ":tag_id", tagID, ":page", pageIndex+1)
-		c.Data["Last"] = c.URLFor("TagController.List", ":tag_id", tagID, ":page", totalPage)
+		c.Data["Next"] = c.URLFor("TagController.Index", ":tag_id", tagID, ":page", pageIndex+1)
+		c.Data["Last"] = c.URLFor("TagController.Index", ":tag_id", tagID, ":page", totalPage)
 	}
 	c.Ctx.Output.Header("Cache-Control", "max-age=1440, s-maxage=1440")
 	c.Ctx.Output.Header("Cloudflare-CDN-Cache-Control", "max-age=86400")

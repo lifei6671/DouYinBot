@@ -90,8 +90,21 @@ func (c *IndexController) List() {
 	if err != nil {
 		logs.Error("获取数据列表失败 -> +%+v", err)
 	}
+
+	if user, err := models.NewDouYinUser().GetById(authorIdStr); err == nil {
+		c.Data["Desc"] = user.Signature
+		if user.AvatarCDNURL != "" {
+			c.Data["AvatarURL"] = user.AvatarCDNURL
+		} else {
+			c.Data["AvatarURL"] = user.AvatarLarger
+		}
+
+	}
+
 	if len(list) > 0 {
-		c.Data["Nickname"] = list[0].Nickname
+		if _, ok := c.Data["NickName"]; !ok {
+			c.Data["Nickname"] = list[0].Nickname
+		}
 
 		for i, video := range list {
 			if desc, err := models.NewDouYinTag().FormatTagHtml(video.Desc); err == nil {
