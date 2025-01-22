@@ -32,32 +32,6 @@ jobs:
         id: vars
         run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      # 构建 Go 二进制文件
-      - name: Build Binaries
-        run: |
-          mkdir -p dist
-          # 静态链接 Linux amd64
-          CGO_ENABLED=1 CC=musl-gcc \
-          CGO_CFLAGS="-I/usr/include" \
-          CGO_LDFLAGS="-L/usr/lib -lwebp -static" \
-          GOOS=linux GOARCH=amd64 go build -o dist/douyinbot-linux-amd64 main.go
-
-          # 静态链接 Linux arm64
-          CGO_ENABLED=1 CC=musl-gcc \
-          CGO_CFLAGS="-I/usr/include" \
-          CGO_LDFLAGS="-L/usr/lib -lwebp -static" \
-          GOOS=linux GOARCH=arm64 go build -o dist/douyinbot-linux-arm64 main.go
-
-      # 创建 Release 并上传二进制文件
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            dist/douyinbot-linux-amd64
-            dist/douyinbot-linux-arm64
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # 登录 Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
