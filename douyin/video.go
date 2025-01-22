@@ -242,9 +242,20 @@ func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
 		}
 
 		if err := os.Rename(filename, newPath); err == nil {
+
 			filename = newPath
 		}
 
+	}
+
+	if ext != ".webp" {
+		newPath := strings.TrimSuffix(filename, ext) + ".webp"
+		if oErr := utils.Image2Webp(filename, newPath); oErr == nil {
+			_ = os.Remove(filename)
+			return newPath, nil
+		} else {
+			logs.Error("转换 WebP 格式出错： %+v", oErr)
+		}
 	}
 
 	logs.Info("保存封面成功: %s  %s", urlStr, filename)

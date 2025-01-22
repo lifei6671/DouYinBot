@@ -4,13 +4,50 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"image"
 	"image/jpeg"
 	"io"
+	"log"
 	"os"
 	"strings"
 
 	"golang.org/x/image/webp"
+
+	webpp "github.com/chai2010/webp"
 )
+
+// Image2Webp 将图片转为webp
+// inputFile 图片字节切片（仅限gif,jpeg,png格式）
+// outputFile webp图片字节切片
+// 图片质量
+func Image2Webp(inputPath, outputPath string) error {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return fmt.Errorf("failed to open input file: %w", err)
+	}
+	defer file.Close()
+	oFile, err := os.Create(outputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create output file: %w", err)
+	}
+	defer oFile.Close()
+	//解析图片
+	img, _, err := image.Decode(file)
+	if err != nil {
+		log.Printf("decode image err:%s", err)
+		return err
+	}
+	//转为webp
+	webpBytes, err := webpp.EncodeRGBA(img, 100)
+
+	if err != nil {
+		log.Printf("encode image err:%s", err)
+		return err
+	}
+	_, oErr := oFile.Write(webpBytes)
+
+	return oErr
+}
 
 // IsAnimatedWebP 判断一个 WebP 是否是一个动画文件
 func IsAnimatedWebP(filepath string) (bool, error) {
