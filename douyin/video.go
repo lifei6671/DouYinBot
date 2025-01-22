@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -18,6 +19,8 @@ import (
 
 	"github.com/lifei6671/douyinbot/internal/utils"
 )
+
+var ErrAnimatedWebP = errors.New("animated webp")
 
 type VideoType int
 
@@ -231,9 +234,17 @@ func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
 			ext = ".jpg"
 		}
 		newPath := filename + ext
+		if ext == ".webp" {
+			if ok, err := utils.IsAnimatedWebP(filename); ok && err == nil {
+				_ = os.Remove(filename)
+				return "", ErrAnimatedWebP
+			}
+		}
+
 		if err := os.Rename(filename, newPath); err == nil {
 			filename = newPath
 		}
+
 	}
 
 	logs.Info("保存封面成功: %s  %s", urlStr, filename)

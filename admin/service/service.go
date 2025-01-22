@@ -123,6 +123,13 @@ func execute(ctx context.Context) {
 			coverURL := video.OriginCover
 
 			coverPath, err := video.DownloadCover(video.OriginCover, savepath)
+			if err != nil && errors.Is(err, douyin.ErrAnimatedWebP) {
+				coverPath, err = video.DownloadCover(video.Cover, savepath)
+			}
+			if err != nil {
+				logs.Error("下载封面失败 -> [cover=%s] [errmsg=%+v]", video.Cover, err)
+				break
+			}
 			if err == nil {
 				coverURL = strings.ReplaceAll("/"+strings.TrimPrefix(coverPath, savepath), "//", "/")
 			}

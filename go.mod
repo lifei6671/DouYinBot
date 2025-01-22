@@ -18,11 +18,12 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	golang.org/x/crypto v0.31.0
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
+	golang.org/x/image v0.23.0
 )
 
 require (
-	github.com/PuerkitoBio/goquery v1.8.0 // indirect
-	github.com/andybalholm/cascadia v1.3.1 // indirect
+	github.com/PuerkitoBio/goquery v1.10.1 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.7 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.24 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.28 // indirect

@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/beego/beego/v2/server/web"
 
+	"github.com/lifei6671/douyinbot/admin/service"
 	"github.com/lifei6671/douyinbot/admin/structs"
 	"github.com/lifei6671/douyinbot/douyin"
 )
@@ -40,11 +42,11 @@ func (c *HomeController) Index() {
 				Message: "解析内容失败",
 			}
 		} else {
-			//service.Push(context.TODO(), service.MediaContent{
-			//	Content: douYinContent,
-			//	UserId:  "lifei6671",
-			//})
-			//return
+			service.Push(context.Background(), service.MediaContent{
+				Content: douYinContent,
+				UserId:  "lifei6671",
+			})
+			return
 			video, err := douYin.Get(douYinContent)
 			if err != nil {
 				c.Data["json"] = &structs.JsonResult[string]{
