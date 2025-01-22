@@ -2,7 +2,7 @@ FROM golang:1.23.5-alpine3.21 as build
 
 LABEL maintainer="longfei6671@163.com"
 
-RUN apk add  --update-cache  libc-dev git gcc musl-gcc musl-dev sqlite-dev sqlite-static libwebp libwebp-dev libwebp-static
+RUN apk add  --update-cache  libc-dev git gcc  musl-dev sqlite-dev sqlite-static libwebp libwebp-dev libwebp-static
 
 WORKDIR /go/src/app/
 
@@ -10,7 +10,7 @@ COPY . .
 
 ENV GOPROXY=https://goproxy.cn,direct
 ENV CGO_ENABLED=1
-ENV CC="musl-gcc"
+ENV CC="gcc"
 ENV CGO_LDFLAGS="-static"
 ENV CGO_CFLAGS="-I/usr/include"
 ENV CGO_LDFLAGS="-L/usr/lib -lwebp -static"
