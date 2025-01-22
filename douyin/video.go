@@ -172,7 +172,9 @@ func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
 	hash := md5.Sum([]byte(uri.Path))
 	hashStr := hex.EncodeToString(hash[:])
 
-	filename = filepath.Join(filename, v.Author.Id, "cover", hashStr+filepath.Ext(uri.Path))
+	ext := filepath.Ext(uri.Path)
+
+	filename = filepath.Join(filename, v.Author.Id, "cover", hashStr+ext)
 
 	dir := filepath.Dir(filename)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -215,6 +217,25 @@ func (v *Video) DownloadCover(urlStr string, filename string) (string, error) {
 		logs.Error("保存图片失败: %s  %+v", urlStr, err)
 		return "", err
 	}
+	if ext == "" {
+		switch resp.Header.Get("Content-Type") {
+		case "image/jpeg":
+			ext = ".jpeg"
+		case "image/png":
+			ext = ".png"
+		case "image/gif":
+			ext = ".gif"
+		case "image/webp":
+			ext = ".webp"
+		default:
+			ext = ".jpg"
+		}
+		newPath := filename + ext
+		if err := os.Rename(filename, newPath); err == nil {
+			filename = newPath
+		}
+	}
+
 	logs.Info("保存封面成功: %s  %s", urlStr, filename)
 	return filename, nil
 }
