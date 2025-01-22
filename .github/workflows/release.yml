@@ -19,7 +19,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebp-dev musl-tools
+          sudo apt-get install -y libwebp-dev musl-tools musl-dev
 
       # 设置 Go 环境
       - name: Set up Go
