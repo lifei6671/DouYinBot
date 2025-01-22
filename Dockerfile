@@ -2,14 +2,16 @@ FROM golang:1.23.5-alpine3.21 as build
 
 LABEL maintainer="longfei6671@163.com"
 
-RUN apk add  --update-cache  libc-dev git gcc musl-dev sqlite-dev sqlite-static
+RUN apk add  --update-cache  libc-dev git gcc musl-gcc musl-dev sqlite-dev sqlite-static libwebp libwebp-dev libwebp-static
 
 WORKDIR /go/src/app/
 
 COPY . .
 
 ENV GOPROXY=https://goproxy.cn,direct
-
+ENV CGO_ENABLED=1
+ENV CC=musl-gcc
+CGO_LDFLAGS="-static"
 RUN go mod download &&\
     go build -ldflags='-s -w -extldflags "-static"' -tags "libsqlite3 linux" -o douyinbot main.go
 
