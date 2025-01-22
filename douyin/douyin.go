@@ -145,18 +145,10 @@ func (d *DouYin) Get(shardContent string) (Video, error) {
 	}
 
 	//获取封面
-	video.Cover = utils.First(result.CoverData.DynamicCover.UrlList)
-
-	if video.Cover == "" {
-		video.Cover = utils.First(result.CoverData.Cover.UrlList)
-	}
+	video.Cover = utils.First(result.CoverData.OriginCover.UrlList)
 
 	//获取原始封面
-	video.OriginCover = utils.First(result.CoverData.DynamicCover.UrlList)
-
-	if video.OriginCover == "" {
-		video.OriginCover = utils.First(result.CoverData.OriginCover.UrlList)
-	}
+	video.OriginCover = utils.First(result.CoverData.OriginCover.UrlList)
 
 	video.OriginCoverList = result.CoverData.Cover.UrlList
 
