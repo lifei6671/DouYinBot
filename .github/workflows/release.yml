@@ -15,6 +15,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # 安装依赖
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebp-dev musl-tools
+
       # 设置 Go 环境
       - name: Set up Go
         uses: actions/setup-go@v4
@@ -30,10 +36,17 @@ jobs:
       - name: Build Binaries
         run: |
           mkdir -p dist
+          # 静态链接 Linux amd64
+          CGO_ENABLED=1 CC=musl-gcc \
+          CGO_CFLAGS="-I/usr/include" \
+          CGO_LDFLAGS="-L/usr/lib -lwebp -static" \
           GOOS=linux GOARCH=amd64 go build -o dist/douyinbot-linux-amd64 main.go
+
+          # 静态链接 Linux arm64
+          CGO_ENABLED=1 CC=musl-gcc \
+          CGO_CFLAGS="-I/usr/include" \
+          CGO_LDFLAGS="-L/usr/lib -lwebp -static" \
           GOOS=linux GOARCH=arm64 go build -o dist/douyinbot-linux-arm64 main.go
-          GOOS=windows GOARCH=amd64 go build -o dist/douyinbot-windows-amd64.exe main.go
-          GOOS=windows GOARCH=arm64 go build -o dist/douyinbot-windows-arm64.exe main.go
 
       # 创建 Release 并上传二进制文件
       - name: Create GitHub Release
@@ -42,8 +55,6 @@ jobs:
           files: |
             dist/douyinbot-linux-amd64
             dist/douyinbot-linux-arm64
-            dist/douyinbot-windows-amd64.exe
-            dist/douyinbot-windows-arm64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
