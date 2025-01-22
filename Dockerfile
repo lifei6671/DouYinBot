@@ -19,7 +19,7 @@ LABEL maintainer="longfei6671@163.com"
 
 COPY --from=build /go/src/app/douyinbot /var/www/douyinbot/
 
-RUN apk add --no-cache sqlite-libs
+RUN apk add --no-cache sqlite-libs gcc
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 RUN chmod +x /var/www/douyinbot/douyinbot
 
