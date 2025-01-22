@@ -98,7 +98,7 @@ func (d *DouYinTag) GetList(pageIndex int, tagID string) (list []*DouYinVideo, t
 		tagName = v.Name
 	}
 
-	_, err = o.QueryTable(NewDouYinVideo().TableName()).Filter("video_id__in", videoIDs...).All(&list)
+	_, err = o.QueryTable(NewDouYinVideo().TableName()).Filter("video_id__in", videoIDs...).OrderBy("-id").All(&list)
 	if err != nil {
 		return nil, "", 0, err
 	}
