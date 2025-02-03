@@ -79,6 +79,51 @@ func (d *DouYinVideo) FirstByVideoId(videoId string) (*DouYinVideo, error) {
 	}
 	return d, nil
 }
+
+// Next 查询指定视频的下一条视频
+func (d *DouYinVideo) Next(videoId string) (*DouYinVideo, error) {
+	o := orm.NewOrm()
+
+	var current DouYinVideo
+	err := o.QueryTable(d.TableName()).Filter("video_id", videoId).One(&current)
+	if err != nil {
+		return nil, err
+	}
+	// 查询下一条
+	var nextVideo DouYinVideo
+	errNext := o.QueryTable(d.TableName()).
+		Filter("id__gt", current.Id).
+		OrderBy("id").
+		Limit(1).
+		One(&nextVideo)
+	if errNext != nil {
+		return nil, errNext
+	}
+	return &nextVideo, nil
+}
+
+// Prev 查询指定视频的上一条视频
+func (d *DouYinVideo) Prev(videoId string) (*DouYinVideo, error) {
+	o := orm.NewOrm()
+
+	var current DouYinVideo
+	err := o.QueryTable(d.TableName()).Filter("video_id", videoId).One(&current)
+	if err != nil {
+		return nil, err
+	}
+	// 查询下一条
+	var prevVideo DouYinVideo
+	errPrev := o.QueryTable(d.TableName()).
+		Filter("id__lt", current.Id).
+		OrderBy("-id"). // 降序排列后取第一条
+		Limit(1).
+		One(&prevVideo)
+	if errPrev != nil {
+		return nil, errPrev
+	}
+	return &prevVideo, nil
+}
+
 func init() {
 	// 需要在init中注册定义的model
 	orm.RegisterModel(new(DouYinVideo))

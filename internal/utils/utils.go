@@ -36,3 +36,11 @@ func First[T any](v []T) T {
 	}
 	return zero
 }
+
+// Ternary 泛型三元表达式
+func Ternary[T any](condition bool, trueVal, falseVal T) T {
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}

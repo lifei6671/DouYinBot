@@ -27,7 +27,7 @@ body {
     overflow: hidden
 }
 
-.image-content > img {
+.image-content img {
     width: 100%;
     vertical-align: middle;
 }

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{{.video.Nickname}} - {{.desc}}">
+    <meta name="google-site-verification" content="J_E-OodpvF9EtDOOrZXUxIt61CpaU89xz8CpN359ILE"/>
+    <title>{{.video.Nickname}}_抖音无水印工具_最新抖音在线无水印解析</title>
+    <link href="/static/bootstrap/v4.6.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/video.css" rel="stylesheet">
+</head>
+<body class="d-flex flex-column h-100">
+<header>
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-dark bg-dark shadow-sm">
+        <div class="container d-flex justify-content-between">
+            <a href="/" class="navbar-brand d-flex align-items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+                     stroke-linecap="round" stroke-linejoin="round" stroke-width="2" aria-hidden="true" class="mr-2"
+                     viewBox="0 0 24 24" focusable="false">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                    <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+                <strong>白茶清欢短视频</strong>
+            </a>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{urlfor "HomeController.Index"}}">抖音无水印下载工具 <span
+                                class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+<!-- Begin page content -->
+<main role="main" class="flex-shrink-0">
+    <div class="album py-3 bg-light">
+        <div class="container">
+            <div id="pages">
+                <div class="page">
+                    <video class="video-bg" poster="{{.video.VideoLocalCover}}" autoplay muted loop playsinline
+                           controls>
+                        <source src="{{.video.VideoPlayAddr}}" type="video/mp4">
+                        <source src="{{urlfor "VideoController.Index" "video_id" .video.VideoId }}" type="video/mp4">
+                    </video>
+                    <div class="content">
+                        <div class="author">
+                            <a href="{{urlfor "IndexController.List" ":author_id" .video.AuthorId ":page" 1 }}"
+                               title="{{.video.Nickname}}">@{{.video.Nickname}}</a>
+                        </div>
+                        <div class="quote"> {{str2html  .video.Desc}}.</div>
+                    </div>
+                </div>
+            </div>
+            {{/*            <div id="issue-info">当前问题：加载中...</div>*/}}
+        </div>
+    </div>
+</main>
+<script src="/static/jquery/jquery-3.6.0.min.js"></script>
+<script src="/static/bootstrap/v4.6.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        let currentPage = 0;
+        let isAnimating = false;
+        let startY = 0;
+        let videoID = "{{.video.VideoId}}";
+
+        // PC滚轮事件
+        $(window).on('wheel', function (e) {
+            if (isAnimating) return;
+            if (e.originalEvent.deltaY > 0) {
+                nextPage();
+            } else {
+                prevPage();
+            }
+        });
+
+        // 移动端触摸事件
+        $(document).on('touchstart', function (e) {
+            startY = e.touches[0].clientY;
+        });
+
+        $(document).on('touchend', function (e) {
+            if (isAnimating) return;
+            const endY = e.changedTouches[0].clientY;
+            const deltaY = startY - endY;
+
+            if (deltaY > 50) {
+                nextPage();
+            } else if (deltaY < -50) {
+                prevPage();
+            }
+        });
+
+        async function loadPages(action) {
+            try {
+                isAnimating = true;
+                const params = new URLSearchParams({
+                    video_id: videoID,
+                    action: action
+                });
+                let response = await fetch(`{{urlfor "ContentController.Next"}}?${params.toString()}`);
+                if (!response.ok) throw new Error("请求失败");
+
+                let data = await response.json();
+                if (data.errcode === 404) {
+                    throw new Error(data.message);
+                }
+                animatePages();
+                const pageElement = createPageElement(data.data);
+                $('#pages').html(pageElement);
+
+            } catch (error) {
+                console.error('加载失败:', error);
+                isAnimating = false;
+            }
+        }
+
+
+        function createPageElement(data) {
+            videoID = data.video_id;
+            return $(`
+                    <div class="page">
+                        <video class="video-bg" poster="${data.cover}" autoplay muted loop playsinline controls>
+                            <source src="${data.play_addr}" type="video/mp4">
+                            <source src="${data.local_play_addr}" type="video/mp4">
+                        </video>
+                        <div class="content">
+                            <div class="author">
+                                <a href="${data.author_url}" title="${data.nickname}">@${data.nickname}</a>
+                            </div>
+                            <div class="quote">"${data.desc}"</div>
+                        </div>
+                    </div>
+                `);
+        }
+
+        async function nextPage() {
+            await loadPages("next");
+        }
+
+        async function prevPage() {
+            await loadPages("prev");
+        }
+
+        function animatePages() {
+            $('#pages').css('transform', `translateY(-${currentPage * 90}vh)`);
+            setTimeout(() => {
+                isAnimating = false;
+            }, 1500);
+        }
+    });
+</script>
+</body>
+</html>

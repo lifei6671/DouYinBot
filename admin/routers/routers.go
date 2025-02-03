@@ -14,6 +14,9 @@ func init() {
 	web.Router("/douyin/download", &controllers.HomeController{}, "get:Download")
 	web.Router("/tag/:tag_id:int_:page:int.html", &controllers.TagController{}, "get:Index")
 
+	web.Router("/content_:video_id:string.html", &controllers.ContentController{}, "get:Index")
+	web.Router("/content/next", &controllers.ContentController{}, "get:Next")
+
 	web.Router("/wechat", &controllers.WeiXinController{}, "get:Index")
 	web.Router("/wechat", &controllers.WeiXinController{}, "post:Dispatch")
 
