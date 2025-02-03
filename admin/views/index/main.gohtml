@@ -3,9 +3,9 @@
         <div class="col-lg-4 col-md-6 col-sm-12">
             <div class="card mb-4 shadow-sm">
                 <div class="image-content">
-                    <a href="{{urlfor "ContentController.Index" ":video_id" .VideoId}}"><img src="{{.VideoLocalCover}}"
-                                                                                             alt="{{.Nickname}}"
-                                                                                             loading="lazy"></a>
+                    <a href="{{urlfor "ContentController.Index" ":video_id" .VideoId}}">
+                        <img src="{{.VideoLocalCover}}" alt="{{.Nickname}}" loading="lazy">
+                    </a>
                 </div>
                 <div class="card-body">
                     <p class="card-text">
