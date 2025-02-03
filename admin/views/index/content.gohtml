@@ -38,7 +38,8 @@
         <div class="container">
             <div id="pages">
                 <div class="page">
-                    <video class="video-bg" poster="{{.video.VideoLocalCover}}" autoplay loop playsinline controls>
+                    <video class="video-bg" id="video-play" poster="{{.video.VideoLocalCover}}" autoplay loop
+                           playsinline controls volume="0.1">
                         <source src="{{.video.VideoPlayAddr}}" type="video/mp4">
                         <source src="{{urlfor "VideoController.Index" "video_id" .video.VideoId }}" type="video/mp4">
                     </video>
@@ -59,6 +60,16 @@
 <script src="/static/bootstrap/v4.6.0/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function () {
+        // 全局监听body下的play事件
+        document.body.addEventListener('play', (e) => {
+            const video = e.target;
+            if (video.tagName === 'VIDEO') {
+                video.volume = 0.1; // 播放时设置音量
+                // 避免重复设置（可选）
+                video.removeEventListener('play', arguments.callee);
+            }
+        }, true); // 使用捕获阶段确保事件触发
+
         let currentPage = 0;
         let isAnimating = false;
         let startY = 0;
@@ -120,7 +131,7 @@
             videoID = data.video_id;
             return $(`
                     <div class="page">
-                        <video class="video-bg" poster="${data.cover}" autoplay muted loop playsinline controls>
+                        <video class="video-bg" poster="${data.cover}" autoplay loop playsinline controls>
                             <source src="${data.play_addr}" type="video/mp4">
                             <source src="${data.local_play_addr}" type="video/mp4">
                         </video>
