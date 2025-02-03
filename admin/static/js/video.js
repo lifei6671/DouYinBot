@@ -165,7 +165,7 @@ function createVideoElement(videoData) {
     const item = document.createElement('div');
     item.className = 'video-item';
     item.innerHTML = `
-                <video poster="${videoData.cover}" loop playsinline controls>
+                <video poster="${videoData.cover}" loop playsinline controls preload="none">
                     <source src="${videoData.play_addr}" type="video/mp4">
                     <source src="${videoData.local_play_addr}" type="video/mp4">
                 </video>

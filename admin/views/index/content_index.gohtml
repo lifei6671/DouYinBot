@@ -12,7 +12,7 @@
 <div class="video-container">
     <div class="video-wrapper">
         <div class="video-item">
-            <video autoplay loop playsinline controls>
+            <video autoplay loop playsinline controls preload="none">
                 <source src="{{.video.VideoPlayAddr}}" type="video/mp4">
                 <source src="{{urlfor "VideoController.Index" "video_id" .video.VideoId }}" type="video/mp4">
             </video>
@@ -37,6 +37,6 @@
     let videoID = "{{.video.VideoId}}";
     let nexURL = `{{urlfor "ContentController.Next"}}`;
 </script>
-<script src="/static/js/video.js"></script>
+<script src="/static/js/video.js?v=1738581751"></script>
 </body>
 </html>
