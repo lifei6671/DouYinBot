@@ -12,7 +12,7 @@
 <div class="video-container">
     <div class="video-wrapper">
         <div class="video-item">
-            <video autoplay loop playsinline controls preload="none">
+            <video autoplay loop playsinline controls preload="none" poster="{{.video.VideoLocalCover}}">
                 <source src="{{.video.VideoPlayAddr}}" type="video/mp4">
                 <source src="{{urlfor "VideoController.Index" "video_id" .video.VideoId }}" type="video/mp4">
             </video>
