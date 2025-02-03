@@ -50,22 +50,23 @@ func Run(addr string, configFile string) error {
 			controllers.SetDefaultVideoContent(b)
 		}
 	}
+
 	web.Get("/static/*.*", func(ctx *context.Context) {
 		var b []byte
 		var err error
 		if web.BConfig.RunMode == web.PROD {
 			//读取文件
-			b, err = Assets.ReadFile(strings.TrimPrefix(ctx.Request.RequestURI, "/"))
+			b, err = Assets.ReadFile(strings.TrimPrefix(ctx.Request.URL.Path, "/"))
 		} else {
-			b, err = os.ReadFile(filepath.Join(web.WorkPath, ctx.Request.RequestURI))
+			b, err = os.ReadFile(filepath.Join(web.WorkPath, ctx.Request.URL.Path))
 		}
 		if err != nil {
-			logs.Error("文件不存在 -> %s", ctx.Request.RequestURI)
+			logs.Error("文件不存在 -> %s", ctx.Request.URL.Path)
 			ctx.Output.SetStatus(404)
 			return
 		}
 		//解析文件类型
-		contentType := mime.TypeByExtension(filepath.Ext(ctx.Request.RequestURI))
+		contentType := mime.TypeByExtension(filepath.Ext(ctx.Request.URL.Path))
 		if contentType != "" {
 			ctx.Output.Header("Content-Type", contentType)
 		}
@@ -78,7 +79,8 @@ func Run(addr string, configFile string) error {
 			}
 		}
 		//写入缓冲时间
-		ctx.Output.Header("Cache-Control", fmt.Sprintf("max-age=%d", 3600*30*24))
+		ctx.Output.Header("Cache-Control", fmt.Sprintf("max-age=%d, s-maxage=%d", 3600*30*24, 3600*30*24))
+		ctx.Output.Header("Cloudflare-CDN-Cache-Control", "max-age=14400")
 		ctx.Output.Header("Last-Modified", RunTime.Format(modifiedFormat))
 
 		err = ctx.Output.Body(b)
@@ -118,8 +120,8 @@ func Run(addr string, configFile string) error {
 			}
 		}
 		//写入缓冲时间
-		ctx.Output.Header("Cache-Control", fmt.Sprintf("max-age=%d", 3600*30*24))
-		ctx.Output.Header("Last-Modified", RunTime.Format(modifiedFormat))
+		ctx.Output.Header("Cache-Control", fmt.Sprintf("max-age=%d, s-maxage=%d", 3600*30*24, 3600*30*24))
+		ctx.Output.Header("Cloudflare-CDN-Cache-Control", "max-age=14400")
 
 		err = ctx.Output.Body(b)
 		if err != nil {
