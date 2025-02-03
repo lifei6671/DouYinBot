@@ -1,0 +1,110 @@
+/* 新增加载提示样式 */
+.loading-indicator {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    display: none;
+    z-index: 100;
+}
+
+.error-indicator {
+    background: rgba(255, 0, 0, 0.7);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.video-container {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+.video-wrapper {
+    position: absolute;
+    width: 100%;
+    /*transition: transform 0.5s ease-in-out;*/
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.swipe-active {
+    transition: none !important;
+}
+
+.video-item {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: scale-down;
+    z-index: 1;
+    background-color: black;
+    display: flex;
+}
+
+.video-info {
+    color: white;
+    z-index: 2;
+    position: absolute;
+    bottom: 70px;
+    left: 10px;
+}
+
+.video-title {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.video-description {
+    font-size: 1em;
+    opacity: 0.9;
+}
+
+video::-webkit-media-controls-panel {
+    display: flex !important;
+    opacity: 1 !important;
+}
+
+video::-webkit-media-controls-timeline {
+    display: flex !important;
+}
+
+/* 禁止控制条自动隐藏（仅部分浏览器支持） */
+video::-webkit-media-controls {
+    transition: none !important;
+    visibility: visible !important;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+a:hover {
+    color: white;
+}

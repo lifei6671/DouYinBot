@@ -37,7 +37,7 @@ func (c *ContentController) Index() {
 	}
 	c.Data["video"] = video
 
-	c.TplName = "index/content.gohtml"
+	c.TplName = "index/content_index.gohtml"
 }
 
 type VideoResult struct {

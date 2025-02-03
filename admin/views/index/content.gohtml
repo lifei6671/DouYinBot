@@ -39,7 +39,7 @@
             <div id="pages">
                 <div class="page">
                     <video class="video-bg" id="video-play" poster="{{.video.VideoLocalCover}}" autoplay loop
-                           playsinline controls volume="0.1">
+                           playsinline controls>
                         <source src="{{.video.VideoPlayAddr}}" type="video/mp4">
                         <source src="{{urlfor "VideoController.Index" "video_id" .video.VideoId }}" type="video/mp4">
                     </video>
@@ -48,7 +48,7 @@
                             <a href="{{urlfor "IndexController.List" ":author_id" .video.AuthorId ":page" 1 }}"
                                title="{{.video.Nickname}}">@{{.video.Nickname}}</a>
                         </div>
-                        <div class="quote"> {{str2html  .video.Desc}}.</div>
+                        <div class="quote"> {{str2html  .video.Desc}}</div>
                     </div>
                 </div>
             </div>
