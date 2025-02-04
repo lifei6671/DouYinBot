@@ -4,6 +4,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/beego/beego/v2/core/logs"
@@ -46,7 +47,7 @@ func (c *IndexController) Index() {
 		} else {
 			logs.Error("渲染标签失败 ->%d - %+v", video.Id, err)
 		}
-		if video.VideoLocalCover == "/cover" || video.VideoLocalCover == "/cover/" {
+		if strings.HasPrefix(video.VideoLocalCover, "/cover") {
 			service.PushDownloadQueue(video)
 		}
 	}

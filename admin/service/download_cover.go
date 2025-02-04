@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/url"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -59,8 +60,19 @@ func ExecDownloadQueue(videoModel models.DouYinVideo) {
 				videoModel.VideoLocalCover = urlStr
 			}
 		}
-		if err := videoModel.Save(); err != nil {
-			logs.Error("下载视频封面失败 -> [video_id=%s] %+v", videoModel.VideoId, err)
+	} else if strings.HasPrefix(videoModel.VideoCover, "/cover") {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+		coverPath := filepath.Join(savepath, videoModel.VideoLocalCover)
+		if utils.FileExists(coverPath) {
+			// 将封面上传到S3服务器
+			if urlStr, err := uploadFile(ctx, coverPath); err == nil {
+				videoModel.VideoLocalCover = urlStr
+			}
 		}
+	}
+
+	if err := videoModel.Save(); err != nil {
+		logs.Error("下载视频封面失败 -> [video_id=%s] %+v", videoModel.VideoId, err)
 	}
 }
