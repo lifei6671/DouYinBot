@@ -36,6 +36,12 @@ func (c *ContentController) Index() {
 		c.Ctx.Output.SetStatus(500)
 		return
 	}
+	if m, err := web.AppConfig.GetSection("nickname"); err == nil {
+		if nickname, ok := m[video.AuthorId]; ok {
+			video.Desc = "#" + nickname + " " + strings.TrimRight(video.Desc, ".") + " ."
+			c.Data["raw_nickname"] = nickname
+		}
+	}
 	c.Data["desc"] = video.Desc
 	html, err := models.NewDouYinTag().FormatTagHtml(video.Desc)
 	if err != nil {
@@ -50,6 +56,7 @@ func (c *ContentController) Index() {
 	if !strings.HasPrefix(video.VideoLocalCover, "https://") {
 		video.VideoLocalCover = web.AppConfig.DefaultString("domain", "") + video.VideoLocalCover
 	}
+
 	c.Data["video"] = video
 
 	utils.CacheHeader(c.Ctx.Output, time.Now(), 3600, 86400)

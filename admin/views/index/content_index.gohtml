@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="{{.video.Nickname}} - {{date .video.Created "Y-m-d H:i:s"}} - {{.desc}}">
+    <meta name="description"
+          content="{{.video.Nickname}}{{if .raw_nickname}}({{.raw_nickname}}){{end}} - {{date .video.Created "Y-m-d H:i:s"}} - {{.desc}}">
     <meta name="google-site-verification" content="J_E-OodpvF9EtDOOrZXUxIt61CpaU89xz8CpN359ILE"/>
-    <title>{{.video.Nickname}}-抖音无水印-抖音型男集锦</title>
+    <title>{{.video.Nickname}}{{if .raw_nickname}}({{.raw_nickname}}){{end}}-抖音无水印-抖音型男集锦</title>
     <link href="/static/css/video-index.css?v=1738580459" rel="stylesheet">
     <script type="application/ld+json">
         {
