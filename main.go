@@ -31,9 +31,15 @@ func main() {
 	if work, err := filepath.Abs("admin"); err == nil {
 		if configFile == "" {
 			configFile = filepath.Join(work, "/conf/app.conf")
+		} else {
+			configFile, err = filepath.Abs(configFile)
+		}
+		if err != nil {
+			panic(err)
 		}
 		web.WorkPath = work
 	}
+
 	if err := models.Init(dataPath); err != nil {
 		panic(err)
 	}
