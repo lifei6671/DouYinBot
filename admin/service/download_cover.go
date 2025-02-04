@@ -60,7 +60,7 @@ func ExecDownloadQueue(videoModel models.DouYinVideo) {
 				videoModel.VideoLocalCover = urlStr
 			}
 		}
-	} else if strings.HasPrefix(videoModel.VideoCover, "/cover") {
+	} else if strings.HasPrefix(videoModel.VideoLocalCover, "/cover") {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
 		coverPath := filepath.Join(savepath, videoModel.VideoLocalCover)
