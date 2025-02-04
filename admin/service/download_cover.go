@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 
@@ -29,8 +30,26 @@ func ExecDownloadQueue(videoModel models.DouYinVideo) {
 	if videoModel.VideoLocalCover == "/cover" || videoModel.VideoLocalCover == "/cover/" {
 		avatarPath, err := utils.DownloadCover(videoModel.AuthorId, videoModel.VideoCover, savepath)
 		if err != nil {
+			var uri *url.URL
+			uri, err = url.ParseRequestURI(videoModel.VideoCover)
+			if err != nil {
+				logs.Error("解析封面文件失败: url[%s] filename[%s] %+v", videoModel.VideoCover, err)
+				return
+			}
+			if !strings.HasPrefix(uri.Host, "p5-ipv6") {
+				uri.Host = "p5-ipv6.douyinpic.com"
+			}
+			avatarPath, err = utils.DownloadCover(videoModel.AuthorId, uri.String(), savepath)
+
+			if err == nil {
+				videoModel.VideoCover = uri.String()
+			}
 			videoModel.VideoLocalCover = "/static/images/default.jpg"
-		} else {
+		}
+		if err != nil {
+			logs.Error("下载视频封面失败: url[%s] filename[%s] %+v", videoModel.VideoCover, err)
+		}
+		if err == nil {
 			videoModel.VideoLocalCover = "/cover" + strings.ReplaceAll("/"+strings.TrimPrefix(avatarPath, savepath), "//", "/")
 
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
