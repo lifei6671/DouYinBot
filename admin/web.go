@@ -51,6 +51,26 @@ func Run(addr string, configFile string) error {
 		}
 	}
 
+	web.Get("/robots.txt", func(ctx *context.Context) {
+		var b []byte
+		var err error
+		if web.BConfig.RunMode == web.PROD {
+			//读取文件
+			b, err = Assets.ReadFile("static/" + strings.TrimPrefix(ctx.Request.URL.Path, "/"))
+		} else {
+			b, err = os.ReadFile(filepath.Join(web.WorkPath, "static", "robots.txt"))
+		}
+		if err != nil {
+			logs.Error("文件不存在 -> %s", ctx.Request.URL.Path)
+			ctx.Output.SetStatus(404)
+			return
+		}
+		err = ctx.Output.Body(b)
+		if err != nil {
+			logs.Error("写入数据到客户端失败 -> %+v", err)
+		}
+	})
+
 	web.Get("/static/*.*", func(ctx *context.Context) {
 		var b []byte
 		var err error

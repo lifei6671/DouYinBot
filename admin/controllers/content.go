@@ -96,6 +96,13 @@ func (c *ContentController) Next() {
 		c.Ctx.Output.SetStatus(500)
 		return
 	}
+	//如果原始播放链接是抖音的，则切换为本地播放
+	if strings.Contains(video.VideoPlayAddr, "aweme.snssdk.com") || strings.Contains(video.VideoPlayAddr, ".douyinvod.com") {
+		video.VideoPlayAddr = web.AppConfig.DefaultString("domain", "") + c.URLFor("VideoController.Index", "video_id", video.VideoId)
+	}
+	if !strings.HasPrefix(video.VideoLocalCover, "https://") {
+		video.VideoLocalCover = web.AppConfig.DefaultString("domain", "") + video.VideoLocalCover
+	}
 	ret := structs.JsonResult[*VideoResult]{
 		ErrCode: 0,
 		Message: "",

@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /content/next/
+Disallow: /wechat
+Disallow: /baidu
