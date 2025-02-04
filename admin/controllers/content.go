@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -41,6 +42,13 @@ func (c *ContentController) Index() {
 		logs.Error("处理视频标签失败[video_id=%s] %+v", video.VideoId, err)
 	} else {
 		video.Desc = html
+	}
+	//如果原始播放链接是抖音的，则切换为本地播放
+	if strings.Contains(video.VideoPlayAddr, "aweme.snssdk.com") || strings.Contains(video.VideoPlayAddr, ".douyinvod.com") {
+		video.VideoPlayAddr = web.AppConfig.DefaultString("domain", "") + c.URLFor("VideoController.Index", "video_id", video.VideoId)
+	}
+	if !strings.HasPrefix(video.VideoLocalCover, "https://") {
+		video.VideoLocalCover = web.AppConfig.DefaultString("domain", "") + video.VideoLocalCover
 	}
 	c.Data["video"] = video
 

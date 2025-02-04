@@ -7,6 +7,21 @@
     <meta name="google-site-verification" content="J_E-OodpvF9EtDOOrZXUxIt61CpaU89xz8CpN359ILE"/>
     <title>{{.video.Nickname}}-抖音无水印-抖音型男集锦</title>
     <link href="/static/css/video-index.css?v=1738580459" rel="stylesheet">
+    <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "VideoObject",
+          "name": "{{.video.Nickname}} 创作于 {{date .video.Created "Y-m-d H:i:s"}}",
+      "description": "{{.video.Desc}}",
+      "thumbnailUrl": "{{.video.VideoLocalCover}}",
+      "uploadDate":  "{{dateformat .video.Created "2006-01-02T15:04:05:07:00+00:00"}}",
+      "contentUrl": "{{.video.VideoPlayAddr}}",
+      "interactionStatistic": {
+        "@type": "InteractionCounter",
+        "interactionType": "https://schema.org/WatchAction"
+      }
+    }
+    </script>
 </head>
 <body>
 <div class="video-container">
