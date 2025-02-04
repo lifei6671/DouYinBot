@@ -60,14 +60,17 @@ func ExecDownloadQueue(videoModel models.DouYinVideo) {
 				videoModel.VideoLocalCover = urlStr
 			}
 		}
-	} else if strings.HasPrefix(videoModel.VideoLocalCover, "/cover") {
+	} else if strings.HasPrefix(videoModel.VideoLocalCover, "/cover/") {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 		defer cancel()
-		coverPath := filepath.Join(savepath, videoModel.VideoLocalCover)
+		coverPath := filepath.Join(savepath, strings.TrimPrefix(videoModel.VideoLocalCover, "/cover"))
+		log.Println(coverPath)
 		if utils.FileExists(coverPath) {
 			// 将封面上传到S3服务器
 			if urlStr, err := uploadFile(ctx, coverPath); err == nil {
 				videoModel.VideoLocalCover = urlStr
+			} else {
+				logs.Error("下载视频封面失败: url[%s] filename[%s] %+v", coverPath, err)
 			}
 		}
 	}
