@@ -60,6 +60,7 @@ func Run(addr string, configFile string) error {
 				ctx.Output.SetStatus(http.StatusNotFound)
 				return
 			}
+			ctx.Output.Header("X-Content-Type-Options", "nosniff")
 			err = ctx.Output.Body(b)
 			if err != nil {
 				logs.Error("写入数据到客户端失败 -> %+v", err)
@@ -87,6 +88,7 @@ func Run(addr string, configFile string) error {
 		contentType := mime.TypeByExtension(filepath.Ext(ctx.Request.URL.Path))
 		if contentType != "" {
 			ctx.Output.Header("Content-Type", contentType)
+			ctx.Output.Header("X-Content-Type-Options", "nosniff")
 		}
 		//解析客户端文件版本
 		modified := ctx.Request.Header.Get("If-Modified-Since")
@@ -128,6 +130,7 @@ func Run(addr string, configFile string) error {
 		contentType := mime.TypeByExtension(filepath.Ext(filename))
 		if contentType != "" {
 			ctx.Output.Header("Content-Type", contentType)
+			ctx.Output.Header("X-Content-Type-Options", "nosniff")
 		}
 		//解析客户端文件版本
 		modified := ctx.Request.Header.Get("If-Modified-Since")
