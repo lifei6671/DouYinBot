@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="{{.video.Nickname}} - {{.desc}}">
+    <meta name="description" content="{{.video.Nickname}} - {{date .video.Created "Y-m-d H:i:s"}} - {{.desc}}">
     <meta name="google-site-verification" content="J_E-OodpvF9EtDOOrZXUxIt61CpaU89xz8CpN359ILE"/>
     <title>{{.video.Nickname}}-抖音无水印-抖音型男集锦</title>
     <link href="/static/css/video-index.css?v=1738580459" rel="stylesheet">
@@ -12,7 +12,8 @@
 <div class="video-container">
     <div class="video-wrapper">
         <div class="video-item">
-            <video autoplay loop playsinline controls preload="none" poster="{{.video.VideoLocalCover}}">
+            <video autoplay loop playsinline controls
+                   preload="none"{{if .video.VideoLocalCover}} poster="{{.video.VideoLocalCover}}"{{end}}>
                 <source src="{{.video.VideoPlayAddr}}" type="video/mp4">
                 <source src="{{urlfor "VideoController.Index" "video_id" .video.VideoId }}" type="video/mp4">
             </video>
@@ -37,7 +38,7 @@
     let videoID = "{{.video.VideoId}}";
     let nexURL = `{{urlfor "ContentController.Next"}}`;
 </script>
-<script src="/static/js/video.js?v=1738581751"></script>
+<script src="/static/js/video.js?v=1738581752"></script>
 <script>
     var _hmt = _hmt || [];
     (function () {

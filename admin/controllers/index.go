@@ -2,12 +2,15 @@ package controllers
 
 import (
 	"math"
+	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 
 	"github.com/lifei6671/douyinbot/admin/models"
+	"github.com/lifei6671/douyinbot/internal/utils"
 )
 
 type IndexController struct {
@@ -15,6 +18,10 @@ type IndexController struct {
 }
 
 func (c *IndexController) Index() {
+	if err := utils.IfLastModified(c.Ctx.Input, time.Now()); err == nil {
+		c.Abort(strconv.Itoa(http.StatusNotModified))
+		return
+	}
 	page := c.Ctx.Input.Param(":page")
 	pageIndex := 1
 	if page != "" {
@@ -56,12 +63,16 @@ func (c *IndexController) Index() {
 		c.Data["Next"] = c.URLFor("IndexController.Index", ":page", pageIndex+1)
 		c.Data["Last"] = c.URLFor("IndexController.Index", ":page", totalPage)
 	}
-	c.Ctx.Output.Header("Cache-Control", "max-age=1440, s-maxage=1440")
-	c.Ctx.Output.Header("Cloudflare-CDN-Cache-Control", "max-age=86400")
+	utils.CacheHeader(c.Ctx.Output, time.Now(), 1440, 7200)
+
 	c.TplName = "index/index.gohtml"
 }
 
 func (c *IndexController) List() {
+	if err := utils.IfLastModified(c.Ctx.Input, time.Now()); err == nil {
+		c.Abort(strconv.Itoa(http.StatusNotModified))
+		return
+	}
 	page := c.Ctx.Input.Param(":page")
 	pageIndex := 1
 	if page != "" {
@@ -132,7 +143,6 @@ func (c *IndexController) List() {
 		c.Data["Next"] = c.URLFor("IndexController.List", ":author_id", authorId, ":page", pageIndex+1)
 		c.Data["Last"] = c.URLFor("IndexController.List", ":author_id", authorId, ":page", totalPage)
 	}
-	c.Ctx.Output.Header("Cache-Control", "max-age=1440, s-maxage=1440")
-	c.Ctx.Output.Header("Cloudflare-CDN-Cache-Control", "max-age=86400")
+	utils.CacheHeader(c.Ctx.Output, time.Now(), 1440, 7200)
 	c.TplName = "index/list.gohtml"
 }

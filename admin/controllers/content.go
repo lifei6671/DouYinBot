@@ -2,6 +2,9 @@ package controllers
 
 import (
 	"errors"
+	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -17,6 +20,10 @@ type ContentController struct {
 }
 
 func (c *ContentController) Index() {
+	if err := utils.IfLastModified(c.Ctx.Input, time.Now()); err == nil {
+		c.Abort(strconv.Itoa(http.StatusNotModified))
+		return
+	}
 	videoId := c.Ctx.Input.Param(":video_id")
 
 	if videoId == "" {
@@ -36,6 +43,8 @@ func (c *ContentController) Index() {
 		video.Desc = html
 	}
 	c.Data["video"] = video
+
+	utils.CacheHeader(c.Ctx.Output, time.Now(), 3600, 86400)
 
 	c.TplName = "index/content_index.gohtml"
 }

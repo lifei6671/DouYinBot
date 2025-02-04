@@ -2,12 +2,15 @@ package controllers
 
 import (
 	"math"
+	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
 
 	"github.com/lifei6671/douyinbot/admin/models"
+	"github.com/lifei6671/douyinbot/internal/utils"
 )
 
 type TagController struct {
@@ -15,6 +18,10 @@ type TagController struct {
 }
 
 func (c *TagController) Index() {
+	if err := utils.IfLastModified(c.Ctx.Input, time.Now()); err == nil {
+		c.Abort(strconv.Itoa(http.StatusNotModified))
+		return
+	}
 	page := c.Ctx.Input.Param(":page")
 	tagID := c.Ctx.Input.Param(":tag_id")
 	pageIndex := 1
@@ -65,8 +72,7 @@ func (c *TagController) Index() {
 		c.Data["Next"] = c.URLFor("TagController.Index", ":tag_id", tagID, ":page", pageIndex+1)
 		c.Data["Last"] = c.URLFor("TagController.Index", ":tag_id", tagID, ":page", totalPage)
 	}
-	c.Ctx.Output.Header("Cache-Control", "max-age=1440, s-maxage=1440")
-	c.Ctx.Output.Header("Cloudflare-CDN-Cache-Control", "max-age=86400")
+	utils.CacheHeader(c.Ctx.Output, time.Now(), 3600, 86400)
 
 	c.TplName = "index/list.gohtml"
 }
