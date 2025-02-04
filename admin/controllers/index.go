@@ -10,6 +10,7 @@ import (
 	"github.com/beego/beego/v2/server/web"
 
 	"github.com/lifei6671/douyinbot/admin/models"
+	"github.com/lifei6671/douyinbot/admin/service"
 	"github.com/lifei6671/douyinbot/internal/utils"
 )
 
@@ -44,6 +45,9 @@ func (c *IndexController) Index() {
 			list[i] = video
 		} else {
 			logs.Error("渲染标签失败 ->%d - %+v", video.Id, err)
+		}
+		if video.VideoLocalCover == "/cover" || video.VideoLocalCover == "/cover/" {
+			service.PushDownloadQueue(video)
 		}
 	}
 	c.Data["List"] = list

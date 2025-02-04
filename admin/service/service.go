@@ -215,7 +215,11 @@ func execute(ctx context.Context) {
 			_, _ = downloadAvatar(ctx, &video)
 
 			logs.Info("解析抖音视频成功 -> 【%s】- %s", content, m.VideoBackAddr)
-
+		case cover, ok := <-_downloadQueue:
+			if !ok {
+				return
+			}
+			ExecDownloadQueue(cover)
 		case <-ctx.Done():
 			return
 		}
@@ -275,7 +279,7 @@ func uploadFile(ctx context.Context, filename string) (string, error) {
 
 func downloadAvatar(ctx context.Context, video *douyin.Video) (string, error) {
 	avatarURL := video.Author.AvatarLarger
-	avatarPath, err := video.DownloadCover(video.Author.AvatarLarger, savepath)
+	avatarPath, err := utils.DownloadCover(video.Author.Id, video.Author.AvatarLarger, savepath)
 	if err == nil {
 		avatarURL = strings.ReplaceAll("/"+strings.TrimPrefix(avatarPath, savepath), "//", "/")
 	}
