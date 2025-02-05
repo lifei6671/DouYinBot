@@ -122,11 +122,10 @@ function handleTouchEnd(e) {
         if (video.paused) {
             const playPromise = video.play();
             console.log("播放结果", playPromise);
-            e.preventDefault();
         } else {
             video.pause();
-            e.preventDefault();
         }
+        e.preventDefault();
     } else {
         handleSwipe(deltaY);
     }
@@ -165,9 +164,10 @@ function createVideoElement(videoData) {
     const item = document.createElement('div');
     item.className = 'video-item';
     item.innerHTML = `
-                <video poster="${videoData.cover}" loop playsinline controls preload="none">
+                <video poster="${videoData.cover}" loop playsinline controls preload="auto">
                     <source src="${videoData.play_addr}" type="video/mp4">
                     <source src="${videoData.local_play_addr}" type="video/mp4">
+                     您的浏览器不支持视频播放。
                 </video>
                 <div class="video-info">
                     <h2 class="video-title"> <a href="${videoData.author_url}" title="${videoData.nickname}">@${videoData.nickname}</a></h2>
