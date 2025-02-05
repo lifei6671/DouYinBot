@@ -14,7 +14,7 @@
           "@context": "https://schema.org",
           "@type": "VideoObject",
           "name": "{{.video.Nickname}} 创作于 {{date .video.Created "Y-m-d H:i:s"}}",
-      "description": "{{.video.Desc}}",
+      "description": "{{.video.Nickname}}{{if .video.Desc}} - {{.video.Desc}}{{end}}",
       "thumbnailUrl": "{{.video.VideoLocalCover}}",
       "uploadDate":  "{{dateformat .video.Created "2006-01-02T15:04:05:07:00+00:00"}}",
       "contentUrl": "{{.video.VideoPlayAddr}}",
