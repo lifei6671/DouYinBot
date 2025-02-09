@@ -52,6 +52,7 @@ func (c *IndexController) Index() {
 		}
 	}
 	c.Data["List"] = list
+	c.Data["PageIndex"] = pageIndex
 	totalPage := int(math.Ceil(float64(total) / float64(models.PageSize)))
 
 	if pageIndex <= 1 {
@@ -132,6 +133,7 @@ func (c *IndexController) List() {
 		}
 	}
 	c.Data["List"] = list
+	c.Data["PageIndex"] = pageIndex
 	totalPage := int(math.Ceil(float64(total) / float64(models.PageSize)))
 
 	if pageIndex <= 1 {

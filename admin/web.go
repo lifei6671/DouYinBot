@@ -17,6 +17,7 @@ import (
 	"github.com/lifei6671/fink-download/fink"
 
 	"github.com/lifei6671/douyinbot/admin/controllers"
+	"github.com/lifei6671/douyinbot/admin/models"
 	_ "github.com/lifei6671/douyinbot/admin/routers"
 	"github.com/lifei6671/douyinbot/admin/service"
 )
@@ -50,6 +51,7 @@ func Run(addr string, configFile string) error {
 			controllers.SetDefaultVideoContent(b)
 		}
 	}
+	models.PageSize = max(web.AppConfig.DefaultInt("max_page_limit", models.PageSize))
 
 	web.Get("/robots.txt", func(ctx *context.Context) {
 		if configFile != "" {

@@ -8,7 +8,7 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 )
 
-const PageSize = 18
+var PageSize = 18
 
 type DouYinVideo struct {
 	Id               int       `orm:"column(id);auto;pk"`
