@@ -74,7 +74,41 @@ video {
     z-index: 2;
     position: absolute;
     bottom: 80px;
-    left: 45px;
+    left: 1.25rem;
+}
+
+.video-back {
+    color: white;
+    z-index: 2;
+    position: absolute;
+    top: 10px;
+    left: 1.25rem;
+}
+
+.video-back .back-a {
+    display: flex;
+    width: 54px;
+    height: 54px;
+    background-color: rgba(0, 0, 0, .18);
+    border: 1px solid rgba(255, 255, 255, .15);
+    border-radius: 32px;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+}
+
+.semi-icon {
+    text-align: center;
+    text-transform: none;
+    text-rendering: optimizelegibility;
+    fill: currentColor;
+    font-style: normal;
+    line-height: 0;
+    display: inline-block
+}
+
+.video-back .semi-icon > svg {
+    vertical-align: middle;
 }
 
 .video-title {

@@ -19,8 +19,7 @@ wrapper.addEventListener("click", (e) => {
             e.preventDefault();
         }
     }
-}, true)
-
+});
 
 let videoItems = [];
 let currentIndex = 0;
@@ -52,6 +51,31 @@ function calculateViewport() {
 
     // 修正当前位置
     wrapper.style.transform = `translateY(-${currentIndex * window.innerHeight}px)`;
+}
+
+function back() {
+    console.log(previousUrl)
+    try {
+        // 创建 URL 对象以便于比较协议、域名和端口
+        const previousUrlObj = new URL(previousUrl);
+        const currentUrlObj = new URL(currentUrl);
+        // 比较协议、域名和端口是否相同
+        const isSameOrigin = (
+            previousUrlObj.protocol === currentUrlObj.protocol &&
+            previousUrlObj.hostname === currentUrlObj.hostname &&
+            previousUrlObj.port === currentUrlObj.port
+        );
+        if (isSameOrigin && previousUrl) {
+            // 如果同源且上一页 URL 存在，则返回上一页
+            window.history.back();
+        } else {
+            // 否则返回首页，这里假设首页路径为根路径 '/'
+            window.location.href = '/';
+        }
+    } catch (e) {
+        console.log(e);
+        window.location.href = '/';
+    }
 }
 
 // 初始化时计算
@@ -117,15 +141,18 @@ function handleTouchEnd(e) {
     const endY = e.changedTouches[0].clientY;
     const deltaY = startY - endY; // 修正方向计算
     if (deltaY === 0) {
-        //如果滚动为0，则用户可能是点击了
-        const video = videoItems[currentIndex].querySelector('video');
-        if (video.paused) {
-            const playPromise = video.play();
-            console.log("播放结果", playPromise);
-        } else {
-            video.pause();
+        const videoTarget = e.target.tagName;
+        if (videoTarget === "VIDEO") {
+            //如果滚动为0，则用户可能是点击了
+            const video = videoItems[currentIndex].querySelector('video');
+            if (video.paused) {
+                const playPromise = video.play();
+                console.log("播放结果", playPromise);
+            } else {
+                video.pause();
+            }
+            e.preventDefault();
         }
-        e.preventDefault();
     } else {
         handleSwipe(deltaY);
     }
@@ -164,6 +191,13 @@ function createVideoElement(videoData) {
     const item = document.createElement('div');
     item.className = 'video-item';
     item.innerHTML = `
+            <div class="video-back">
+                <a href="javascript:back();" class="back-a">
+                <span class="semi-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M16.7071 3.29289C16.3166 2.90237 15.6834 2.90237 15.2929 3.29289L7.29289 11.2929C6.90237 11.6834 6.90237 12.3166 7.29289 12.7071L15.2929 20.7071C15.6834 21.0976 16.3166 21.0976 16.7071 20.7071C17.0976 20.3166 17.0976 19.6834 16.7071 19.2929L9.41421 12L16.7071 4.70711C17.0976 4.31658 17.0976 3.68342 16.7071 3.29289Z" fill="currentColor"></path></svg>
+                </span>
+                </a>
+            </div>
                 <video poster="${videoData.cover}" loop playsinline controls preload="auto">
                     <source src="${videoData.play_addr}" type="video/mp4">
                     <source src="${videoData.local_play_addr}" type="video/mp4">
