@@ -21,10 +21,7 @@ type ContentController struct {
 }
 
 func (c *ContentController) Index() {
-	if err := utils.IfLastModified(c.Ctx.Input, time.Now()); err == nil {
-		c.Abort(strconv.Itoa(http.StatusNotModified))
-		return
-	}
+
 	videoId := c.Ctx.Input.Param(":video_id")
 
 	if videoId == "" {
@@ -36,6 +33,11 @@ func (c *ContentController) Index() {
 		c.Ctx.Output.SetStatus(500)
 		return
 	}
+	if err := utils.IfLastModified(c.Ctx.Input, video.Created); err == nil {
+		c.Abort(strconv.Itoa(http.StatusNotModified))
+		return
+	}
+
 	if m, err := web.AppConfig.GetSection("nickname"); err == nil {
 		if nickname, ok := m[video.AuthorId]; ok {
 			video.Desc = "#" + nickname + " " + strings.TrimRight(video.Desc, ".") + " ."
@@ -59,7 +61,14 @@ func (c *ContentController) Index() {
 
 	c.Data["video"] = video
 
-	utils.CacheHeader(c.Ctx.Output, time.Now(), 3600, 86400)
+	minAge, maxAge := 3600, 86400
+
+	if time.Now().Sub(video.Created).Hours() > 24*7 {
+		minAge = 3600 * 24 * 7
+		maxAge = 3600 * 24 * 30
+	}
+
+	utils.CacheHeader(c.Ctx.Output, video.Created, minAge, maxAge)
 
 	c.TplName = "index/content_index.gohtml"
 }
