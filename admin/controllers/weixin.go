@@ -124,7 +124,7 @@ func (c *WeiXinController) Dispatch() {
 			})
 		}
 
-		_ = c.response("正在处理。。")
+		_ = c.response(autoReplyContent + "😁")
 		return
 	} else if c.body.MsgType == string(wechat.WeiXinEventMsgType) {
 		//如果是推送的订阅事件
