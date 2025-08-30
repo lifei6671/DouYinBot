@@ -20,7 +20,7 @@ var (
 	token            = web.AppConfig.DefaultString("wechattoken", "")
 	key              = web.AppConfig.DefaultString("wechatencodingaeskey", "")
 	appId            = web.AppConfig.DefaultString("wechatappid", "")
-	autoReplyContent = "回复关键字：\n1：注册账号\n2：绑定百度网盘"
+	autoReplyContent = web.AppConfig.DefaultString("auto_reply_content", "")
 )
 
 type WeiXinController struct {
