@@ -171,7 +171,7 @@
                 data: "url=" + encodeURI(douYinContent),
                 success: function ($resp) {
                     if($resp.errcode === 0) {
-                        downVideo($resp.data.url,$resp.data.name);
+                        $alertMessage.text($resp.message);
                     }else {
                         $errorMessage.text($resp.message);
                     }
