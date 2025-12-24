@@ -48,6 +48,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">解析</button>
                     <button type="button" id="downloadVideo" class="btn btn-primary">下载</button>
+                    <button type="button" id="sendVideo" class="btn btn-primary">发送</button>
                     <span id="errorMessage" class="text-danger" style="font-size: 12px"></span>
                     <span id="alertMessage" class="text-info" style="font-size: 12px"></span>
                 </form>
@@ -157,6 +158,29 @@
                     $errorMessage.text('服务器异常');
                 }
             });
+       });
+       $("#sendVideo).on("click",function(){
+            let douYinContent = getVideoContent();
+            if (douYinContent === false) {
+                return false;
+            }
+            $.ajax({
+                url :"{{urlfor "HomeController.SendVideo"}}" ,
+                dataType: "json",
+                type:"get",
+                data: "url=" + encodeURI(douYinContent),
+                success: function ($resp) {
+                    if($resp.errcode === 0) {
+                        downVideo($resp.data.url,$resp.data.name);
+                    }else {
+                        $errorMessage.text($resp.message);
+                    }
+                },
+                error : function () {
+                    $errorMessage.text('服务器异常');
+                }
+            });
+            })
        });
     });
 </script>

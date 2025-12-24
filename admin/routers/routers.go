@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/beego/beego/v2/server/web"
+	"github.com/lifei6671/douyinbot/admin/filters"
 
 	"github.com/lifei6671/douyinbot/admin/controllers"
 )
@@ -10,8 +11,13 @@ func init() {
 	web.Router("/", &controllers.IndexController{}, "get:Index")
 	web.Router("/page/:page:int.html", &controllers.IndexController{}, "get:Index")
 	web.Router("/page/:author_id:int_:page:int.html", &controllers.IndexController{}, "get:List")
+
+	// 🔐 对 /douyin 及所有子路径生效
+	web.InsertFilter("/douyin/*", web.BeforeRouter, filters.BasicAuthFilter())
+
 	web.Router("/douyin", &controllers.HomeController{}, "get,post:Index")
 	web.Router("/douyin/download", &controllers.HomeController{}, "get:Download")
+
 	web.Router("/tag/:tag_id:int_:page:int.html", &controllers.TagController{}, "get:Index")
 
 	web.Router("/content_:video_id:string.html", &controllers.ContentController{}, "get:Index")

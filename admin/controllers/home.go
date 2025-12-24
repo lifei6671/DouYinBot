@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/beego/beego/v2/server/web"
+	"github.com/lifei6671/douyinbot/admin/service"
 
 	"github.com/lifei6671/douyinbot/admin/structs"
 	"github.com/lifei6671/douyinbot/douyin"
@@ -135,5 +137,25 @@ func (c *HomeController) Download() {
 			}
 		}
 	}
-	c.ServeJSON()
+	_ = c.ServeJSON()
+}
+
+func (c *HomeController) SendVideo() {
+	videoId := c.Ctx.Input.Query("url")
+	if videoId == "" {
+		c.Data["json"] = &structs.JsonResult[string]{
+			ErrCode: 1,
+			Message: "获取抖音视频ID失败",
+		}
+	} else {
+		service.Push(context.Background(), service.MediaContent{
+			Content: videoId,
+			UserId:  "",
+		})
+		c.Data["json"] = &structs.JsonResult[string]{
+			ErrCode: 0,
+			Message: "后台处理中",
+		}
+	}
+	_ = c.ServeJSON()
 }
