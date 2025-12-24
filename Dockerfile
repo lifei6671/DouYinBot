@@ -1,4 +1,4 @@
-FROM golang:1.23.5-alpine3.21 as build
+FROM golang:1.25-alpine3.23 as build
 
 LABEL maintainer="longfei6671@163.com"
 
@@ -18,7 +18,7 @@ ENV CGO_LDFLAGS="-L/usr/lib -lwebp -static"
 RUN go mod download &&\
     go build -ldflags='-s -w -extldflags "-static"' -tags "libsqlite3 linux" -o douyinbot main.go
 
-FROM alpine:3.21
+FROM alpine:3.23
 
 LABEL maintainer="longfei6671@163.com"
 
