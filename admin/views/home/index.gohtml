@@ -85,8 +85,46 @@
             $("#errorMessage").text('请将分享的内容粘贴到文本框');
             return false;
         }
-        return douYinContent;
+        const urls = extractUrls(douYinContent);
+        return urls.length ? urls[0] : null;
     }
+
+    /**
+     * 从文本中提取 URL（http/https），默认返回去重后的数组。
+     * - 会剔除常见的中文/英文结尾标点（避免把 "https://xxx/！" 的 "！" 带进去）
+     * - 会优先把 douyin.com 的链接排在前面
+     */
+    function extractUrls(text) {
+        if (typeof text !== "string") return [];
+
+        // 匹配 http(s) URL，尽量宽松但不跨空白
+        const urlRegex = /https?:\/\/[^\s]+/gi;
+        const matches = text.match(urlRegex) || [];
+
+        const cleaned = matches.map(u =>
+            u.replace(/[)\]}",'，。！？；：、】【《》“”‘’…]+$/g, "") // 去掉末尾常见标点/括号
+        );
+
+        // 去重（保持顺序）
+        const seen = new Set();
+        const unique = [];
+        for (const u of cleaned) {
+            if (!seen.has(u)) {
+                seen.add(u);
+                unique.push(u);
+            }
+        }
+
+        // douyin 链接优先
+        unique.sort((a, b) => {
+            const ad = /douyin\.com/i.test(a) ? 0 : 1;
+            const bd = /douyin\.com/i.test(b) ? 0 : 1;
+            return ad - bd;
+        });
+
+        return unique;
+    }
+
     function downVideo (url, name){
         let xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
