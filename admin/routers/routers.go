@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/beego/beego/v2/server/web"
+
 	"github.com/lifei6671/douyinbot/admin/filters"
 
 	"github.com/lifei6671/douyinbot/admin/controllers"
@@ -17,6 +18,7 @@ func init() {
 
 	web.Router("/douyin", &controllers.HomeController{}, "get,post:Index")
 	web.Router("/douyin/download", &controllers.HomeController{}, "get:Download")
+	web.Router("/douyin/sendVideo", &controllers.HomeController{}, "get:SendVideo")
 
 	web.Router("/tag/:tag_id:int_:page:int.html", &controllers.TagController{}, "get:Index")
 
