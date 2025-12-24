@@ -202,6 +202,7 @@
             if (douYinContent === false) {
                 return false;
             }
+            console.log(douYinContent);
             $.ajax({
                 url :"{{urlfor "HomeController.SendVideo"}}" ,
                 dataType: "json",
@@ -209,6 +210,7 @@
                 data: "url=" + encodeURI(douYinContent),
                 success: function ($resp) {
                     if($resp.errcode === 0) {
+                        $("#douYinContent").val('');
                         $alertMessage.text($resp.message);
                     }else {
                         $errorMessage.text($resp.message);
