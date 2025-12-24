@@ -159,7 +159,7 @@
                 }
             });
        });
-       $("#sendVideo).on("click",function(){
+        $("#sendVideo").on("click", function () {
             let douYinContent = getVideoContent();
             if (douYinContent === false) {
                 return false;
@@ -180,7 +180,6 @@
                     $errorMessage.text('服务器异常');
                 }
             });
-            })
        });
     });
 </script>
