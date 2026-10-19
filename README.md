@@ -2,7 +2,7 @@
 
 抖音(中国区)无水印视频、背景音乐、作者ID、作者昵称、作品标题等的全能解析和下载。
 
-迁移到了新项目 ![https://github.com/lifei6671/video-downloader](https://github.com/lifei6671/video-downloader)
+迁移到了新项目 [https://github.com/lifei6671/video-downloader](https://github.com/lifei6671/video-downloader)
 
 ## 写在前面
 
